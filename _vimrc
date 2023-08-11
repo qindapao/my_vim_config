@@ -55,6 +55,9 @@ set nowrap
 
 set scrolloff=3
 
+" search highlight
+set hlsearch
+
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
@@ -80,6 +83,9 @@ Plugin 'jiangmiao/auto-pairs'
 Plugin 'dense-analysis/ale'
 Plugin 'vim-airline/vim-airline'
 Plugin 'airblade/vim-gitgutter'
+Plugin 'godlygeek/tabular'
+Plugin 'preservim/vim-markdown'
+Plugin 'Yggdroot/indentLine'
 call vundle#end()
 
 
