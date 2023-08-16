@@ -7,42 +7,43 @@ source $VIMRUNTIME/mswin.vim
 " Use the internal diff if available.
 " Otherwise use the special 'diffexpr' for Windows.
 if &diffopt !~# 'internal'
-  set diffexpr=MyDiff()
+    set diffexpr=MyDiff()
 endif
 function MyDiff()
-  let opt = '-a --binary '
-  if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
-  if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
-  let arg1 = v:fname_in
-  if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
-  let arg1 = substitute(arg1, '!', '\!', 'g')
-  let arg2 = v:fname_new
-  if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
-  let arg2 = substitute(arg2, '!', '\!', 'g')
-  let arg3 = v:fname_out
-  if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
-  let arg3 = substitute(arg3, '!', '\!', 'g')
-  if $VIMRUNTIME =~ ' '
-    if &sh =~ '\<cmd'
-      if empty(&shellxquote)
-        let l:shxq_sav = ''
-        set shellxquote&
-      endif
-      let cmd = '"' . $VIMRUNTIME . '\diff"'
+    let opt = '-a --binary '
+    if &diffopt =~ 'icase' | let opt = opt . '-i ' | endif
+    if &diffopt =~ 'iwhite' | let opt = opt . '-b ' | endif
+    let arg1 = v:fname_in
+    if arg1 =~ ' ' | let arg1 = '"' . arg1 . '"' | endif
+    let arg1 = substitute(arg1, '!', '\!', 'g')
+    let arg2 = v:fname_new
+    if arg2 =~ ' ' | let arg2 = '"' . arg2 . '"' | endif
+    let arg2 = substitute(arg2, '!', '\!', 'g')
+    let arg3 = v:fname_out
+    if arg3 =~ ' ' | let arg3 = '"' . arg3 . '"' | endif
+    let arg3 = substitute(arg3, '!', '\!', 'g')
+    if $VIMRUNTIME =~ ' '
+        if &sh =~ '\<cmd'
+            if empty(&shellxquote)
+                let l:shxq_sav = ''
+                set shellxquote&
+            endif
+            let cmd = '"' . $VIMRUNTIME . '\diff"'
+        else
+            let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+        endif
     else
-      let cmd = substitute($VIMRUNTIME, ' ', '" ', '') . '\diff"'
+        let cmd = $VIMRUNTIME . '\diff'
     endif
-  else
-    let cmd = $VIMRUNTIME . '\diff'
-  endif
-  let cmd = substitute(cmd, '!', '\!', 'g')
-  silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
-  if exists('l:shxq_sav')
-    let &shellxquote=l:shxq_sav
-  endif
+    let cmd = substitute(cmd, '!', '\!', 'g')
+    silent execute '!' . cmd . ' ' . opt . arg1 . ' ' . arg2 . ' > ' . arg3
+    if exists('l:shxq_sav')
+        let &shellxquote=l:shxq_sav
+    endif
 endfunction
 
 " below are my personal settings
+" 基本设置区域 {
 set nu
 
 set nocompatible
@@ -73,6 +74,9 @@ set guifont=sarasa\ mono\ sc:h13
 set noundofile
 set nobackup
 
+" 基本设置区域 }
+
+" 插件 {
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
@@ -87,6 +91,37 @@ Plugin 'godlygeek/tabular'
 Plugin 'preservim/vim-markdown'
 Plugin 'Yggdroot/indentLine'
 call vundle#end()
+" 插件 }
 
+" 插件配置 {
+" dense-analysis/ale {
+" 设置格式化器
+let g:ale_fixers = {
+\   'sh': ['shfmt'],
+\}
+" 通过ale提供自动完成支持
+let g:ale_completion_enabled = 1
+" 配置自动完成支持
+set omnifunc=ale#completion#OmniFunc
+" 定制错误和告警标签
+let g:ale_sign_error = '>>'
+let g:ale_sign_warning = '--'
+" 修改回显的格式
+let g:ale_echo_msg_error_str = 'E'
+let g:ale_echo_msg_warning_str = 'W'
+let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
+" 在airline中显示错误消息
+let g:airline#extensions#ale#enabled = 1
+" 让浮动窗口的边框更好看
+let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
+" 使用漂亮的unicode字符
+let g:ale_floating_window_border = repeat([''], 8)
+" 错误提示的虚拟文本只在当前行出现
+let g:ale_virtualtext_cursor = 'current'
+
+
+" dense-analysis/ale }
+
+" 插件配置 }
 
 
