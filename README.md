@@ -62,5 +62,9 @@ Scancode Map
 01 00 3A 00 00 00 00 00
 ```
 
+# vim最新的安装包下载
+
+
+https://github.com/vim/vim-win32-installer/releases
 
 
