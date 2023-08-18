@@ -44,6 +44,10 @@ endfunction
 
 " below are my personal settings
 " 基本设置区域 {
+
+" txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
+au! vimrcEx FileType text
+
 set nu
 
 set nocompatible
@@ -80,16 +84,30 @@ set nobackup
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
+" 文件管理器
 Plugin 'preservim/nerdtree'
+" 单词包围
 Plugin 'tpope/vim-surround'
+" bash开发支持
 Plugin 'WolfgangMehner/bash-support'
+" 插入模式下自动补全括号
 Plugin 'jiangmiao/auto-pairs'
+" 异步语法检查和自动格式化框架
 Plugin 'dense-analysis/ale'
+" 漂亮的状态栏
 Plugin 'vim-airline/vim-airline'
-Plugin 'airblade/vim-gitgutter'
+" 自动对齐插件
 Plugin 'godlygeek/tabular'
-Plugin 'preservim/vim-markdown'
+" 对齐参考线插件
 Plugin 'Yggdroot/indentLine'
+" vim的git集成插件
+Plugin 'tpope/vim-fugitive'
+" 显示漂亮的git praph插件
+Plugin 'rbong/vim-flog'
+" vim的中文文档
+Plugin 'yianwillis/vimcdoc'
+" vim的补全框架 :TODO:这里是错误的，必须指定release分支安装
+Plugin 'neoclide/coc.nvim/tree/release'
 call vundle#end()
 " 插件 }
 
