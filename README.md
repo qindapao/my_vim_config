@@ -43,7 +43,7 @@ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 
 >注意安装的时候不要勾选完整构建环境的安装，会出问题。暂时也不需要。
 
-2. nodejs安装完成后先安装插件，插件安装完成后，安装插件市场
+2. nodejs安装完成后先安装插件，安装插件后需要手动切换到release分支，否则使用的是没有编译的版本，插件安装完成后，安装插件市场
 
 ```
 :CocInstall coc-marketplace

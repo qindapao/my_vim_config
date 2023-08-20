@@ -106,8 +106,9 @@ Plugin 'tpope/vim-fugitive'
 Plugin 'rbong/vim-flog'
 " vim的中文文档
 Plugin 'yianwillis/vimcdoc'
-" vim的补全框架 :TODO:这里是错误的，必须指定release分支安装
-Plugin 'neoclide/coc.nvim/tree/release'
+" 这里必须使用realese分支,不能用master分支,master分支需要自己编译
+" 下载下载后手动去插件目录下切换远程分支
+Plugin 'neoclide/coc.nvim'
 call vundle#end()
 " 插件 }
 
