@@ -114,5 +114,41 @@ Scancode Map
 01 00 3A 00 00 00 00 00
 ```
 
+# gtags
+
+http://adoxa.altervista.org/global/
+
+下载后将可执行文件的路径放置到vim能访问到的PATH目录中：C:\Users\pc\.vim\gtags\bin
+
+使用指导：https://zhuanlan.zhihu.com/p/36279445
+
+gtags原生只支持6种语言：原生支持 6 种语言（C，C++，Java，PHP4，Yacc，汇编）
+要支持其它语言，需要使用python。
+
+```bash
+pip install pygments
+```
+
+记得安装python模块的时候以管理员的身份运行。
+
+vim的配置文件中需要加入类似下面的配置：
+```txt
+let $GTAGSLABEL = 'native-pygments'
+let $GTAGSCONF = '/path/to/share/gtags/gtags.conf'
+```
+
+要生成gtags，在vim中需要在项目的根目录下执行：
+:!gtags
+
+
+
+# ctags
+
+下载使用改进后的ctags: 
+项目的主页：
+https://github.com/universal-ctags/ctags
+可执行文件的下载地址：
+https://github.com/universal-ctags/ctags-win32
+
 
 

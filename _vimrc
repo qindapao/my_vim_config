@@ -84,31 +84,25 @@ set nobackup
 set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
-" 文件管理器
-Plugin 'preservim/nerdtree'
-" 单词包围
-Plugin 'tpope/vim-surround'
-" bash开发支持
-Plugin 'WolfgangMehner/bash-support'
-" 插入模式下自动补全括号
-Plugin 'jiangmiao/auto-pairs'
-" 异步语法检查和自动格式化框架
-Plugin 'dense-analysis/ale'
-" 漂亮的状态栏
-Plugin 'vim-airline/vim-airline'
-" 自动对齐插件
-Plugin 'godlygeek/tabular'
-" 对齐参考线插件
-Plugin 'Yggdroot/indentLine'
-" vim的git集成插件
-Plugin 'tpope/vim-fugitive'
-" 显示漂亮的git praph插件
-Plugin 'rbong/vim-flog'
-" vim的中文文档
-Plugin 'yianwillis/vimcdoc'
+
+Plugin 'preservim/nerdtree'                                                      " 文件管理器
+Plugin 'tpope/vim-surround'                                                      " 单词包围
+Plugin 'WolfgangMehner/bash-support'                                             " bash开发支持
+Plugin 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
+Plugin 'dense-analysis/ale'                                                      " 异步语法检查和自动格式化框架
+Plugin 'vim-airline/vim-airline'                                                 " 漂亮的状态栏
+Plugin 'godlygeek/tabular'                                                       " 自动对齐插件
+Plugin 'Yggdroot/indentLine'                                                     " 对齐参考线插件
+Plugin 'tpope/vim-fugitive'                                                      " vim的git集成插件
+Plugin 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
+Plugin 'yianwillis/vimcdoc'                                                      " vim的中文文档
 " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
 " 下载下载后手动去插件目录下切换远程分支
 Plugin 'neoclide/coc.nvim'
+Plugin 'ludovicchabant/vim-gutentags'                                            " gtags ctags自动生成插件
+Plugin 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
+Plugin 'preservim/tagbar'                                                        " 当前文件的标签浏览器
+Plugin 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
 call vundle#end()
 " 插件 }
 
@@ -140,6 +134,39 @@ let g:ale_virtualtext_cursor = 'current'
 
 
 " dense-analysis/ale }
+
+" vim-gutentags {
+" 这两句非常重要是缺一不可的
+let $GTAGSLABEL = 'native-pygments'                                              " 让非C语言使用这个生成符号表
+let $GTAGSCONF = 'C:/Users/pc/.vim/gtags/share/gtags/gtags.conf'                 " gtags的配置文件的路径
+
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']      " gutentags 搜索工程目录的标志，当前文件路径向上递归直到碰到这些文件/目录名
+let g:gutentags_ctags_tagfile = '.tags'                                          " 所生成的数据文件的名称
+
+let g:gutentags_modules = ['ctags', 'gtags_cscope']                              " 同时开启 ctags 和 gtags 支持
+
+let g:gutentags_cache_dir = expand('~/.cache/tags')                              " 将自动生成的 ctags/gtags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录
+
+" 配置 ctags 的参数，老的 Exuberant-ctags 不能有 --extra=+q，注意
+let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
+let g:gutentags_ctags_extra_args += ['--c++-kinds=+px']
+let g:gutentags_ctags_extra_args += ['--c-kinds=+px']
+
+" 如果使用 universal ctags 需要增加下面一行，老的 Exuberant-ctags 不能加下一行
+let g:gutentags_ctags_extra_args += ['--output-format=e-ctags']
+
+" 禁用 gutentags 自动加载 gtags 数据库的行为
+let g:gutentags_auto_add_gtags_cscope = 0
+
+let g:gutentags_plus_switch = 0                                                  " 是否自动将光标定位到自动修复列表位置 0:禁用 1:打开
+
+" vim-gutentags }
+
+
+" tagbar {
+nmap <F8> :TagbarToggle<CR>
+" tagbar }
+
 
 " 插件配置 }
 
