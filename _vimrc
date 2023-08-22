@@ -66,10 +66,9 @@ set hlsearch
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
-set noexpandtab
+set expandtab                                                                    " 用空格替换TAB
 
-" highlight current line
-set cursorline
+set cursorline                                                                   " highlight current line
 " cursor not blinking
 set guicursor+=a:blinkon0
 
@@ -77,6 +76,10 @@ set guifont=sarasa\ mono\ sc:h13
 
 set noundofile
 set nobackup
+set guioptions+=b                                                                " 添加水平滚动条
+
+
+
 
 " 基本设置区域 }
 
@@ -85,6 +88,7 @@ set rtp+=~/.vim/bundle/Vundle.vim
 call vundle#begin()
 Plugin 'VundleVim/Vundle.vim'
 
+Plugin 'schmich/vim-guifont'                                                     " 灵活设置字体大小
 Plugin 'preservim/nerdtree'                                                      " 文件管理器
 Plugin 'tpope/vim-surround'                                                      " 单词包围
 Plugin 'WolfgangMehner/bash-support'                                             " bash开发支持
@@ -95,6 +99,7 @@ Plugin 'godlygeek/tabular'                                                      
 Plugin 'Yggdroot/indentLine'                                                     " 对齐参考线插件
 Plugin 'tpope/vim-fugitive'                                                      " vim的git集成插件
 Plugin 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
+Plugin 'airblade/vim-gitgutter'                                                  " git改变显示插件
 Plugin 'yianwillis/vimcdoc'                                                      " vim的中文文档
 " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
 " 下载下载后手动去插件目录下切换远程分支
@@ -103,6 +108,10 @@ Plugin 'ludovicchabant/vim-gutentags'                                           
 Plugin 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
 Plugin 'preservim/tagbar'                                                        " 当前文件的标签浏览器
 Plugin 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
+Plugin 'azabiong/vim-highlighter'                                                " 多高亮标签插件
+
+Plugin 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
+
 call vundle#end()
 " 插件 }
 
@@ -127,8 +136,6 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:airline#extensions#ale#enabled = 1
 " 让浮动窗口的边框更好看
 let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
-" 使用漂亮的unicode字符
-let g:ale_floating_window_border = repeat([''], 8)
 " 错误提示的虚拟文本只在当前行出现
 let g:ale_virtualtext_cursor = 'current'
 
@@ -136,7 +143,7 @@ let g:ale_virtualtext_cursor = 'current'
 " dense-analysis/ale }
 
 " vim-gutentags {
-" 这两句非常重要是缺一不可的
+" 这两句非常重要是缺一不可的,并且配置文件的路径一定不能写错
 let $GTAGSLABEL = 'native-pygments'                                              " 让非C语言使用这个生成符号表
 let $GTAGSCONF = 'C:/Users/pc/.vim/gtags/share/gtags/gtags.conf'                 " gtags的配置文件的路径
 
@@ -168,6 +175,24 @@ nmap <F8> :TagbarToggle<CR>
 " tagbar }
 
 
-" 插件配置 }
+" vim-gitgutter {
+let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " 是否自动将光标定位到自动修复列表位置 0:禁用 1:打开
+let g:gitgutter_max_signs = -1                                                   " 标记的数量为无限
+" vim-gitgutter }
 
+" vim-guifont {
+let guifontpp_size_increment=2
+let guifontpp_smaller_font_map="<F10>"
+let guifontpp_larger_font_map="<C-S-F10>"
+let guifontpp_original_font_map="<C-F10>"
+" vim-guifont }
+
+" gtagsomnicomplete {
+" https://github.com/ragcatshxu/gtagsomnicomplete 这个插件没有使用插件管理器安装
+autocmd FileType c,python set omnifunc=gtagsomnicomplete#Complete
+" gtagsomnicomplete }
+
+
+
+" 插件配置 }
 

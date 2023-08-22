@@ -56,6 +56,15 @@ git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
 :CocList marketplace python
 ```
 
+3. 可以使用下面的命令显示当前安装的子插件
+   
+```
+:CocList
+extensitions
+```
+
+然后光标移动到需要操作的插件上，然后按`TAB`键，就可以卸载或者暂时禁用某个插件。
+
 
 
 
@@ -151,4 +160,16 @@ https://github.com/universal-ctags/ctags
 https://github.com/universal-ctags/ctags-win32
 
 
+# git可执行文件的位置
+
+如果电脑中安装了几个虚拟机，那么可能环境变量中会有重复的git.exe可执行程序，可能导致vim找到错误的exe程序，解决方法是把真正的系统的git.exe放置在环境变量的最前面的位置上。
+
+# 文件备份
+
+当前所有的文件都已经备份到了百度网盘。
+
+```
+vim
+```
+目录下。
 
