@@ -146,8 +146,7 @@ let $GTAGSLABEL = 'native-pygments'
 let $GTAGSCONF = '/path/to/share/gtags/gtags.conf'
 ```
 
-要生成gtags，在vim中需要在项目的根目录下执行：
-:!gtags
+已经按照链接中的方法配置。
 
 
 
