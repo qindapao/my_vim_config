@@ -129,8 +129,10 @@ http://adoxa.altervista.org/global/
 
 下载后将可执行文件的路径放置到vim能访问到的PATH目录中：C:\Users\pc\.vim\gtags\bin
 
-使用指导：https://zhuanlan.zhihu.com/p/36279445
-
+使用指导:
+https://zhuanlan.zhihu.com/p/36279445
+这个是对上面的一些补充:
+https://learnku.com/articles/28249
 gtags原生只支持6种语言：原生支持 6 种语言（C，C++，Java，PHP4，Yacc，汇编）
 要支持其它语言，需要使用python。
 

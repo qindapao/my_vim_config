@@ -79,6 +79,9 @@ set nobackup
 set guioptions+=b                                                                " 添加水平滚动条
 
 
+nnoremap oo o<Esc>                                                               " 映射普通模式下面插入一行
+nnoremap OO O<Esc>                                                               " 映射普通模式上面插入一行
+set rnu                                                                          " 打开相对行号
 
 
 " 基本设置区域 }
@@ -121,10 +124,6 @@ call vundle#end()
 let g:ale_fixers = {
 \   'sh': ['shfmt'],
 \}
-" 通过ale提供自动完成支持
-let g:ale_completion_enabled = 1
-" 配置自动完成支持
-set omnifunc=ale#completion#OmniFunc
 " 定制错误和告警标签
 let g:ale_sign_error = '>>'
 let g:ale_sign_warning = '--'
@@ -189,7 +188,7 @@ let guifontpp_original_font_map="<C-F10>"
 
 " gtagsomnicomplete {
 " https://github.com/ragcatshxu/gtagsomnicomplete 这个插件没有使用插件管理器安装
-autocmd FileType c,python set omnifunc=gtagsomnicomplete#Complete
+autocmd FileType c,python,sh set omnifunc=gtagsomnicomplete#Complete
 " gtagsomnicomplete }
 
 
