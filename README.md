@@ -154,6 +154,13 @@ let $GTAGSCONF = '/path/to/share/gtags/gtags.conf'
 
 已经按照链接中的方法配置。
 
+如果想让gtags可以识别**库目录**，可以采用创建软链接的方法把库目录的软链接创建到项目的根目录位置。
+
+```txt
+mklink /d d:\pythonlib C:\Python311\Lib
+```
+
+
 
 
 # ctags
