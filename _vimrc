@@ -44,6 +44,7 @@ endfunction
 
 " below are my personal settings
 " 基本设置区域 {
+filetype plugin indent on                                                        " 打开文件类型检测
 
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx FileType text
@@ -82,6 +83,8 @@ set guioptions+=b                                                               
 nnoremap oo o<Esc>                                                               " 映射普通模式下面插入一行
 nnoremap OO O<Esc>                                                               " 映射普通模式上面插入一行
 set rnu                                                                          " 打开相对行号
+set autoread                                                                     " 自动加载文件变化
+
 
 
 " 基本设置区域 }
@@ -114,6 +117,9 @@ Plugin 'MattesGroeger/vim-bookmarks'                                            
 Plugin 'azabiong/vim-highlighter'                                                " 多高亮标签插件
 
 Plugin 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
+Plugin 'Yggdroot/LeaderF'                                                        " 模糊搜索插件
+Plugin 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
+Plugin 'easymotion/vim-easymotion'                                               " 快速移动插件
 
 call vundle#end()
 " 插件 }

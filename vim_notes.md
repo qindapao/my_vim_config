@@ -55,5 +55,16 @@ To see the gtags log.
 
 https://github.com/skywind3000/gutentags_plus
 
+# 文件操作
+
+## 打开历史文件
+
+```txt
+:browse oldfiles
+<ESC>
+选择数字
+<CR>
+```
+
 
 
