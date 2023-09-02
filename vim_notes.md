@@ -82,6 +82,14 @@ let g:gutentags_define_advanced_commands = 1
 :messages
 To see the gtags log.
 
+**当前有一个问题:**
+
+就是查询了几次后，会在项目的目录下生成`.stats`后缀的文件。具体原因不明，目前的解决方案是，在项目的根目录下执行删除命令:
+
+`find . -name "*.stats" | xargs rm -f`
+
+删除前最好是用`find . -name "*.stats"`命令查询下需要删除的文件是否都是它们，不要误删除。
+
 更完整的说明可以看这里：
 https://github.com/skywind3000/gutentags_plus
 
