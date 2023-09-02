@@ -299,6 +299,12 @@ let g:Lf_ShortcutB = '<c-l>'                                                    
 let g:Lf_ShortcutF = '<c-p>'                                                     " 打开leaderf窗口
 
 
+" search visually selected text literally, don't quit LeaderF after accepting an entry
+xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+
+
+
+
 " LeaderF 配置 }
 
 " 插件配置 }
