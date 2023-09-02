@@ -110,6 +110,8 @@ autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tm
 " 插件 {
 call plug#begin('~/.vim/plugged')
 
+" 这个补全插件的位置最好放置到最前面,目前不直到原因
+Plug 'qindapao/gtagsomnicomplete', {'branch': 'for_use'}                       " gtags完成插件
 Plug 'schmich/vim-guifont'                                                     " 灵活设置字体大小
 Plug 'preservim/nerdtree'                                                      " 文件管理器
 Plug 'tpope/vim-surround'                                                      " 单词包围
@@ -141,6 +143,7 @@ Plug 'rakr/vim-one'                                                            "
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  " catppuccin 主题
 Plug 'jsit/toast.vim'                                                          " toast 主题
 Plug 'cormacrelf/vim-colors-github'                                            " github 主题
+
 call plug#end()
 " 插件 }
 
@@ -214,7 +217,7 @@ let guifontpp_original_font_map="<C-F10>"
 
 " gtagsomnicomplete {
 " https://github.com/ragcatshxu/gtagsomnicomplete 这个插件没有使用插件管理器安装
-autocmd FileType c,python,sh set omnifunc=gtagsomnicomplete#Complete
+autocmd FileType c,python,sh,perl set omnifunc=gtagsomnicomplete#Complete
 " gtagsomnicomplete }
 
 " vim-rainbow {
