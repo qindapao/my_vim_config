@@ -9,11 +9,15 @@ https://github.com/vim/vim-win32-installer/releases
 
 # 特殊插件安装备忘
 
-## vundle
+## vim-plug
 
-```bash
-git clone https://github.com/VundleVim/Vundle.vim.git ~/.vim/bundle/Vundle.vim
-```
+选择使用vim-plug来管理插件。
+
+https://github.com/junegunn/vim-plug
+
+下载plug.vim，然后放置到`autoload`目录下。
+
+
 ## rbong/vim-flog
 
 这个插件漂亮显示git graph，但是需要安装LuaJIT 2.1，可以参考[这里](https://github.com/rbong/vim-flog)的说明。

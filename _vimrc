@@ -90,38 +90,35 @@ set autoread                                                                    
 " 基本设置区域 }
 
 " 插件 {
-set rtp+=~/.vim/bundle/Vundle.vim
-call vundle#begin()
-Plugin 'VundleVim/Vundle.vim'
+call plug#begin('~/.vim/plugged')
 
-Plugin 'schmich/vim-guifont'                                                     " 灵活设置字体大小
-Plugin 'preservim/nerdtree'                                                      " 文件管理器
-Plugin 'tpope/vim-surround'                                                      " 单词包围
-Plugin 'WolfgangMehner/bash-support'                                             " bash开发支持
-Plugin 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
-Plugin 'dense-analysis/ale'                                                      " 异步语法检查和自动格式化框架
-Plugin 'vim-airline/vim-airline'                                                 " 漂亮的状态栏
-Plugin 'godlygeek/tabular'                                                       " 自动对齐插件
-Plugin 'Yggdroot/indentLine'                                                     " 对齐参考线插件
-Plugin 'tpope/vim-fugitive'                                                      " vim的git集成插件
-Plugin 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
-Plugin 'airblade/vim-gitgutter'                                                  " git改变显示插件
-Plugin 'yianwillis/vimcdoc'                                                      " vim的中文文档
+Plug 'schmich/vim-guifont'                                                     " 灵活设置字体大小
+Plug 'preservim/nerdtree'                                                      " 文件管理器
+Plug 'tpope/vim-surround'                                                      " 单词包围
+Plug 'WolfgangMehner/bash-support'                                             " bash开发支持
+Plug 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
+Plug 'dense-analysis/ale'                                                      " 异步语法检查和自动格式化框架
+Plug 'vim-airline/vim-airline'                                                 " 漂亮的状态栏
+Plug 'godlygeek/tabular'                                                       " 自动对齐插件
+Plug 'Yggdroot/indentLine'                                                     " 对齐参考线插件
+Plug 'tpope/vim-fugitive'                                                      " vim的git集成插件
+Plug 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
+Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
+Plug 'yianwillis/vimcdoc'                                                      " vim的中文文档
 " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
-" 下载下载后手动去插件目录下切换远程分支
-Plugin 'neoclide/coc.nvim'
-Plugin 'ludovicchabant/vim-gutentags'                                            " gtags ctags自动生成插件
-Plugin 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
-Plugin 'preservim/tagbar'                                                        " 当前文件的标签浏览器
-Plugin 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
-Plugin 'azabiong/vim-highlighter'                                                " 多高亮标签插件
+Plug 'neoclide/coc.nvim', {'branch': 'release'}
+Plug 'ludovicchabant/vim-gutentags'                                            " gtags ctags自动生成插件
+Plug 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
+Plug 'preservim/tagbar'                                                        " 当前文件的标签浏览器
+Plug 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
+Plug 'azabiong/vim-highlighter'                                                " 多高亮标签插件
 
-Plugin 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
-Plugin 'Yggdroot/LeaderF'                                                        " 模糊搜索插件
-Plugin 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
-Plugin 'easymotion/vim-easymotion'                                               " 快速移动插件
+Plug 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
+Plug 'Yggdroot/LeaderF'                                                        " 模糊搜索插件
+Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
+Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
 
-call vundle#end()
+call plug#end()
 " 插件 }
 
 " 插件配置 {
