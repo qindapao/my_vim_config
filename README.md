@@ -69,7 +69,20 @@ extensitions
 
 然后光标移动到需要操作的插件上，然后按`TAB`键，就可以卸载或者暂时禁用某个插件。
 
+**其它补全插件**:
 
+[tabnine-vim](https://github.com/codota/tabnine-vim)
+[completor](https://github.com/maralla/completor.vim)
+
+
+## markdown2ctags
+
+原始的tagbar插件无法显示markdown格式的大纲，需要配合这个插件一起使用。
+安装后需要设置可执行文件的位置:
+```
+\ 'ctagsbin' : 'C:/Users/pc/.vim/plugged/markdown2ctags/markdown2ctags.py',
+```
+其它的配置见`_vimrc`文件中的内容。
 
 
 # 语法检查和格式化器
@@ -185,3 +198,6 @@ vim
 ```
 目录下。
 
+其它资源
+
+https://hanleylee.com/articles/usage-of-vim-editor-basic/

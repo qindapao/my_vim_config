@@ -146,6 +146,28 @@ https://github.com/skywind3000/gutentags_plus
 
 按`<TAB>`键后可以进入`leaderf`的普通模式。`F1`可以查看这些普通命令的使用说明。再按`<TAB>`键就退出普通模式，又可以输入。
 
+当前预览框最多显示的条目数量是**200**个，目前我自己改了下：
+
+```python
+def getInitialWinHeight(self):
+    if self._reverse_order:
+        return self._initial_win_height
+    else:
+        return 200
+```
+上面的`200`改成了`2000`.有空可以问下原作者这里是否可以调整。
+
+
+- leaderf和gtags的配合
+
+```vim
+let g:Lf_CacheDirectory = expand('~')
+let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')         " vim-gentags和leaderf共享的配置,只能这样配
+```
+
+最重要的就是上面的配置，_vimrc中已经说明了，需要和`vim-gutentags`插件公用相关的`gtags`路径，所以只能这样配置。
+
+
 # 替换
 
 ## 全局替换
@@ -177,6 +199,7 @@ https://github.com/skywind3000/gutentags_plus
 选择数字
 <CR>
 ```
+
 
 
 

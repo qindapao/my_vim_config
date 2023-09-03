@@ -143,6 +143,9 @@ Plug 'rakr/vim-one'                                                            "
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  " catppuccin 主题
 Plug 'jsit/toast.vim'                                                          " toast 主题
 Plug 'cormacrelf/vim-colors-github'                                            " github 主题
+" 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
+Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
 
 call plug#end()
 " 插件 }
@@ -180,7 +183,8 @@ let g:gutentags_ctags_tagfile = '.tags'                                         
 
 let g:gutentags_modules = ['ctags', 'gtags_cscope']                              " 同时开启 ctags 和 gtags 支持
 
-let g:gutentags_cache_dir = expand('~/.cache/tags')                              " 将自动生成的 ctags/gtags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录
+" 用leaderf设置的缓存目录,这里就不要设置了,屏蔽掉
+" let g:gutentags_cache_dir = expand('~/.cache/tags')                              " 将自动生成的 ctags/gtags 文件全部放入 ~/.cache/tags 目录中，避免污染工程目录
 
 " 配置 ctags 的参数，老的 Exuberant-ctags 不能有 --extra=+q，注意
 let g:gutentags_ctags_extra_args = ['--fields=+niazS', '--extra=+q']
@@ -198,9 +202,9 @@ let g:gutentags_plus_switch = 0                                                 
 " vim-gutentags }
 
 
-" tagbar {
-nmap <F8> :TagbarToggle<CR>
-" tagbar }
+" NERDTree {
+nmap <F8> :NERDTreeToggle<CR>
+" NERDTree }
 
 
 " vim-gitgutter {
@@ -251,14 +255,34 @@ colorscheme toast
 " " vim-colors-github 主题 }
 
 " LeaderF 配置 {
+
+let g:Lf_GtagsAutoGenerate = 0
+let g:Lf_GtagsGutentags = 1
+
+let g:Lf_CacheDirectory = expand('~')
+let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')         " vim-gentags和leaderf共享的配置,只能这样配
+
+
+
+" 索引方式
+let g:Lf_UseVersionControlTool=1                                                 " 这个是默认选项, 可以不写, 按照版本控制工具来索引
+let g:Lf_DefaultExternalTool='rg'                                                " 如果不是一个repo, 那么使用rg工具来索引
+" 下面的两个cache都不要使用,否则结果可能不准确或者不实时显示
+let g:Lf_UseCache = 0                                                            " 不要使用缓存,这样结果是最准确的
+let g:Lf_UseMemoryCache = 0                                                      " 也不要使用内存的缓存,保证每次结果都是准确的
+
+let g:Lf_ShortcutB = '<c-l>'                                                     " 打开buffer搜索窗口
+let g:Lf_ShortcutF = '<c-p>'                                                     " 打开leaderf窗口
+
+" 为不同的项目配置不同的忽略配置
+" autocmd BufNewFile,BufRead X:/yourdir* let g:Lf_WildIgnore={'file':['*.vcproj', '*.vcxproj'],'dir':[]}
+
 " popup menu的显示效果非常差,就暂时不用它了
 " let g:Lf_WindowPosition = 'popup'                                              " 配置leaderf的弹出窗口类型为popup
 " 根目录配置
 let g:Lf_WorkingDirectoryMode = 'AF'                                             " 配置leaderf的工作目录模式
 let g:Lf_RootMarkers = ['.git', '.svn', '.hg', '.project', '.root']              " 根目录标识
-" 索引方式
-let g:Lf_UseVersionControlTool=1                                                 " 这个是默认选项, 可以不写, 按照版本控制工具来索引
-let g:Lf_DefaultExternalTool='rg'                                                " 如果不是一个repo, 那么使用rg工具来索引
+
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜索. -F 搜索字符串而不是正则表达式. -w 搜索只匹配有边界的词.)
 " 命令行显示:Leaderf rg -e,然后等待输入正则表达式
@@ -295,20 +319,30 @@ noremap <leader>fl :LeaderfLine<cr>
 noremap <leader>fw :LeaderfWindow<cr>
 noremap <leader>frr :LeaderfRgRecall<cr>
 
-" 为不同的项目配置不同的忽略配置
-" autocmd BufNewFile,BufRead X:/yourdir* let g:Lf_WildIgnore={'file':['*.vcproj', '*.vcxproj'],'dir':[]}
-
-let g:Lf_ShortcutB = '<c-l>'                                                     " 打开buffer搜索窗口
-let g:Lf_ShortcutF = '<c-p>'                                                     " 打开leaderf窗口
-
-
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 
+" leaderf不要自动生成标签,用gentags插件生成
 
+nmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
+nmap <unique> <leader>fgr <Plug>LeaderfGtagsReference
+nmap <unique> <leader>fgs <Plug>LeaderfGtagsSymbol
+nmap <unique> <leader>fgg <Plug>LeaderfGtagsGrep
 
+vmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
+vmap <unique> <leader>fgr <Plug>LeaderfGtagsReference
+vmap <unique> <leader>fgs <Plug>LeaderfGtagsSymbol
+vmap <unique> <leader>fgg <Plug>LeaderfGtagsGrep
+
+noremap <leader>fgo :<C-U><C-R>=printf("Leaderf! gtags --recall %s", "")<CR><CR>
+noremap <leader>fgn :<C-U><C-R>=printf("Leaderf gtags --next %s", "")<CR><CR>
+noremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR>
 
 " LeaderF 配置 }
+
+" tagbar 配置 {
+map <F4> :TagbarToggle<CR>
+" tagbar 配置 }
 
 " 插件配置 }
 
