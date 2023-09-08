@@ -61,7 +61,7 @@ https://github.com/junegunn/vim-plug
 ```
 
 3. 可以使用下面的命令显示当前安装的子插件
-   
+
 ```
 :CocList
 extensitions
@@ -178,7 +178,7 @@ mklink /d d:\pythonlib C:\Python311\Lib
 
 # ctags
 
-下载使用改进后的ctags: 
+下载使用改进后的ctags:
 项目的主页：
 https://github.com/universal-ctags/ctags
 可执行文件的下载地址：

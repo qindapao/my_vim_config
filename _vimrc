@@ -45,7 +45,8 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 filetype plugin indent on                                                        " 打开文件类型检测
-
+set history=1000
+let mapleader="\\"
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx FileType text
 
@@ -81,7 +82,7 @@ set guioptions+=b                                                               
 
 " 映射普通模式下面插入一行
 nnoremap oo o<Esc>
-" 映射普通模式上面插入一行                                                               
+" 映射普通模式上面插入一行
 nnoremap OO O<Esc>
 " 由于环境变量的问题,下面这行暂时不使用
 " command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw            " 搜索git关注的文件 :Sch xx
@@ -104,6 +105,28 @@ set guioptions-=m                                                               
 " 打开某个目录下面的文件执行vimgrep忽略设置,这样每个项目可以独立
 autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tmp,test.c
 
+" 编辑vim配置文件
+nnoremap <Leader>ve :e $MYVIMRC<CR>
+" 重新加载vim配置文件
+nnoremap <Leader>vr :source $MYVIMRC<CR>
+
+" 映射命令行历史操作,这个注释不能写到映射后面
+cnoremap <c-j> <down>
+cnoremap <c-k> <up>
+
+" 在location window列出搜索结果
+nnoremap <leader>lv :lv /<c-r>=expand("<cword>")<cr>/%<cr>:lw<cr>
+
+" 移除文件中所有行尾的空白字符
+nnoremap <leader><leader><space> :%s/\s\+$//e<CR>
+
+" 插入模式下快速插入日期时间(需要按两个TAB键触发)
+iab xtime <c-r>=strftime("%Y-%m-%d %H:%M:%S")<cr>
+
+
+
+2023-09-08 20:34:35 
+
 
 " 基本设置区域 }
 
@@ -114,6 +137,7 @@ call plug#begin('~/.vim/plugged')
 Plug 'qindapao/gtagsomnicomplete', {'branch': 'for_use'}                       " gtags完成插件
 Plug 'schmich/vim-guifont'                                                     " 灵活设置字体大小
 Plug 'preservim/nerdtree'                                                      " 文件管理器
+Plug 'Xuyuanp/nerdtree-git-plugin'                                             " nerdtree中显示git变化
 Plug 'tpope/vim-surround'                                                      " 单词包围
 Plug 'WolfgangMehner/bash-support'                                             " bash开发支持
 Plug 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
@@ -122,6 +146,7 @@ Plug 'vim-airline/vim-airline'                                                 "
 Plug 'godlygeek/tabular'                                                       " 自动对齐插件
 Plug 'Yggdroot/indentLine'                                                     " 对齐参考线插件
 Plug 'tpope/vim-fugitive'                                                      " vim的git集成插件
+Plug 'junegunn/gv.vim'                                                         " git树显示插件
 Plug 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
 Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
 Plug 'yianwillis/vimcdoc'                                                      " vim的中文文档
@@ -146,6 +171,10 @@ Plug 'cormacrelf/vim-colors-github'                                            "
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
+Plug 'img-paste-devs/img-paste.vim'                                            " markdown 直接粘贴图片
+
+Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
+
 
 call plug#end()
 " 插件 }
@@ -208,7 +237,7 @@ nmap <F8> :NERDTreeToggle<CR>
 
 
 " vim-gitgutter {
-let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " 是否自动将光标定位到自动修复列表位置 0:禁用 1:打开
+let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " git可执行文件路径
 let g:gitgutter_max_signs = -1                                                   " 标记的数量为无限
 " vim-gitgutter }
 
@@ -251,7 +280,7 @@ colorscheme toast
 " let g:github_colors_block_diffmark = 0
 " colorscheme github
 " let g:airline_theme = "github"
-" 
+"
 " " vim-colors-github 主题 }
 
 " LeaderF 配置 {
@@ -288,21 +317,21 @@ let g:Lf_RootMarkers = ['.git', '.svn', '.hg', '.project', '.root']             
 " 命令行显示:Leaderf rg -e,然后等待输入正则表达式
 nmap <unique> <leader>fr <Plug>LeaderfRgPrompt
 " 查询光标或者可视模式下所在的词,非全词匹配
-nmap <unique> <leader>fra <Plug>LeaderfRgCwordLiteralNoBoundary
+nmap <unique> <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary
 " 查询光标或者可视模式下所在的词,全词匹配
-nmap <unique> <leader>frb <Plug>LeaderfRgCwordLiteralBoundary
+nmap <unique> <leader>frw <Plug>LeaderfRgCwordLiteralBoundary
 " 查询光标或者可视模式下所在的正则表达式，非全词匹配
-nmap <unique> <leader>frc <Plug>LeaderfRgCwordRegexNoBoundary
+nmap <unique> <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary
 " 查询光标或者可视模式下所在的正则表达式，全词匹配
-nmap <unique> <leader>frd <Plug>LeaderfRgCwordRegexBoundary
+nmap <unique> <leader>frew <Plug>LeaderfRgCwordRegexBoundary
 " 上面解释了
-vmap <unique> <leader>fra <Plug>LeaderfRgVisualLiteralNoBoundary
+vmap <unique> <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary
 " 上面解释了
-vmap <unique> <leader>frb <Plug>LeaderfRgVisualLiteralBoundary
+vmap <unique> <leader>frw <Plug>LeaderfRgVisualLiteralBoundary
 " 上面解释了
-vmap <unique> <leader>frc <Plug>LeaderfRgVisualRegexNoBoundary
+vmap <unique> <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary
 " 上面解释了
-vmap <unique> <leader>frd <Plug>LeaderfRgVisualRegexBoundary
+vmap <unique> <leader>frew <Plug>LeaderfRgVisualRegexBoundary
 
 " 跳到字符串搜索的下一个结果
 noremap ]n :Leaderf rg --next<CR>
@@ -343,6 +372,30 @@ noremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR
 " tagbar 配置 {
 map <F4> :TagbarToggle<CR>
 " tagbar 配置 }
+
+" auto-pairs 配置 {
+au Filetype markdown let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
+" auto-pairs 配置 }
+
+" vim-markdown {
+" 这个命令可能失效,需要在vim中手动执行这个命令,编辑markdown文件的时候
+set concealcursor=""                                                             " 设置光标处的字符不要收缩,不然无法编辑
+" vim-markdown }
+
+" img-paste {
+autocmd FileType markdown,tex nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
+" img-paste }
+
+" vim-easymotion 的配置 {
+let g:EasyMotion_smartcase = 1
+map <Leader><Leader>j <Plug>(easymotion-j)
+map <Leader><Leader>k <Plug>(easymotion-k)
+map <Leader><leader>h <Plug>(easymotion-linebackward)
+map <Leader><leader>l <Plug>(easymotion-lineforward)
+map <Leader><leader>. <Plug>(easymotion-repeat)
+map <Leader>W <Plug>(easymotion-bd-w)
+map <Leader>a <Plug>(easymotion-jumptoanywhere)
+" vim-easymotion 的配置 }
 
 " 插件配置 }
 

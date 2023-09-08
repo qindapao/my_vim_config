@@ -1,3 +1,30 @@
+
+# 快捷键整理
+## 窗口和buffer管理
+由于有一个`terminal_help`插件把窗口切换快捷键映射了，不再是默认的`ctrl + w`，而且可以支持连续切换，目前是下面的值：
+
+>下面这些操作都是在普通模式下
+
+| 按键            | 功能           | 备注 |
+|-----------------|----------------|------|
+| alt + shift + H | 切换到左边窗口 |      |
+| alt + shift + L | 切换到右边窗口 |      |
+| alt + shift + J | 切换到下边窗口 |      |
+| alt + shift + K | 切换到上边窗口 |      |
+| ctrl + w + c    | 关闭当前窗口   |      |
+| ctrl + w + v    | 左右拆分窗口   |      |
+| ctrl + w + s    | 上下拆分窗口   |      |
+
+- 在NERD_tree插件的窗口中
+
+按`m`然后等待一会儿，会出现文件操作的小窗口，可以对文件进行重命名或者删除添加复制等操作。
+
+
+## vim自带终端操作
+
+也是由于`terminal_help`插件的关系，所以拷贝字符到终端的操作方式发生变化。
+- `alt shift - " 0` 5个键表示复制复制寄存器中的值到终端窗口
+
 # 搜索
 
 - 递归搜索当前目录以及所有子目录并quickfix打开
@@ -15,9 +42,11 @@
 >排除掉objd目录以及它的子目录，排除掉obj目录以及它的子目录，排除掉当前目录下的*.tmp文件和test.c文件
 
 还有个思路是关注需要搜索的文件：
+
 ```txt
 :noautocmd vimgrep /{pattern}/gj `git ls-files`
 ```
+
 映射一个快捷方式在配置文件中：
 ```txt
 command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
@@ -32,6 +61,8 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 `:vim /\cxx/ %`
 
 >在当前文件中查找`xx`，并忽略大小写。
+
+- vimgrep是可以搜索软链接目录的
 
 # tags查找搜索
 
@@ -104,12 +135,11 @@ https://github.com/skywind3000/gutentags_plus
 
 如果需要在保持搜索框不自动关闭的情况下能动态打开文件，需要这样发命令:
 
-```
+```vim
 :Leaderf rg -F --no-auto-preview --stayOpen -e mouse
 ```
 
 上面这个命令的意思是：在保持搜索框不自动关闭的情况下，不要显示预览窗口(**如果有预览窗口就无法正常的打开文件！**)，然后正则搜索`mouse`字符串。
-
 
 - 固定搜索某些目录
 
@@ -122,9 +152,12 @@ https://github.com/skywind3000/gutentags_plus
 
 排除掉`src`目录。
 
+- 搜索当前文件中的行
+
+`leaderfLine`
+
 
 - 进入`leaderf`后的操作
-
 
 | 快捷键                     | 说明                                         |
 | -------------------------- | -------------------------------------------- |
