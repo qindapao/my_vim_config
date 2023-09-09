@@ -132,6 +132,9 @@ nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>
 " 设置grep默认显示行号
 set grepprg=grep\ -n
 
+set shell=bash
+
+
 " 基本设置区域 }
 
 " 插件 {
