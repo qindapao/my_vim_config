@@ -123,10 +123,14 @@ nnoremap <leader><leader><space> :%s/\s\+$//e<CR>
 " 插入模式下快速插入日期时间(需要按两个TAB键触发)
 iab xtime <c-r>=strftime("%Y-%m-%d %H:%M:%S")<cr>
 
+" 打开当前文件所在的目录
+nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>
 
+" 某些插件可能需要手动指定python3库的地址,不过大多情况下这个值是默认的并不需要设置，只有出问题才需要设置
+" set pythonthreedll = D:\python\python38.dll
 
-2023-09-08 20:34:35 
-
+" 设置grep默认显示行号
+set grepprg=grep\ -n
 
 " 基本设置区域 }
 
@@ -139,6 +143,7 @@ Plug 'schmich/vim-guifont'                                                     "
 Plug 'preservim/nerdtree'                                                      " 文件管理器
 Plug 'Xuyuanp/nerdtree-git-plugin'                                             " nerdtree中显示git变化
 Plug 'tpope/vim-surround'                                                      " 单词包围
+Plug 'tpope/vim-repeat'                                                        " vim重复插件,可以重复surround的内容
 Plug 'WolfgangMehner/bash-support'                                             " bash开发支持
 Plug 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
 Plug 'dense-analysis/ale'                                                      " 异步语法检查和自动格式化框架
@@ -269,19 +274,19 @@ let g:rainbow_active = 1                                                        
 " colorscheme catppuccin_frappe                                                  " 还可以选择catppuccin_latte catppuccin_macchiato catppuccin_mocha
 " " catppuccin主题 }
 
-" toast主题 {
-set background=light
-colorscheme toast
-" toast主题 }
+" " toast主题 {
+" set background=light
+" colorscheme toast
+" " toast主题 }
 
-" " vim-colors-github 主题 {
-" let g:github_colors_soft = 1
-" set background=dark
-" let g:github_colors_block_diffmark = 0
-" colorscheme github
-" let g:airline_theme = "github"
-"
-" " vim-colors-github 主题 }
+" vim-colors-github 主题 {
+let g:github_colors_soft = 1
+set background=dark
+let g:github_colors_block_diffmark = 0
+colorscheme github
+let g:airline_theme = "github"
+
+" vim-colors-github 主题 }
 
 " LeaderF 配置 {
 
@@ -393,9 +398,19 @@ map <Leader><Leader>k <Plug>(easymotion-k)
 map <Leader><leader>h <Plug>(easymotion-linebackward)
 map <Leader><leader>l <Plug>(easymotion-lineforward)
 map <Leader><leader>. <Plug>(easymotion-repeat)
-map <Leader>W <Plug>(easymotion-bd-w)
-map <Leader>a <Plug>(easymotion-jumptoanywhere)
+map <Leader>w <Plug>(easymotion-bd-w)
+map <Leader>W <Plug>(easymotion-overwin-w)
+map <Leader>f <Plug>(easymotion-bd-f)
+map <Leader>F <Plug>(easymotion-overwin-f)
 " vim-easymotion 的配置 }
 
+" coc补全插件的一些配置 {
+let g:coc_snippet_next = '<tab>'
+inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+" coc补全插件的一些配置 }
+
 " 插件配置 }
+
+
+
 
