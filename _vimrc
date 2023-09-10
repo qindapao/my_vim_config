@@ -193,6 +193,8 @@ Plug 'img-paste-devs/img-paste.vim'                                            "
 
 " 这个也没啥用,先禁用掉
 " Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
+" 安装vim 文档插件
+Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 
 
 call plug#end()
