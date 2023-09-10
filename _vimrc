@@ -69,6 +69,9 @@ set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set expandtab                                                                    " 用空格替换TAB
+" perl格式的文件,TAB就是TAB, 不要替换
+autocmd FileType perl setlocal noexpandtab
+
 
 set cursorline                                                                   " highlight current line
 " cursor not blinking
@@ -132,7 +135,8 @@ nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>
 " 设置grep默认显示行号
 set grepprg=grep\ -n
 
-set shell=bash
+" 这句话暂时不能设置,会导致perl文件打开异常
+" set shell=bash
 
 
 " 基本设置区域 }
@@ -408,7 +412,6 @@ map <Leader>F <Plug>(easymotion-overwin-f)
 " vim-easymotion 的配置 }
 
 " coc补全插件的一些配置 {
-let g:coc_snippet_next = '<tab>'
 inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 " coc补全插件的一些配置 }
 
