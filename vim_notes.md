@@ -1,8 +1,10 @@
+# vim_notes
+
 [TOC]
 
-# 快捷键整理
+## 快捷键整理
 
-## 窗口和buffer管理
+### 窗口和buffer管理
 
 由于有一个`terminal_help`插件把窗口切换快捷键映射了，不再是默认的`ctrl + w`，而且可以支持连续切换，目前是下面的值：
 
@@ -20,16 +22,15 @@
 
 - 在NERD_tree插件的窗口中
 
-按`m`然后等待一会儿，会出现文件操作的小窗口，可以对文件进行重命名或者删除添加复制等操作。
+按 `m` 然后等待一会儿，会出现文件操作的小窗口，可以对文件进行重命名或者删除添加复制等操作。
 
+### vim自带终端操作
 
-## vim自带终端操作
-
-也是由于 `terminal_help` 插件的关系，所以拷贝字符到终端的操作方式发生变化。
+也是由于 `terminal_help` 插件的关系 ，所以拷贝字符到终端的操作方式发生变化。
 
 - `ctrl shift - " 0` 5个键表示复制复制寄存器中的值到终端窗口
 
-# 搜索
+## 搜索
 
 - 递归搜索当前目录以及所有子目录并quickfix打开
 
@@ -52,6 +53,7 @@
 ```
 
 映射一个快捷方式在配置文件中：
+
 ```txt
 command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 ```
@@ -68,11 +70,11 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 
 - vimgrep是可以搜索软链接目录的
 
-# tags查找搜索
+## tags查找搜索
 
-## gtags
+### gtags
 
-**完整的命令：**
+** 完整的命令：**
 :GscopeFind {querytype} {name}
 
 {name}中如果需要包含空格，那么需要使用反斜杠转义。无法忽略大小写，要实现比较麻烦，如果需要查询忽略大小写的正则表达式，建议还是使用vimgrep来实现。如果是简单的大小写匹配也可以使用下面这个例子演示的来实现。比**vimgrep**更**快速**。
@@ -129,7 +131,7 @@ To see the gtags log.
 https://github.com/skywind3000/gutentags_plus
 
 
-# leaderf
+## leaderf
 
 模糊查找插件，使用前先安装[ripgrep](https://github.com/BurntSushi/ripgrep)
 
@@ -192,6 +194,7 @@ def getInitialWinHeight(self):
     else:
         return 200
 ```
+
 上面的`200`改成了`2000`.有空可以问下原作者这里是否可以调整。
 
 
@@ -199,15 +202,16 @@ def getInitialWinHeight(self):
 
 ```vim
 let g:Lf_CacheDirectory = expand('~')
-let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')         " vim-gentags和leaderf共享的配置,只能这样配
+" vim-gentags和leaderf共享的配置,只能这样配
+let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')         
 ```
 
 最重要的就是上面的配置，_vimrc中已经说明了，需要和`vim-gutentags`插件公用相关的`gtags`路径，所以只能这样配置。
 
 
-# 替换
+## 替换
 
-## 全局替换
+### 全局替换
 
 - 加入参数列表
 
@@ -224,11 +228,9 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')        
 >对参数列表中的文件依次把`hata`替换成`love`，并且更新文件，在每次替换前进行手动确认。
 
 
+## 文件操作
 
-
-# 文件操作
-
-## 打开历史文件
+### 打开历史文件
 
 ```txt
 :browse oldfiles
@@ -237,27 +239,26 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')        
 <CR>
 ```
 
-# 未整理
+## 未整理
 
 - 当前操作某些文件会产生 `.stats` 后缀结尾的文件，目前不知道这些文件是怎么产生的。可以通过 `everything` 软件通过正则搜索带 `.stats` 后缀的文件来统一删除。
 
-# 常用插件操作
+## 常用插件操作
 
-## surround
+### surround
 
 - 如果想在添加的括号后面补一个空格，那么使用前半括号，比如 `ysiw(` ，添加括号后，括号后面会补一个空格。
 - 如果不需要空格，使用后半括号，比如 `ysiw)` ，效果就是不会补空格。
 
-
-## completor 补全插件
+### completor 补全插件
 
 补全插件遇到文件名中有特殊字符，比如 `@ ! # *` 等，是无法正常补全的。
 
-
-## coc 补全框架
+### coc 补全框架
 
 目前遇到的问问题是，补全的第一个选项无法选择，都必须通过选择下一个再选择上一个来实现。设置了下面这行也没用。
 
 ```vim
 let g:coc_snippet_next = '<tab>'
 ```
+

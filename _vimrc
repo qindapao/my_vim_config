@@ -60,6 +60,11 @@ set colorcolumn=81,121
 
 set nowrap
 
+" 如果是markdown文件设置wrap
+autocmd FileType markdown set wrap
+
+
+
 set scrolloff=3
 
 " search highlight
@@ -182,10 +187,12 @@ Plug 'jsit/toast.vim'                                                          "
 Plug 'cormacrelf/vim-colors-github'                                            " github 主题
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
+" 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟
+" Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
 Plug 'img-paste-devs/img-paste.vim'                                            " markdown 直接粘贴图片
 
-Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
+" 这个也没啥用,先禁用掉
+" Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
 
 
 call plug#end()
@@ -389,9 +396,16 @@ map <F4> :TagbarToggle<CR>
 au Filetype markdown let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
 " auto-pairs 配置 }
 
+
+
 " vim-markdown {
 " 这个命令可能失效,需要在vim中手动执行这个命令,编辑markdown文件的时候
-set concealcursor=""                                                             " 设置光标处的字符不要收缩,不然无法编辑
+let g:vim_markdown_emphasis_multiline = 0
+" 设置光标处的字符都不要自动收缩
+let g:vim_markdown_conceal = 0
+set concealcursor=""
+let g:vim_markdown_conceal_code_blocks = 0
+let g:vim_markdown_strikethrough = 1
 " vim-markdown }
 
 " img-paste {
