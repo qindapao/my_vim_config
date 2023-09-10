@@ -412,7 +412,7 @@ map <Leader>F <Plug>(easymotion-overwin-f)
 " vim-easymotion 的配置 }
 
 " coc补全插件的一些配置 {
-inoremap <silent><expr> <TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+inoremap <silent><expr> <S-TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 " coc补全插件的一些配置 }
 
 " 插件配置 }
