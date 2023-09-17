@@ -2,7 +2,27 @@
 # my_vim_config
 vim configuration file for my personal use
 
-[TOC]
+
+<!-- vim-markdown-toc GFM -->
+
++ [vim最新的安装包下载](#vim最新的安装包下载)
++ [特殊插件安装备忘](#特殊插件安装备忘)
+    * [vim-plug](#vim-plug)
+    * [rbong/vim-flog](#rbongvim-flog)
+    * [coc.nvim](#cocnvim)
+    * [markdown2ctags](#markdown2ctags)
++ [语法检查和格式化器](#语法检查和格式化器)
+    * [bash](#bash)
+        - [shell-check](#shell-check)
+        - [shfmt](#shfmt)
++ [在windows下为vim的配置文件创建符号链接](#在windows下为vim的配置文件创建符号链接)
++ [交换esc和caps lock的键位](#交换esc和caps-lock的键位)
++ [gtags](#gtags)
++ [ctags](#ctags)
++ [git可执行文件的位置](#git可执行文件的位置)
++ [文件备份](#文件备份)
+
+<!-- vim-markdown-toc -->
 
 # vim最新的安装包下载
 

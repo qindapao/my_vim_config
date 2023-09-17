@@ -227,6 +227,7 @@ Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': 
 " 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟,这个插件还有个问题是,git对比的时候也弄得乱七八糟,所以先直接禁用掉
 Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
 Plug 'img-paste-devs/img-paste.vim'                                            " markdown 直接粘贴图片
+Plug 'mzlogin/vim-markdown-toc'                                                " 自动设置标题
 
 " 这个也没啥用,先禁用掉
 " Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
@@ -479,8 +480,9 @@ command! Gcf GitGutterQuickFixCurrentFile | copen
 
 " vim-gitgutter 插件配置 }
 
-
-
+" vim-markdown-toc 插件配置 {
+let g:vmt_cycle_list_item_markers = 1
+" vim-markdown-toc 插件配置 }
 
 " 插件配置 }
 
