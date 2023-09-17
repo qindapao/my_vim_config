@@ -1,9 +1,8 @@
 
-[TOC]
-
 # my_vim_config
 vim configuration file for my personal use
 
+[TOC]
 
 # vim最新的安装包下载
 
