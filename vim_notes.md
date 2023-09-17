@@ -4,7 +4,6 @@
 
 ## 快捷键整理
 
-
 ### 窗口和buffer管理
 
 由于有一个`terminal_help`插件把窗口切换快捷键映射了，不再是默认的`ctrl + w`，而且可以支持连续切换，目前是下面的值：
@@ -24,7 +23,6 @@
 - 在NERD_tree插件的窗口中
 
 按 `m` 然后等待一会儿，会出现文件操作的小窗口，可以对文件进行重命名或者删除添加复制等操作。
-
 
 - 如果在一些`quickfix`或者`locallist`之类的界面中，如果想分屏打开一个窗口，直接`ctrl + w + <CR>`即可。
 
@@ -78,7 +76,7 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 
 ### gtags
 
-** 完整的命令：**
+**完整的命令：**
 :GscopeFind {querytype} {name}
 
 {name}中如果需要包含空格，那么需要使用反斜杠转义。无法忽略大小写，要实现比较麻烦，如果需要查询忽略大小写的正则表达式，建议还是使用vimgrep来实现。如果是简单的大小写匹配也可以使用下面这个例子演示的来实现。比**vimgrep**更**快速**。
@@ -106,6 +104,7 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 
 如果使用过程中遇到了异常，使用下面的方法来解决：
 比如抛出下面的异常:
+
 ```txt
 ERROR: gutentags: gtags-cscope job failed, returned: 1
 ```
@@ -132,7 +131,7 @@ To see the gtags log.
 删除前最好是用`find . -name "*.stats"`命令查询下需要删除的文件是否都是它们，不要误删除。
 
 更完整的说明可以看这里：
-https://github.com/skywind3000/gutentags_plus
+[补充](https://github.com/skywind3000/gutentags_plus)
 
 
 ## leaderf
@@ -268,7 +267,27 @@ let g:coc_snippet_next = '<tab>'
 
 #### coc框架下的c语言补全
 
-1. 首先要做的事情是安装[clang](https://github.com/llvm/llvm-project)，对于`windows`系统来说，选择`LLVM-16.0.6-win64.exe`这样格式的安装包即可。
+1. 首先要做的事情是安装[clang](https://github.com/llvm/llvm-project)，对于`windows`系统来说，选择`LLVM-16.0.6-win64.exe`这样格式的安装包即可。记得安装最后的时候勾选添加到`PATH`。
+
+2. 安装完成后，在命令执行窗口下输入以下的命令，如果能显示正常的信息，证明`clang`安装成功。
+
+```cmd
+C:\Users\pc>clang -v
+clang version 16.0.6
+Target: x86_64-pc-windows-msvc
+Thread model: posix
+InstalledDir: D:\programes\LLVM\bin
+
+C:\Users\pc>
+```
+
+3. `clang`安装成功后，需要在`coc`的命令行运行以下指令，安装`coc`的`clang`补全插件：
+
+```vim
+:CocInstall coc-clangd
+```
+
+4. 安装完成后，打开一个C语言的源程序，会出现补全和代码提示。
 
 
 ## git
@@ -292,3 +311,21 @@ alias git="git.exe"
 ```
 
 这样输入`git`的时候，实际调用的程序是`git.exe`，而不是虚拟终端中默认的版本不正确的`git`。
+
+### 使用浏览器打开当前文件的远程文件
+
+如果是用的是常规的`github`或者是类似的通用的`git`远程客户端，那么使用`vim-fugitive`插件的`:GBrowse`命令即可直接打开。
+
+但是如果使用的是公司的系统，或者是`vim-rhubarb`(这个插件是搭配着`vim-fugitive`插件一起使用的)插件无法配置公司客户端，那么可以自己实现一个使用浏览器打开远程分支的功能，大概的思路如下：
+
+在`_vimrc`中实现一个函数
+
+```vim
+# 得到当前文件对应的远程分支的主机名和分支名
+git.exe rev-parse --abbrev-ref --symbolic-full-name @{upstream}
+# 得到当前分支对应的远程分支的url，下面的主机名用上面得到的结果
+git.exe config --get remote.主机名.url
+# 然后用这些地址拼接成一个浏览器地址，再使用下面的命令来打开
+silent excute '!chrome' get_adr
+```
+

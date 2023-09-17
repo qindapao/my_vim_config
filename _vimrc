@@ -42,7 +42,7 @@ function MyDiff()
     endif
 endfunction
 
-function! Diff(spec)
+function! GitDiff(spec)
     vertical new
     setlocal bufhidden=wipe buftype=nofile nobuflisted noswapfile
     let cmd = "++edit #"
@@ -55,7 +55,7 @@ function! Diff(spec)
     wincmd p
     diffthis
 endfunction
-command! -nargs=? Diff call Diff(<q-args>)
+command! -nargs=? Diff call GitDiff(<q-args>)
 
 " below are my personal settings
 " 基本设置区域 {
@@ -137,7 +137,7 @@ set rnu                                                                         
 set autoread                                                                     " 自动加载文件变化
 
 " 折叠配置区域
-set foldenable                                                                   " 开始折叠
+" set foldenable                                                                   " 开始折叠
 set foldmethod=indent                                                            " 设置缩进折叠
 setlocal foldlevel=3                                                             " 设置折叠层数为
 set foldlevelstart=99                                                            " 打开文件是默认不折叠代码
@@ -199,6 +199,7 @@ Plug 'vim-airline/vim-airline'                                                 "
 Plug 'godlygeek/tabular'                                                       " 自动对齐插件
 Plug 'Yggdroot/indentLine'                                                     " 对齐参考线插件
 Plug 'tpope/vim-fugitive'                                                      " vim的git集成插件
+Plug 'tpope/vim-rhubarb'                                                       " 用于打开gi的远程
 Plug 'junegunn/gv.vim'                                                         " git树显示插件
 Plug 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
 Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
@@ -223,8 +224,8 @@ Plug 'jsit/toast.vim'                                                          "
 Plug 'cormacrelf/vim-colors-github'                                            " github 主题
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
-" 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟
-" Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
+" 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟,这个插件还有个问题是,git对比的时候也弄得乱七八糟,所以先直接禁用掉
+Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
 Plug 'img-paste-devs/img-paste.vim'                                            " markdown 直接粘贴图片
 
 " 这个也没啥用,先禁用掉
@@ -335,7 +336,7 @@ let g:rainbow_active = 1                                                        
 
 " vim-colors-github 主题 {
 let g:github_colors_soft = 1
-set background=dark
+set background=light
 let g:github_colors_block_diffmark = 0
 colorscheme github
 let g:airline_theme = "github"
@@ -443,9 +444,10 @@ au Filetype markdown let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"
 let g:vim_markdown_emphasis_multiline = 0
 " 设置光标处的字符都不要自动收缩
 let g:vim_markdown_conceal = 0
-set concealcursor=""
 let g:vim_markdown_conceal_code_blocks = 0
 let g:vim_markdown_strikethrough = 1
+" 设置禁用折叠,这个一定要设置,不然会造成对比的时候语法错乱
+let g:vim_markdown_folding_disabled = 1
 " vim-markdown }
 
 " img-paste {

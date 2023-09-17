@@ -1,12 +1,9 @@
-[TOC]
-
-
 # my_vim_config
 vim configuration file for my personal use
 
+[TOC]
 
 # vim最新的安装包下载
-
 
 https://github.com/vim/vim-win32-installer/releases
 
@@ -78,6 +75,7 @@ extensitions
 [completor](https://github.com/maralla/completor.vim)
 
 
+
 ## markdown2ctags
 
 原始的tagbar插件无法显示markdown格式的大纲，需要配合这个插件一起使用。
@@ -116,7 +114,6 @@ https://github.com/mvdan/sh => shfmt_v3.7.0_windows_amd64.exe
 
 
 
-
 # 在windows下为vim的配置文件创建符号链接
 ```txt
 C:\Windows\System32>D:
@@ -136,6 +133,7 @@ D:\programes\Vim>
 1. win + R 输入 regedit 打开注册表
 2. 进入目录 HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Keyboard Layout
 3. 建立一个二进制的映射
+
 ```txt
 Scancode Map
 00 00 00 00 00 00 00 00
