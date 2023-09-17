@@ -271,3 +271,24 @@ let g:coc_snippet_next = '<tab>'
 1. 首先要做的事情是安装[clang](https://github.com/llvm/llvm-project)，对于`windows`系统来说，选择`LLVM-16.0.6-win64.exe`这样格式的安装包即可。
 
 
+## git
+
+### 配置终端中使用的git工具
+
+```bash
+root@DESKTOP-0MVRMOU:/etc# git.exe --version
+git version 2.37.3.windows.1
+root@DESKTOP-0MVRMOU:/etc# git --version
+git version 2.34.1
+root@DESKTOP-0MVRMOU:/etc#
+```
+
+由于默认的git可能是虚拟环境中的，并不是`windows`系统默认的`git.exe`可执行程序，这可能造成使用到了错误的程序，可以在终端的配置文件中增加别名来解决。
+
+配置文件的一般位置是在`/etc/profile`，我们只需要在这个配置文件中加入下面这句话：
+
+```bash
+alias git="git.exe"
+```
+
+这样输入`git`的时候，实际调用的程序是`git.exe`，而不是虚拟终端中默认的版本不正确的`git`。
