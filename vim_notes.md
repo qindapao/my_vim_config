@@ -4,6 +4,7 @@
 
 ## 快捷键整理
 
+
 ### 窗口和buffer管理
 
 由于有一个`terminal_help`插件把窗口切换快捷键映射了，不再是默认的`ctrl + w`，而且可以支持连续切换，目前是下面的值：
@@ -23,6 +24,9 @@
 - 在NERD_tree插件的窗口中
 
 按 `m` 然后等待一会儿，会出现文件操作的小窗口，可以对文件进行重命名或者删除添加复制等操作。
+
+
+- 如果在一些`quickfix`或者`locallist`之类的界面中，如果想分屏打开一个窗口，直接`ctrl + w + <CR>`即可。
 
 ### vim自带终端操作
 
@@ -261,4 +265,9 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 ```vim
 let g:coc_snippet_next = '<tab>'
 ```
+
+#### coc框架下的c语言补全
+
+1. 首先要做的事情是安装[clang](https://github.com/llvm/llvm-project)，对于`windows`系统来说，选择`LLVM-16.0.6-win64.exe`这样格式的安装包即可。
+
 

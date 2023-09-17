@@ -42,8 +42,29 @@ function MyDiff()
     endif
 endfunction
 
+function! Diff(spec)
+    vertical new
+    setlocal bufhidden=wipe buftype=nofile nobuflisted noswapfile
+    let cmd = "++edit #"
+    if len(a:spec)
+        let cmd = printf('!git -C %s show %s:./%s', shellescape(expand('#:p:h'), 1), a:spec, shellescape(expand('#:t'), 1))
+    endif
+    execute "read " . cmd
+    silent 0d_
+    diffthis
+    wincmd p
+    diffthis
+endfunction
+command! -nargs=? Diff call Diff(<q-args>)
+
 " below are my personal settings
 " 基本设置区域 {
+
+" 设置默认的终端为bash
+let g:terminal_cwd = 1
+let g:terminal_shell = 'bash'
+
+
 filetype plugin indent on                                                        " 打开文件类型检测
 set history=1000
 let mapleader="\\"
@@ -63,7 +84,22 @@ set nowrap
 " 如果是markdown文件设置wrap
 autocmd FileType markdown set wrap
 
-
+" 设置标签页的显示格式
+set guitablabel=%N%M%t
+" 切换标签页快捷方式
+noremap tn :tabnew<CR>
+noremap tc :tabclose<CR>
+noremap to :tabonly<CR>
+:nn <M-1> 1gt
+:nn <M-2> 2gt
+:nn <M-3> 3gt
+:nn <M-4> 4gt
+:nn <M-5> 5gt
+:nn <M-6> 6gt
+:nn <M-7> 7gt
+:nn <M-8> 8gt
+:nn <M-9> 9gt
+:nn <M-0> :tablast<CR>
 
 set scrolloff=3
 
@@ -195,7 +231,9 @@ Plug 'img-paste-devs/img-paste.vim'                                            "
 " Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
 " 安装vim 文档插件
 Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
-
+Plug 'mhinz/vim-startify'                                                      " vim的开始页
+Plug 'farmergreg/vim-lastplace'                                                " 打开文件的上次位置
+Plug 'rickhowe/diffchar.vim'                                                   " 更明显的对比
 
 call plug#end()
 " 插件 }
@@ -430,6 +468,17 @@ map <Leader>F <Plug>(easymotion-overwin-f)
 " coc补全插件的一些配置 {
 inoremap <silent><expr> <S-TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
 " coc补全插件的一些配置 }
+
+" vim-gitgutter 插件配置 {
+nnoremap gnh :GitGutterNextHunk<CR>
+nnoremap gph :GitGutterPrevHunk<CR>
+command! Gqf GitGutterQuickFix | copen
+command! Gcf GitGutterQuickFixCurrentFile | copen
+
+" vim-gitgutter 插件配置 }
+
+
+
 
 " 插件配置 }
 
