@@ -95,6 +95,8 @@ extensitions
 [tabnine-vim](https://github.com/codota/tabnine-vim)
 [completor](https://github.com/maralla/completor.vim)
 
+>completor这个插件比较特别，我发现它可以补全中文上下文，但是`coc.nvim`都不行。所以`completor`这个插件还是很有价值的，目前我在公司就是用的是这个插件。
+
 
 
 ## 4 markdown2ctags
