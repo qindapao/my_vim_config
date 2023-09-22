@@ -575,7 +575,7 @@ let g:vmt_auto_update_on_save = 1
 
 " vim-bookmarks 书签插件配置 {
 let g:bookmark_save_per_working_dir = 1
-let g:bookmark_auto_save = 0
+let g:bookmark_auto_save = 1
 " vim-bookmarks 书签插件配置 }
 
 " indentLine 插件配置 {
