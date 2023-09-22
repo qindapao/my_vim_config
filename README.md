@@ -3,24 +3,25 @@
 vim configuration file for my personal use
 
 
-<!-- vim-markdown-toc GFM -->
+<!-- vim-markdown-toc Marked -->
 
 + [vim最新的安装包下载](#vim最新的安装包下载)
 + [特殊插件安装备忘](#特殊插件安装备忘)
-    * [vim-plug](#vim-plug)
-    * [rbong/vim-flog](#rbongvim-flog)
-    * [coc.nvim](#cocnvim)
-    * [markdown2ctags](#markdown2ctags)
+    * [1 vim-plug](#1-vim-plug)
+    * [2 rbong/vim-flog](#2-rbong/vim-flog)
+    * [3 coc.nvim](#3-coc.nvim)
+    * [4 markdown2ctags](#4-markdown2ctags)
 + [语法检查和格式化器](#语法检查和格式化器)
-    * [bash](#bash)
-        - [shell-check](#shell-check)
-        - [shfmt](#shfmt)
+    * [5 bash](#5-bash)
+        - [5.1 shell-check](#5.1-shell-check)
+        - [5.2 shfmt](#5.2-shfmt)
 + [在windows下为vim的配置文件创建符号链接](#在windows下为vim的配置文件创建符号链接)
 + [交换esc和caps lock的键位](#交换esc和caps-lock的键位)
 + [gtags](#gtags)
 + [ctags](#ctags)
 + [git可执行文件的位置](#git可执行文件的位置)
 + [文件备份](#文件备份)
++ [字体](#字体)
 
 <!-- vim-markdown-toc -->
 
@@ -30,7 +31,7 @@ https://github.com/vim/vim-win32-installer/releases
 
 # 特殊插件安装备忘
 
-## vim-plug
+## 1 vim-plug
 
 选择使用vim-plug来管理插件。
 
@@ -38,8 +39,7 @@ https://github.com/junegunn/vim-plug
 
 下载plug.vim，然后放置到`autoload`目录下。
 
-
-## rbong/vim-flog
+## 2 rbong/vim-flog
 
 这个插件漂亮显示git graph，但是需要安装LuaJIT 2.1，可以参考[这里](https://github.com/rbong/vim-flog)的说明。
 
@@ -57,7 +57,7 @@ https://github.com/junegunn/vim-plug
    lua\jit\*
 5. 源码和可执行文件都已经备份。
 
-## coc.nvim
+## 3 coc.nvim
 
 >vim的智能提示和语法自动完成插件
 
@@ -97,7 +97,7 @@ extensitions
 
 
 
-## markdown2ctags
+## 4 markdown2ctags
 
 原始的tagbar插件无法显示markdown格式的大纲，需要配合这个插件一起使用。
 安装后需要设置可执行文件的位置:
@@ -117,8 +117,8 @@ C:\Users\pc\.vim
     shfmt.exe
 ```
 
-## bash
-### shell-check
+## 5 bash
+### 5.1 shell-check
 >bash的语法检查器
 
 https://www.shellcheck.net/
@@ -128,7 +128,7 @@ https://github.com/koalaman/shellcheck
 **windows**: shellcheck-v0.9.0.zip
 set shellcheck.exe to PATH
 
-### shfmt
+### 5.2 shfmt
 >bash的自动化格式器
 
 https://github.com/mvdan/sh => shfmt_v3.7.0_windows_amd64.exe
@@ -207,6 +207,7 @@ https://github.com/universal-ctags/ctags
 https://github.com/universal-ctags/ctags-win32
 
 
+
 # git可执行文件的位置
 
 如果电脑中安装了几个虚拟机，那么可能环境变量中会有重复的git.exe可执行程序，可能导致vim找到错误的exe程序，解决方法是把真正的系统的git.exe放置在环境变量的最前面的位置上。
@@ -223,3 +224,10 @@ vim
 其它资源
 
 https://hanleylee.com/articles/usage-of-vim-editor-basic/
+
+
+# 字体
+
+一个很好看的适合`vim`使用的[字体](https://github.com/hanleylee/yahei-fira-icon-hybrid-font)。
+
+

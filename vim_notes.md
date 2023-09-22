@@ -1,34 +1,36 @@
 # vim_notes
 
 
-<!-- vim-markdown-toc GFM -->
+<!-- vim-markdown-toc Marked -->
 
-* [快捷键整理](#快捷键整理)
-    - [窗口和buffer管理](#窗口和buffer管理)
-    - [vim自带终端操作](#vim自带终端操作)
-* [搜索](#搜索)
-* [tags查找搜索](#tags查找搜索)
-    - [gtags](#gtags)
-* [leaderf](#leaderf)
-* [替换](#替换)
-    - [全局替换](#全局替换)
-* [文件操作](#文件操作)
-    - [打开历史文件](#打开历史文件)
-* [未整理](#未整理)
-* [常用插件操作](#常用插件操作)
-    - [surround](#surround)
-    - [completor 补全插件](#completor-补全插件)
-    - [coc 补全框架](#coc-补全框架)
-        + [coc框架下的c语言补全](#coc框架下的c语言补全)
-* [git](#git)
-    - [配置终端中使用的git工具](#配置终端中使用的git工具)
-    - [使用浏览器打开当前文件的远程文件](#使用浏览器打开当前文件的远程文件)
+* [1 快捷键整理](#1-快捷键整理)
+    - [1.1 窗口和buffer管理](#1.1-窗口和buffer管理)
+    - [1.2 vim自带终端操作](#1.2-vim自带终端操作)
+* [2 搜索](#2-搜索)
+* [3 tags查找搜索](#3-tags查找搜索)
+    - [3.1 gtags](#3.1-gtags)
+* [4 leaderf](#4-leaderf)
+* [5 替换](#5-替换)
+    - [5.1 全局替换](#5.1-全局替换)
+* [6 文件操作](#6-文件操作)
+    - [6.1 打开历史文件](#6.1-打开历史文件)
+* [7 未整理](#7-未整理)
+* [8 常用插件操作](#8-常用插件操作)
+    - [8.1 surround](#8.1-surround)
+    - [8.2 completor 补全插件](#8.2-completor-补全插件)
+    - [8.3 coc 补全框架](#8.3-coc-补全框架)
+        + [8.3.1 coc框架下的c语言补全](#8.3.1-coc框架下的c语言补全)
+* [9 git](#9-git)
+    - [9.1 配置终端中使用的git工具](#9.1-配置终端中使用的git工具)
+    - [9.2 使用浏览器打开当前文件的远程文件](#9.2-使用浏览器打开当前文件的远程文件)
+* [10 vim的自定义函数](#10-vim的自定义函数)
+* [11 vscode](#11-vscode)
 
 <!-- vim-markdown-toc -->
 
-## 快捷键整理
+## 1 快捷键整理
 
-### 窗口和buffer管理
+### 1.1 窗口和buffer管理
 
 由于有一个`terminal_help`插件把窗口切换快捷键映射了，不再是默认的`ctrl + w`，而且可以支持连续切换，目前是下面的值：
 
@@ -44,21 +46,21 @@
 | ctrl + w + v    | 左右拆分窗口   |      |
 | ctrl + w + s    | 上下拆分窗口   |      |
 
-- 在NERD_tree插件的窗口中
+1. 在NERD_tree插件的窗口中
 
 按 `m` 然后等待一会儿，会出现文件操作的小窗口，可以对文件进行重命名或者删除添加复制等操作。
 
-- 如果在一些`quickfix`或者`locallist`之类的界面中，如果想分屏打开一个窗口，直接`ctrl + w + <CR>`即可。
+2. 如果在一些`quickfix`或者`locallist`之类的界面中，如果想分屏打开一个窗口，直接`ctrl + w + <CR>`即可。
 
-### vim自带终端操作
+### 1.2 vim自带终端操作
 
 也是由于 `terminal_help` 插件的关系 ，所以拷贝字符到终端的操作方式发生变化。
 
-- `ctrl shift - " 0` 5个键表示复制复制寄存器中的值到终端窗口
+3. `ctrl shift - " 0` 5个键表示复制复制寄存器中的值到终端窗口
 
-## 搜索
+## 2 搜索
 
-- 递归搜索当前目录以及所有子目录并quickfix打开
+1. 递归搜索当前目录以及所有子目录并quickfix打开
 
 `: vim /string/ ** | copen`
 
@@ -66,7 +68,7 @@
 `: vim /string/ **/*.txt **/*.py | copen`
 >查找当前目录以及子目录下的所有的txt和py后缀文件。
 
-- 搜索的时候排除不需要关注的目录
+2. 搜索的时候排除不需要关注的目录
 
 可以使用wildignore选项：
 `:set wildignore+=objd/**,obj/**,*.tmp,test.c`
@@ -86,7 +88,7 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 
 这样，`:Sch xx`就可以搜索我们关注的文件了，不过在windows上这里可能会有点问题，因为git的可执行文件的路径问题。
 
-- 忽略大小写
+3. 忽略大小写
 
 `\c`
 
@@ -94,11 +96,18 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 
 >在当前文件中查找`xx`，并忽略大小写。
 
-- vimgrep是可以搜索软链接目录的
+4. vimgrep是可以搜索软链接目录的
 
-## tags查找搜索
 
-### gtags
+5. 搜索后的单词被高亮，如果想去除高亮，可以用下面的命令。
+
+```vim
+:noh
+```
+
+## 3 tags查找搜索
+
+### 3.1 gtags
 
 **完整的命令：**
 :GscopeFind {querytype} {name}
@@ -158,7 +167,7 @@ To see the gtags log.
 [补充](https://github.com/skywind3000/gutentags_plus)
 
 
-## leaderf
+## 4 leaderf
 
 模糊查找插件，使用前先安装[ripgrep](https://github.com/BurntSushi/ripgrep)
 
@@ -236,9 +245,9 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 最重要的就是上面的配置，_vimrc中已经说明了，需要和`vim-gutentags`插件公用相关的`gtags`路径，所以只能这样配置。
 
 
-## 替换
+## 5 替换
 
-### 全局替换
+### 5.1 全局替换
 
 - 加入参数列表
 
@@ -255,9 +264,9 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 >对参数列表中的文件依次把`hata`替换成`love`，并且更新文件，在每次替换前进行手动确认。
 
 
-## 文件操作
+## 6 文件操作
 
-### 打开历史文件
+### 6.1 打开历史文件
 
 ```txt
 :browse oldfiles
@@ -266,22 +275,30 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 <CR>
 ```
 
-## 未整理
+## 7 未整理
 
 - 当前操作某些文件会产生 `.stats` 后缀结尾的文件，目前不知道这些文件是怎么产生的。可以通过 `everything` 软件通过正则搜索带 `.stats` 后缀的文件来统一删除。
 
-## 常用插件操作
+**待办的事项**:
 
-### surround
+:TODO: tabmode插件当前在`markdown`的收缩语法或者是`zimwiki`的收缩语法的时候，留空的宽度是不对的，是按照原有的字符数来留空的，这样语法收缩后会导致无法对齐。这个空了可以优化下，思路是增加一个选项，给定软件留空策略，一共三种：
+
+1. 不留空
+2. 以`markdown`语法收缩后作为基准。
+3. 以`zimwiki`语法收缩后作为基准。
+
+## 8 常用插件操作
+
+### 8.1 surround
 
 - 如果想在添加的括号后面补一个空格，那么使用前半括号，比如 `ysiw(` ，添加括号后，括号后面会补一个空格。
 - 如果不需要空格，使用后半括号，比如 `ysiw)` ，效果就是不会补空格。
 
-### completor 补全插件
+### 8.2 completor 补全插件
 
 补全插件遇到文件名中有特殊字符，比如 `@ ! # *` 等，是无法正常补全的。
 
-### coc 补全框架
+### 8.3 coc 补全框架
 
 目前遇到的问问题是，补全的第一个选项无法选择，都必须通过选择下一个再选择上一个来实现。设置了下面这行也没用。
 
@@ -289,7 +306,7 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 let g:coc_snippet_next = '<tab>'
 ```
 
-#### coc框架下的c语言补全
+#### 8.3.1 coc框架下的c语言补全
 
 1. 首先要做的事情是安装[clang](https://github.com/llvm/llvm-project)，对于`windows`系统来说，选择`LLVM-16.0.6-win64.exe`这样格式的安装包即可。记得安装最后的时候勾选添加到`PATH`。
 
@@ -314,9 +331,9 @@ C:\Users\pc>
 4. 安装完成后，打开一个C语言的源程序，会出现补全和代码提示。
 
 
-## git
+## 9 git
 
-### 配置终端中使用的git工具
+### 9.1 配置终端中使用的git工具
 
 ```bash
 root@DESKTOP-0MVRMOU:/etc# git.exe --version
@@ -336,7 +353,7 @@ alias git="git.exe"
 
 这样输入`git`的时候，实际调用的程序是`git.exe`，而不是虚拟终端中默认的版本不正确的`git`。
 
-### 使用浏览器打开当前文件的远程文件
+### 9.2 使用浏览器打开当前文件的远程文件
 
 如果是用的是常规的`github`或者是类似的通用的`git`远程客户端，那么使用`vim-fugitive`插件的`:GBrowse`命令即可直接打开。
 
@@ -352,4 +369,75 @@ git.exe config --get remote.主机名.url
 # 然后用这些地址拼接成一个浏览器地址，再使用下面的命令来打开
 silent excute '!chrome' get_adr
 ```
+
+## 10 vim的自定义函数
+
+如果想要`vim`调用一个函数而不是输出回车就生效，最好的办法是使用`silent`命令。比如：
+```vim
+autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
+```
+## 11 vscode
+
+在`vscode`中也是可以使用`vim`的，安装`vscodevim`插件即可。这里是我的`vscode`的配置文件的备份：
+
+```json
+{
+    "python.defaultInterpreterPath": "D:\\programes\\python3\\python.exe",
+    "editor.renderWhitespace": "all",
+    "editor.cursorBlinking": "solid",
+    "editor.fontFamily": "sarasa mono sc",
+    "security.workspace.trust.untrustedFiles": "open",
+    "editor.minimap.enabled": false,
+    "editor.tabCompletion": "on",
+    "markdown.preview.fontSize": 12,
+    "markdown.preview.lineHeight": 1.2,
+    "[markdown]": {
+        "editor.wordWrap": "on",
+        "editor.quickSuggestions": {
+          "comments": "on",
+          "strings": "on",
+          "other": "on"
+        },
+        "editor.tabCompletion": "on"
+    },
+    "terminal.integrated.profiles.windows": {
+        "PowerShell -NoProfile": {
+          "source": "PowerShell",
+          "args": [
+            "-NoProfile"
+          ]
+        },
+        "Git-Bash": {
+          "path": "D:\\programes\\git\\Git\\bin\\bash.exe",
+          "args": ["--login"]
+        }
+      },
+    "terminal.integrated.defaultProfile.windows": "Git-Bash",
+    "markdown-preview-enhanced.enableExtendedTableSyntax": true,
+    "markdown-preview-enhanced.enableHTML5Embed": true,
+    "markdown-preview-enhanced.enableTypographer": true,
+    "markdown-preview-enhanced.HTML5EmbedUseLinkSyntax": true,
+    "workbench.colorTheme": "Default Light+",
+    "diffEditor.ignoreTrimWhitespace": false,
+    "[python]": {
+      "editor.formatOnType": true
+    },
+    "editor.mouseWheelZoom": true,
+    "excalidraw.image": {
+      "exportScale": 1,
+      "exportWithBackground": true,
+      "exportWithDarkMode": false
+    },
+    "hediet.vscode-drawio.resizeImages": null,
+    //vscodevim插件的配置
+    "editor.lineNumbers":"relative",
+    "vim.easymotion": true,
+    "vim.incsearch": true,
+    "vim.useSystemClipboard": true,
+    "vim.useCtrlKeys": true,
+    "vim.hlsearch": true,
+  }
+```
+
+上面的配置中，最后面就是关于`vscodevim`插件的配置。
 

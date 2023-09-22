@@ -57,6 +57,70 @@ function! GitDiff(spec)
 endfunction
 command! -nargs=? Diff call GitDiff(<q-args>)
 
+" 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
+" usage :call GenMarkdownSectionNum    给markdown 文件生成目录编号
+function! GenMarkdownSectionNum()
+    if &ft != "markdown"
+        echohl Error
+        echo "filetype is not markdown"
+        echohl None
+        return
+    endif
+    
+    let lvl = []
+    let sect = []
+    let out = ""
+    for i in range(1, line('$'), 1)
+        let line = getline(i)
+        let heading_lvl = strlen(substitute(line, '^\(#*\).*', '\1', ''))
+        if heading_lvl < 2
+            continue
+        endif
+        " there should be only 1 H1, topmost, on a conventional web page
+        " we should generate section numbers begin with the first heading level 2
+        if len(lvl) == 0
+            if heading_lvl != 2 " count from level 2
+                echohl Error
+                echo "subsection must have parent section, ignore illegal heading line at line " . i
+                echohl None
+                continue
+            endif
+            call add(sect, 1)
+            call add(lvl, heading_lvl)
+        else
+            if lvl[-1] == heading_lvl
+                let sect[-1] = sect[-1] + 1
+            elseif lvl[-1] > heading_lvl " pop all lvl less than heading_lvl from tail
+                while len(lvl) != 0 && lvl[-1] > heading_lvl
+                    call remove(lvl, -1)
+                    call remove(sect, -1)
+                endwhile
+                let sect[-1] = sect[-1] + 1
+            elseif lvl[-1] < heading_lvl
+                if heading_lvl - lvl[-1] != 1
+                    echohl Error
+                    echo "subsection must have parent section, ignore illegal heading line at line " . i
+                    echohl None
+                    continue
+                endif
+                call add(sect, 1)
+                call add(lvl, heading_lvl)
+            endif
+        endif
+        
+        let cur_sect = ""
+        for j in sect
+            let cur_sect = cur_sect . "." . j
+        endfor
+        let cur_sect = cur_sect[1:]
+        let out = out . " " . cur_sect
+        call setline(i, substitute(line, '^\(#\+\) \?\([0-9.]\+ \)\? *\(.*\)', '\1 ' . cur_sect . ' \3', line))
+    endfor
+    " echo lvl sect out
+    echo out
+endfunc
+
+
 " below are my personal settings
 " 基本设置区域 {
 
@@ -80,6 +144,12 @@ set ruler
 set colorcolumn=81,121
 
 set nowrap
+
+" 设置文件的编码顺序
+set fileencoding=utf-8
+set encoding=utf-8
+set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,latin1
+
 
 " 如果是markdown文件设置wrap
 autocmd FileType markdown set wrap
@@ -118,7 +188,8 @@ set cursorline                                                                  
 " cursor not blinking
 set guicursor+=a:blinkon0
 
-set guifont=sarasa\ mono\ sc:h13
+" set guifont=sarasa\ mono\ sc:h13
+set guifont=Yahei\ Fira\ Icon\ Hybrid:h13
 
 set noundofile
 set nobackup
@@ -138,6 +209,8 @@ set autoread                                                                    
 
 " 折叠配置区域
 " set foldenable                                                                   " 开始折叠
+" 不要折叠代码
+set nofen
 set foldmethod=indent                                                            " 设置缩进折叠
 setlocal foldlevel=3                                                             " 设置折叠层数为
 set foldlevelstart=99                                                            " 打开文件是默认不折叠代码
@@ -153,6 +226,8 @@ autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tm
 nnoremap <Leader>ve :e $MYVIMRC<CR>
 " 重新加载vim配置文件
 nnoremap <Leader>vr :source $MYVIMRC<CR>
+" 编辑vim的配置文件
+nnoremap <Leader>ve :e $MYVIMRC<CR>
 
 " 映射命令行历史操作,这个注释不能写到映射后面
 cnoremap <c-j> <down>
@@ -236,6 +311,10 @@ Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 Plug 'mhinz/vim-startify'                                                      " vim的开始页
 Plug 'farmergreg/vim-lastplace'                                                " 打开文件的上次位置
 Plug 'rickhowe/diffchar.vim'                                                   " 更明显的对比
+Plug 'terryma/vim-multiple-cursors'                                            " vim的多光标插件
+Plug 'lilydjwg/colorizer'                                                      " vim中显示16进制颜色
+Plug 'michaeljsmith/vim-indent-object'                                         " 基于缩进的文本对象，用于python等语言
+Plug 'dbakker/vim-paragraph-motion'                                            " 增强{  }段落选择的功能,可以用全空格行作为段落
 
 call plug#end()
 " 插件 }
@@ -294,8 +373,12 @@ let g:gutentags_plus_switch = 0                                                 
 
 " NERDTree {
 nmap <F8> :NERDTreeToggle<CR>
+" 刷新NERDTree的状态
+nmap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
+" NERDTree的修改文件的界面使用更小的界面显示
+let NERDTreeMinimalMenu = 1
+let NERDTreeShowHidden = 1
 " NERDTree }
-
 
 " vim-gitgutter {
 let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " git可执行文件路径
@@ -310,7 +393,7 @@ let guifontpp_original_font_map="<C-F10>"
 " vim-guifont }
 
 " gtagsomnicomplete {
-" https://github.com/ragcatshxu/gtagsomnicomplete 这个插件没有使用插件管理器安装
+" https://github.com/ragcatshxu/gtagsomnicomplete 原始的位置,我修改了下，当前使用的是我修改后的
 autocmd FileType c,python,sh,perl set omnifunc=gtagsomnicomplete#Complete
 " gtagsomnicomplete }
 
@@ -341,7 +424,8 @@ set background=light
 let g:github_colors_block_diffmark = 0
 colorscheme github
 let g:airline_theme = "github"
-
+" 切换亮和暗主题
+call github_colors#togglebg_map('<f5>')
 " vim-colors-github 主题 }
 
 " LeaderF 配置 {
@@ -443,9 +527,11 @@ au Filetype markdown let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"
 " vim-markdown {
 " 这个命令可能失效,需要在vim中手动执行这个命令,编辑markdown文件的时候
 let g:vim_markdown_emphasis_multiline = 0
-" 设置光标处的字符都不要自动收缩
-let g:vim_markdown_conceal = 0
-let g:vim_markdown_conceal_code_blocks = 0
+set conceallevel=2
+" 设置语法收缩
+let g:vim_markdown_conceal = 1
+" 设置代码块提示语法收缩
+let g:vim_markdown_conceal_code_blocks = 1
 let g:vim_markdown_strikethrough = 1
 " 设置禁用折叠,这个一定要设置,不然会造成对比的时候语法错乱
 let g:vim_markdown_folding_disabled = 1
@@ -462,8 +548,8 @@ map <Leader><Leader>k <Plug>(easymotion-k)
 map <Leader><leader>h <Plug>(easymotion-linebackward)
 map <Leader><leader>l <Plug>(easymotion-lineforward)
 map <Leader><leader>. <Plug>(easymotion-repeat)
-map <Leader>w <Plug>(easymotion-bd-w)
-map <Leader>W <Plug>(easymotion-overwin-w)
+map <Leader>W <Plug>(easymotion-bd-w)
+map <Leader>w <Plug>(easymotion-overwin-w)
 map <Leader>f <Plug>(easymotion-bd-f)
 map <Leader>F <Plug>(easymotion-overwin-f)
 " vim-easymotion 的配置 }
@@ -482,10 +568,27 @@ command! Gcf GitGutterQuickFixCurrentFile | copen
 
 " vim-markdown-toc 插件配置 {
 let g:vmt_cycle_list_item_markers = 1
+let g:vmt_auto_update_on_save = 1
+" 自动更新
+
 " vim-markdown-toc 插件配置 }
+
+" vim-bookmarks 书签插件配置 {
+let g:bookmark_save_per_working_dir = 1
+let g:bookmark_auto_save = 0
+" vim-bookmarks 书签插件配置 }
+
+" indentLine 插件配置 {
+" 这里一定要配置，不然indentLine插件会把concealcursor=inc，造成光标行也不展开收缩无法编辑
+let g:indentLine_concealcursor = ""
+let g:indentLine_conceallevel = "2"
+" indentLine 插件配置 }
+
 
 " 插件配置 }
 
 
+" 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown文件加上目录序号
+autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 
 
