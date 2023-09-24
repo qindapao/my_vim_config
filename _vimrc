@@ -58,12 +58,22 @@ endfunction
 command! -nargs=? Diff call GitDiff(<q-args>)
 
 " 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
-" usage :call GenMarkdownSectionNum    给markdown 文件生成目录编号
-function! GenMarkdownSectionNum()
-    if &ft != "markdown"
+" usage :call GenMarkdownSectionNum    给markdown/zimwiki 文件生成目录编号
+function! GenSectionNum(file_type)
+    if &ft != a:file_type
         echohl Error
-        echo "filetype is not markdown"
+        echo "filetype is not " . a:file_type
         echohl None
+        return
+    endif
+
+    if a:file_type == 'markdown'
+        let fit_patter = '^\(#\+\) \?\([0-9.]\+ \)\? *\(.*\)'
+    elseif a:file_type = 'zim'
+        let fit_patter = '^\(=\+\) \?\([0-9.]\+ \)\? *\(.*\)'
+    else
+        echohl Error
+        echo "filetype is not surport."
         return
     endif
     
@@ -72,7 +82,12 @@ function! GenMarkdownSectionNum()
     let out = ""
     for i in range(1, line('$'), 1)
         let line = getline(i)
-        let heading_lvl = strlen(substitute(line, '^\(#*\).*', '\1', ''))
+        if a:file_type == 'markdown'
+            let heading_lvl = strlen(substitute(line, '^\(#*\).*', '\1', ''))
+        elseif a:file_type == 'zim'
+            let heading_lvl = 7 - strlen(substitute(line, '^\(=*\).*', '\1', ''))
+        endif
+
         if heading_lvl < 2
             if heading_lvl == 1
                 " 顶级标签可能不只一个
@@ -119,79 +134,11 @@ function! GenMarkdownSectionNum()
         endfor
         let cur_sect = cur_sect[1:]
         let out = out . " " . cur_sect
-        call setline(i, substitute(line, '^\(#\+\) \?\([0-9.]\+ \)\? *\(.*\)', '\1 ' . cur_sect . ' \3', line))
+        call setline(i, substitute(line, fit_patter, '\1 ' . cur_sect . ' \3', line))
     endfor
     " echo lvl sect out
     echo out
 endfunc
-
-function! GenZimwikiSectionNum()
-    if &ft != "zim"
-        echohl Error
-        echo "filetype is not zim"
-        echohl None
-        return
-    endif
-    
-    let lvl = []
-    let sect = []
-    let out = ""
-    for i in range(1, line('$'), 1)
-        let line = getline(i)
-        let heading_lvl = 7 - strlen(substitute(line, '^\(=*\).*', '\1', ''))
-        if heading_lvl < 2
-            if heading_lvl == 1
-                " 顶级标签可能不只一个
-                let lvl = []
-                let sect = []
-            endif
-            continue
-        endif
-
-        " there should be only 1 H1, topmost, on a conventional web page
-        " we should generate section numbers begin with the first heading level 2
-        if len(lvl) == 0
-            if heading_lvl != 2 " count from level 2
-                echohl Error
-                echo "subsection must have parent section, ignore illegal heading line at line " . i
-                echohl None
-                continue
-            endif
-            call add(sect, 1)
-            call add(lvl, heading_lvl)
-        else
-            if lvl[-1] == heading_lvl
-                let sect[-1] = sect[-1] + 1
-            elseif lvl[-1] > heading_lvl " pop all lvl less than heading_lvl from tail
-                while len(lvl) != 0 && lvl[-1] > heading_lvl
-                    call remove(lvl, -1)
-                    call remove(sect, -1)
-                endwhile
-                let sect[-1] = sect[-1] + 1
-            elseif lvl[-1] < heading_lvl
-                if heading_lvl - lvl[-1] != 1
-                    echohl Error
-                    echo "subsection must have parent section, ignore illegal heading line at line " . i
-                    echohl None
-                    continue
-                endif
-                call add(sect, 1)
-                call add(lvl, heading_lvl)
-            endif
-        endif
-        
-        let cur_sect = ""
-        for j in sect
-            let cur_sect = cur_sect . "." . j
-        endfor
-        let cur_sect = cur_sect[1:]
-        let out = out . " " . cur_sect
-        call setline(i, substitute(line, '^\(=\+\) \?\([0-9.]\+ \)\? *\(.*\)', '\1 ' . cur_sect . ' \3', line))
-    endfor
-    " echo lvl sect out
-    echo out
-endfunc
-
 
 " below are my personal settings
 " 基本设置区域 {
@@ -685,7 +632,7 @@ let g:indentLine_conceallevel = "2"
 
 
 " 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown文件加上目录序号
-autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
-autocmd BufWritePost *.txt silent call GenZimwikiSectionNum()
+autocmd BufWritePost *.md silent call GenSectionNum('markdown')
+autocmd BufWritePost *.txt silent call GenSectionNum('zim')
 
 
