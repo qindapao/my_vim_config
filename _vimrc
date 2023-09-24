@@ -298,8 +298,12 @@ Plug 'junegunn/gv.vim'                                                         "
 Plug 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
 Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
 Plug 'yianwillis/vimcdoc'                                                      " vim的中文文档
-" 这里必须使用realese分支,不能用master分支,master分支需要自己编译
-Plug 'neoclide/coc.nvim', {'branch': 'release'}
+if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md'
+    Plug 'maralla/completor.vim'                                               " 主要是用它的中文补全功能
+else
+    " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
+    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+endif
 Plug 'ludovicchabant/vim-gutentags'                                            " gtags ctags自动生成插件
 Plug 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
 Plug 'preservim/tagbar'                                                        " 当前文件的标签浏览器
@@ -631,7 +635,7 @@ let g:indentLine_conceallevel = "2"
 " 插件配置 }
 
 
-" 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown文件加上目录序号
+" 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown/zimwiki文件加上目录序号
 autocmd BufWritePost *.md silent call GenSectionNum('markdown')
 autocmd BufWritePost *.txt silent call GenSectionNum('zim')
 
