@@ -74,6 +74,11 @@ function! GenMarkdownSectionNum()
         let line = getline(i)
         let heading_lvl = strlen(substitute(line, '^\(#*\).*', '\1', ''))
         if heading_lvl < 2
+            if heading_lvl == 1
+                " 顶级标签可能不只一个
+                let lvl = []
+                let sect = []
+            endif
             continue
         endif
         " there should be only 1 H1, topmost, on a conventional web page
@@ -120,6 +125,73 @@ function! GenMarkdownSectionNum()
     echo out
 endfunc
 
+function! GenZimwikiSectionNum()
+    if &ft != "zim"
+        echohl Error
+        echo "filetype is not zim"
+        echohl None
+        return
+    endif
+    
+    let lvl = []
+    let sect = []
+    let out = ""
+    for i in range(1, line('$'), 1)
+        let line = getline(i)
+        let heading_lvl = 7 - strlen(substitute(line, '^\(=*\).*', '\1', ''))
+        if heading_lvl < 2
+            if heading_lvl == 1
+                " 顶级标签可能不只一个
+                let lvl = []
+                let sect = []
+            endif
+            continue
+        endif
+
+        " there should be only 1 H1, topmost, on a conventional web page
+        " we should generate section numbers begin with the first heading level 2
+        if len(lvl) == 0
+            if heading_lvl != 2 " count from level 2
+                echohl Error
+                echo "subsection must have parent section, ignore illegal heading line at line " . i
+                echohl None
+                continue
+            endif
+            call add(sect, 1)
+            call add(lvl, heading_lvl)
+        else
+            if lvl[-1] == heading_lvl
+                let sect[-1] = sect[-1] + 1
+            elseif lvl[-1] > heading_lvl " pop all lvl less than heading_lvl from tail
+                while len(lvl) != 0 && lvl[-1] > heading_lvl
+                    call remove(lvl, -1)
+                    call remove(sect, -1)
+                endwhile
+                let sect[-1] = sect[-1] + 1
+            elseif lvl[-1] < heading_lvl
+                if heading_lvl - lvl[-1] != 1
+                    echohl Error
+                    echo "subsection must have parent section, ignore illegal heading line at line " . i
+                    echohl None
+                    continue
+                endif
+                call add(sect, 1)
+                call add(lvl, heading_lvl)
+            endif
+        endif
+        
+        let cur_sect = ""
+        for j in sect
+            let cur_sect = cur_sect . "." . j
+        endfor
+        let cur_sect = cur_sect[1:]
+        let out = out . " " . cur_sect
+        call setline(i, substitute(line, '^\(=\+\) \?\([0-9.]\+ \)\? *\(.*\)', '\1 ' . cur_sect . ' \3', line))
+    endfor
+    " echo lvl sect out
+    echo out
+endfunc
+
 
 " below are my personal settings
 " 基本设置区域 {
@@ -135,7 +207,8 @@ let mapleader="\\"
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx FileType text
 
-set nu
+set nu                                                                           " 打开当前行号显示
+set rnu                                                                          " 打开相对行号
 
 set nocompatible
 
@@ -204,7 +277,6 @@ nnoremap OO O<Esc>
 " 把目录切换到当前文件所在目录
 nnoremap <silent> <leader>. :cd %:p:h<CR>
 
-set rnu                                                                          " 打开相对行号
 set autoread                                                                     " 自动加载文件变化
 
 " 折叠配置区域
@@ -301,7 +373,7 @@ Plug 'cormacrelf/vim-colors-github'                                            "
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 " 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟,这个插件还有个问题是,git对比的时候也弄得乱七八糟,所以先直接禁用掉
 Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
-Plug 'img-paste-devs/img-paste.vim'                                            " markdown 直接粘贴图片
+Plug 'qindapao/img-paste.vim', {'branch': 'for_zim'}                           " markdown 直接粘贴图片
 Plug 'mzlogin/vim-markdown-toc'                                                " 自动设置标题
 
 " 这个也没啥用,先禁用掉
@@ -315,6 +387,12 @@ Plug 'terryma/vim-multiple-cursors'                                            "
 Plug 'lilydjwg/colorizer'                                                      " vim中显示16进制颜色
 Plug 'michaeljsmith/vim-indent-object'                                         " 基于缩进的文本对象，用于python等语言
 Plug 'dbakker/vim-paragraph-motion'                                            " 增强{  }段落选择的功能,可以用全空格行作为段落
+" 这个插件的语法高亮需要说明下,可能是受默认的txt文件的语法高亮的影响
+" 所以它的语法高亮的优先级并不高,需要先关闭所有的语法高亮，然后单独打开
+" syntax off
+" syntax on
+" 依次要执行上面两条指令
+Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                             " 使用我稍微修改过的分支
 
 call plug#end()
 " 插件 }
@@ -516,6 +594,21 @@ noremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR
 
 " tagbar 配置 {
 map <F4> :TagbarToggle<CR>
+let g:tagbar_type_zim = {
+    \ 'ctagstype' : 'zim',
+    \ 'kinds' : [
+        \ 'h:heading',
+    \ ]
+\ }
+let g:tagbar_type_txt = {
+    \ 'ctagstype' : 'txt',
+    \ 'kinds' : [
+        \ 'h:heading',
+    \ ]
+\ }
+" 0:不要按照tag名排序,而是按照tag出现的顺序排序
+" 1:按照tag名排序
+let g:tagbar_sort = 0
 " tagbar 配置 }
 
 " auto-pairs 配置 {
@@ -538,7 +631,9 @@ let g:vim_markdown_folding_disabled = 1
 " vim-markdown }
 
 " img-paste {
-autocmd FileType markdown,tex nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
+autocmd FileType zim,txt let g:mdip_imgdir = expand('%:t:r')
+autocmd FileType zim,txt let g:PasteImageFunction = 'g:ZimwikiPasteImage'
+autocmd FileType markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
 " img-paste }
 
 " vim-easymotion 的配置 {
@@ -575,7 +670,8 @@ let g:vmt_auto_update_on_save = 1
 
 " vim-bookmarks 书签插件配置 {
 let g:bookmark_save_per_working_dir = 1
-let g:bookmark_auto_save = 1
+" 这里不能设置自动保存，不然会在很多目录保存书签，目前不知道原因
+let g:bookmark_auto_save = 0
 " vim-bookmarks 书签插件配置 }
 
 " indentLine 插件配置 {
@@ -590,5 +686,6 @@ let g:indentLine_conceallevel = "2"
 
 " 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown文件加上目录序号
 autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
+autocmd BufWritePost *.txt silent call GenZimwikiSectionNum()
 
 

@@ -209,6 +209,59 @@ https://github.com/universal-ctags/ctags
 https://github.com/universal-ctags/ctags-win32
 
 
+如果我们需要为`ctags`指定配置文件，那么配置文件的路径是有要求的，可以参考这个链接： [ctags配置文件路径](https://docs.ctags.io/en/latest/option-file.html) 。
+
+在`windows`的系统上配置文件的路径大概如下：
+
+```bash
+C:\Users\pc\ctags.d
+```
+其实就是变量：`%HOMEDRIVE%%HOMEPATH%/ctags.d/`
+
+
+配置文件中的长名称和短名称都只能使用字母和数字，连 **下划线** 都不能使用。这里举一个范例：
+
+**C:\Users\pc\ctags.d\conf.ctags**:
+
+```bash
+--langdef=txt
+--langmap=txt:.txt
+--regex-txt=/^(\={6}\s)(\S.+)(\s\={6})$/\2/h,heading/
+--regex-txt=/^(\={5}\s)(\S.+)(\s\={5})$/. 2/h,heading/
+--regex-txt=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
+--regex-txt=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
+--regex-txt=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
+
+--langdef=zim
+--langmap=zim:.txt
+--regex-zim=/^(\={6}\s)(\S.+)(\s\={6})$/\2/h,heading/
+--regex-zim=/^(\={5}\s)(\S.+)(\s\={5})$/. \2/h,heading/
+--regex-zim=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
+--regex-zim=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
+--regex-zim=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
+
+```
+比如上面这个例子中，如果`heading`写成了`Heading_L1`就不行。上面为了显示出标签的层级，所以在不同层级的标签前面加上了`.`符号来区分。我尝试只加空格或者是只有`TAB`键都不行，具体原因未明，不过多了一个`.`符号也没有变得难看先这样吧。在使用`tagbar`的时候也要注意下，默认情况下tagbar是按照名字来排序标签的，可能和我们的预期不符，可以在`tagbar`的界面的位置按`s`键切换为按照标签出现的顺序排列。上面还有一个非常需要注意的地方是中间的正则表达式必须写成`(\S.+)`才能匹配中文，如果直接写成`.+`是匹配不了中文的。
+
+目前还没有实现各级标签的折叠，不过这样也基本够用了，用空再折腾吧。
+
+当有上面的配置的时候，vim的tagbar插件就可以按照下面配置：
+
+```vim
+let g:tagbar_type_zim = {
+    \ 'ctagstype' : 'zim',
+    \ 'kinds' : [
+        \ 'h:heading',
+    \ ]
+\ }
+let g:tagbar_type_txt = {
+    \ 'ctagstype' : 'txt',
+    \ 'kinds' : [
+        \ 'h:heading',
+    \ ]
+\ }
+```
+更加详细的说明可以参考这个[网页](https://gqqnbig.me/2023/09/20/vim%E9%85%8D%E7%BD%AE%E9%92%A2%E9%93%81%E9%9B%84%E5%BF%83%E6%96%87%E6%A1%A3%E5%A4%A7%E7%BA%B2/)，要注意下`Universal Ctags`和原来那个老的ctag是不一样的。
 
 # git可执行文件的位置
 
@@ -231,5 +284,4 @@ https://hanleylee.com/articles/usage-of-vim-editor-basic/
 # 字体
 
 一个很好看的适合`vim`使用的[字体](https://github.com/hanleylee/yahei-fira-icon-hybrid-font)。
-
 

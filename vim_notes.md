@@ -6,6 +6,7 @@
 * [1 快捷键整理](#1-快捷键整理)
     - [1.1 窗口和buffer管理](#1.1-窗口和buffer管理)
     - [1.2 vim自带终端操作](#1.2-vim自带终端操作)
+    - [链接](#链接)
 * [2 搜索](#2-搜索)
 * [3 tags查找搜索](#3-tags查找搜索)
     - [3.1 gtags](#3.1-gtags)
@@ -25,6 +26,7 @@
     - [9.2 使用浏览器打开当前文件的远程文件](#9.2-使用浏览器打开当前文件的远程文件)
 * [10 vim的自定义函数](#10-vim的自定义函数)
 * [11 vscode](#11-vscode)
+    - [11.1 easymotion插件的一些说明](#11.1-easymotion插件的一些说明)
 
 <!-- vim-markdown-toc -->
 
@@ -57,6 +59,10 @@
 也是由于 `terminal_help` 插件的关系 ，所以拷贝字符到终端的操作方式发生变化。
 
 3. `ctrl shift - " 0` 5个键表示复制复制寄存器中的值到终端窗口
+
+### 链接
+
+`gx`可以在浏览器中打开一个链接，如果链接不能直接被`vim`识别，那么可以先用可视模式选择这个链接，然后再按`gx`一样的。
 
 ## 2 搜索
 
@@ -277,7 +283,9 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 
 ## 7 未整理
 
-- 当前操作某些文件会产生 `.stats` 后缀结尾的文件，目前不知道这些文件是怎么产生的。可以通过 `everything` 软件通过正则搜索带 `.stats` 后缀的文件来统一删除。
+当前操作某些文件会产生 `.stats` 后缀结尾的文件，目前不知道这些文件是怎么产生的。可以通过 `everything` 软件通过正则搜索带`.stats`后缀的文件来统一删除。
+
+
 
 **待办的事项**:
 
@@ -382,62 +390,104 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 
 ```json
 {
-    "python.defaultInterpreterPath": "D:\\programes\\python3\\python.exe",
-    "editor.renderWhitespace": "all",
-    "editor.cursorBlinking": "solid",
-    "editor.fontFamily": "sarasa mono sc",
-    "security.workspace.trust.untrustedFiles": "open",
-    "editor.minimap.enabled": false,
-    "editor.tabCompletion": "on",
-    "markdown.preview.fontSize": 12,
-    "markdown.preview.lineHeight": 1.2,
-    "[markdown]": {
-        "editor.wordWrap": "on",
-        "editor.quickSuggestions": {
-          "comments": "on",
-          "strings": "on",
-          "other": "on"
-        },
-        "editor.tabCompletion": "on"
-    },
-    "terminal.integrated.profiles.windows": {
-        "PowerShell -NoProfile": {
-          "source": "PowerShell",
-          "args": [
-            "-NoProfile"
-          ]
-        },
-        "Git-Bash": {
-          "path": "D:\\programes\\git\\Git\\bin\\bash.exe",
-          "args": ["--login"]
-        }
+  "python.defaultInterpreterPath": "D:\\programes\\python3\\python.exe",
+  "editor.renderWhitespace": "all",
+  "editor.cursorBlinking": "solid",
+  "editor.fontFamily": "sarasa mono sc",
+  "security.workspace.trust.untrustedFiles": "open",
+  "editor.minimap.enabled": false,
+  "editor.tabCompletion": "on",
+  "markdown.preview.fontSize": 12,
+  "markdown.preview.lineHeight": 1.2,
+  "[markdown]": {
+      "editor.wordWrap": "on",
+      "editor.quickSuggestions": {
+        "comments": "on",
+        "strings": "on",
+        "other": "on"
       },
-    "terminal.integrated.defaultProfile.windows": "Git-Bash",
-    "markdown-preview-enhanced.enableExtendedTableSyntax": true,
-    "markdown-preview-enhanced.enableHTML5Embed": true,
-    "markdown-preview-enhanced.enableTypographer": true,
-    "markdown-preview-enhanced.HTML5EmbedUseLinkSyntax": true,
-    "workbench.colorTheme": "Default Light+",
-    "diffEditor.ignoreTrimWhitespace": false,
-    "[python]": {
-      "editor.formatOnType": true
+      "editor.tabCompletion": "on"
+  },
+  "terminal.integrated.profiles.windows": {
+      "PowerShell -NoProfile": {
+        "source": "PowerShell",
+        "args": [
+          "-NoProfile"
+        ]
+      },
+      "Git-Bash": {
+        "path": "D:\\programes\\git\\Git\\bin\\bash.exe",
+        "args": ["--login"]
+      }
     },
-    "editor.mouseWheelZoom": true,
-    "excalidraw.image": {
-      "exportScale": 1,
-      "exportWithBackground": true,
-      "exportWithDarkMode": false
+  "terminal.integrated.defaultProfile.windows": "Git-Bash",
+  "markdown-preview-enhanced.enableExtendedTableSyntax": true,
+  "markdown-preview-enhanced.enableHTML5Embed": true,
+  "markdown-preview-enhanced.enableTypographer": true,
+  "markdown-preview-enhanced.HTML5EmbedUseLinkSyntax": true,
+  "workbench.colorTheme": "Default Light+",
+  "diffEditor.ignoreTrimWhitespace": false,
+  "[python]": {
+    "editor.formatOnType": true
+  },
+  "editor.mouseWheelZoom": true,
+  "excalidraw.image": {
+    "exportScale": 1,
+    "exportWithBackground": true,
+    "exportWithDarkMode": false
+  },
+  "hediet.vscode-drawio.resizeImages": null,
+  //vscodevim插件的配置
+  "editor.lineNumbers":"relative",
+  "vim.easymotion": true,
+  "vim.incsearch": true,
+  "vim.useSystemClipboard": true,
+  "vim.useCtrlKeys": true,
+  "vim.hlsearch": true,
+  "vim.normalModeKeyBindings": [
+    {
+      "before": ["<C-h>"],
+      "after": ["<C-w>", "h"]
     },
-    "hediet.vscode-drawio.resizeImages": null,
-    //vscodevim插件的配置
-    "editor.lineNumbers":"relative",
-    "vim.easymotion": true,
-    "vim.incsearch": true,
-    "vim.useSystemClipboard": true,
-    "vim.useCtrlKeys": true,
-    "vim.hlsearch": true,
-  }
+    {
+      "before": ["<C-j>"],
+      "after": ["<C-w>", "j"]
+    },
+    {
+      "before": ["<C-k>"],
+      "after": ["<C-w>", "k"]
+    },
+    {
+      "before": ["<C-l>"],
+      "after": ["<C-w>", "l"]
+    },
+    {
+      "before": ["b", "c"],
+      "commands": [
+        ":close"
+      ]
+    },
+  ]
+}
 ```
 
 上面的配置中，最后面就是关于`vscodevim`插件的配置。
+
+### 11.1 easymotion插件的一些说明
+
+```vim
+" 向下跳转一个字符
+<leader><leader>w
+" 向下跳转一个字符
+<leader><leader>b
+" 上下搜索一个字符,敲击后会出现让输入查找字符的命令行提示,输入需要查找的字符
+<leader><leader>s
+" 上下搜索两个字符,敲击后会出现让输入查找字符的命令行提示,输入需要查找的2个字符
+<leader><leader>2s
+" 往下搜索一个字符,同上面一样，敲击后输入需要查找的字符
+<leader><leader>f
+" 往上搜索一个字符,同上面一样，敲击后输入需要查找的字符
+<leader><leader>F
+
+```
 
