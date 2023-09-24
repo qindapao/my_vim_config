@@ -69,7 +69,7 @@ function! GenSectionNum(file_type)
 
     if a:file_type == 'markdown'
         let fit_patter = '^\(#\+\) \?\([0-9.]\+ \)\? *\(.*\)'
-    elseif a:file_type = 'zim'
+    elseif a:file_type == 'zim'
         let fit_patter = '^\(=\+\) \?\([0-9.]\+ \)\? *\(.*\)'
     else
         echohl Error
