@@ -59,6 +59,7 @@ command! -nargs=? Diff call GitDiff(<q-args>)
 
 " 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
 " usage :call GenMarkdownSectionNum    给markdown/zimwiki 文件生成目录编号
+" 有一个BUG，如果markdown文件中有注释，会被认为是一级标题，规避的方法是在#前面加一个空格
 function! GenSectionNum(file_type)
     if &ft != a:file_type
         echohl Error
@@ -142,6 +143,13 @@ endfunc
 
 " below are my personal settings
 " 基本设置区域 {
+
+if has('gui_running')
+    " 目前这里无法回到上次的中文输入法,不知道原因
+    set imactivatekey=C
+    inoremap <ESC> <ESC>:set iminsert=2<CR>
+endif
+
 
 " 设置默认的终端为bash
 let g:terminal_cwd = 1
@@ -245,8 +253,6 @@ autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tm
 nnoremap <Leader>ve :e $MYVIMRC<CR>
 " 重新加载vim配置文件
 nnoremap <Leader>vr :source $MYVIMRC<CR>
-" 编辑vim的配置文件
-nnoremap <Leader>ve :e $MYVIMRC<CR>
 
 " 映射命令行历史操作,这个注释不能写到映射后面
 cnoremap <c-j> <down>
@@ -620,9 +626,9 @@ let g:vmt_auto_update_on_save = 1
 " vim-markdown-toc 插件配置 }
 
 " vim-bookmarks 书签插件配置 {
-let g:bookmark_save_per_working_dir = 1
+let g:bookmark_save_per_working_dir = 0
 " 这里不能设置自动保存，不然会在很多目录保存书签，目前不知道原因
-let g:bookmark_auto_save = 0
+let g:bookmark_auto_save = 1
 " vim-bookmarks 书签插件配置 }
 
 " indentLine 插件配置 {

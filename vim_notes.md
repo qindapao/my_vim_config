@@ -24,9 +24,9 @@
 * [9 git](#9-git)
     - [9.1 配置终端中使用的git工具](#9.1-配置终端中使用的git工具)
     - [9.2 使用浏览器打开当前文件的远程文件](#9.2-使用浏览器打开当前文件的远程文件)
-* [10 vim的自定义函数](#10-vim的自定义函数)
-* [11 vscode](#11-vscode)
-    - [11.1 easymotion插件的一些说明](#11.1-easymotion插件的一些说明)
+* [1 vim的自定义函数](#1-vim的自定义函数)
+* [2 vscode](#2-vscode)
+    - [2.1 easymotion插件的一些说明](#2.1-easymotion插件的一些说明)
 
 <!-- vim-markdown-toc -->
 
@@ -163,7 +163,7 @@ To see the gtags log.
 
 **当前有一个问题:**
 
-就是查询了几次后，会在项目的目录下生成`.stats`后缀的文件。具体原因不明，目前的解决方案是，在项目的根目录下执行删除命令:
+就是查询了几次后，会在项目的目录下生成`.stats`后缀的文件。查询得知这些文件是pylint生成的。尝试更新了`pylint`的版本后也没有解决问题。
 
 `find . -name "*.stats" | xargs rm -f`
 
@@ -249,6 +249,14 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 ```
 
 最重要的就是上面的配置，_vimrc中已经说明了，需要和`vim-gutentags`插件公用相关的`gtags`路径，所以只能这样配置。
+
+- leaderf和rg配置搜索字符串时限定文件名过滤
+
+```vim
+leaderf rg -f *.py -e xx
+```
+
+上面的这句话的意思是在所有`.py`后缀结尾的文件中，正则搜索`xx`字符串。
 
 
 ## 5 替换
@@ -392,13 +400,13 @@ git.exe config --get remote.主机名.url
 silent excute '!chrome' get_adr
 ```
 
-## 10 vim的自定义函数
+## 1 vim的自定义函数
 
 如果想要`vim`调用一个函数而不是输出回车就生效，最好的办法是使用`silent`命令。比如：
 ```vim
 autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 ```
-## 11 vscode
+## 2 vscode
 
 在`vscode`中也是可以使用`vim`的，安装`vscodevim`插件即可。这里是我的`vscode`的配置文件的备份：
 
@@ -487,7 +495,7 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 
 上面的配置中，最后面就是关于`vscodevim`插件的配置。
 
-### 11.1 easymotion插件的一些说明
+### 2.1 easymotion插件的一些说明
 
 ```vim
 " 向下跳转一个字符
