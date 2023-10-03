@@ -351,6 +351,9 @@ Plug 'dbakker/vim-paragraph-motion'                                            "
 " 依次要执行上面两条指令
 Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                             " 使用我稍微修改过的分支
 
+Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
+
+
 call plug#end()
 " 插件 }
 
