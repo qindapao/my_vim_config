@@ -211,6 +211,8 @@ set expandtab                                                                   
 " perl格式的文件,TAB就是TAB, 不要替换
 autocmd FileType perl setlocal noexpandtab
 
+" 设置星号不要自动跳转,只高亮
+nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>
 
 set cursorline                                                                   " highlight current line
 " cursor not blinking
