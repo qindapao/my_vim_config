@@ -467,7 +467,7 @@ let g:gutentags_plus_switch = 0                                                 
 " NERDTree {
 nmap <F8> :NERDTreeToggle<CR>
 " 刷新NERDTree的状态
-nmap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
+nmap <leader><leader>r :NERDTreeFocus<cr>R<c-w><c-p>
 " NERDTree的修改文件的界面使用更小的界面显示
 let NERDTreeMinimalMenu = 1
 let NERDTreeShowHidden = 1
