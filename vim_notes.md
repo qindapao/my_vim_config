@@ -10,9 +10,11 @@
 * [2 搜索](#2-搜索)
 * [3 tags查找搜索](#3-tags查找搜索)
     - [3.1 gtags](#3.1-gtags)
+    - [3.2 CCTree](#3.2-cctree)
 * [4 leaderf](#4-leaderf)
 * [5 替换](#5-替换)
     - [5.1 全局替换](#5.1-全局替换)
+    - [5.2 使用插件进行替换](#5.2-使用插件进行替换)
 * [6 文件操作](#6-文件操作)
     - [6.1 打开历史文件](#6.1-打开历史文件)
 * [7 未整理](#7-未整理)
@@ -24,9 +26,9 @@
 * [9 git](#9-git)
     - [9.1 配置终端中使用的git工具](#9.1-配置终端中使用的git工具)
     - [9.2 使用浏览器打开当前文件的远程文件](#9.2-使用浏览器打开当前文件的远程文件)
-* [1 vim的自定义函数](#1-vim的自定义函数)
-* [2 vscode](#2-vscode)
-    - [2.1 easymotion插件的一些说明](#2.1-easymotion插件的一些说明)
+* [10 vim的自定义函数](#10-vim的自定义函数)
+* [11 vscode](#11-vscode)
+    - [11.1 easymotion插件的一些说明](#11.1-easymotion插件的一些说明)
 
 <!-- vim-markdown-toc -->
 
@@ -172,6 +174,26 @@ To see the gtags log.
 更完整的说明可以看这里：
 [补充](https://github.com/skywind3000/gutentags_plus)
 
+### 3.2 CCTree
+
+利用`vim`的`CCTree`插件，可以模拟`source insight`的代码树。插件需要安装[cscope](https://code.google.com/archive/p/cscope-win32/downloads)和[ccglue](https://sourceforge.net/projects/ccglue/files/latest/download)(解压出来有`ccglue.exe`和`ccglue_tracer.exe`两个可执行程序)工具。这里是`windows`版本的工具，选择`64`位的下载。
+
+使用`CCTree`显示`C语言`的函数调用树，需要三步：
+
+1. 先用`cscope`生成数据库。
+
+2. 使用插件的命令添加`cscope`生成的数据库。
+
+`CCTreeLoadDB xx.out`
+
+3. 使用插件的命令打开生成的代码树。
+
+跟踪`main`函数的调用：`CCTreeTraceForward main`
+
+
+>具体的步骤见插件的帮助文档。
+
+
 
 ## 4 leaderf
 
@@ -277,6 +299,9 @@ leaderf rg -f *.py -e xx
 
 >对参数列表中的文件依次把`hata`替换成`love`，并且更新文件，在每次替换前进行手动确认。
 
+### 5.2 使用插件进行替换
+
+`ctrlsf`这个插件也可以方便进行全局替换操作，打开替换窗口后，按`o`直接打开文件，如果想保持替换窗口不动打开文件，使用`O`。
 
 ## 6 文件操作
 
@@ -392,21 +417,21 @@ alias git="git.exe"
 在`_vimrc`中实现一个函数
 
 ```vim
-# 得到当前文件对应的远程分支的主机名和分支名
+ # 得到当前文件对应的远程分支的主机名和分支名
 git.exe rev-parse --abbrev-ref --symbolic-full-name @{upstream}
-# 得到当前分支对应的远程分支的url，下面的主机名用上面得到的结果
+ # 得到当前分支对应的远程分支的url，下面的主机名用上面得到的结果
 git.exe config --get remote.主机名.url
-# 然后用这些地址拼接成一个浏览器地址，再使用下面的命令来打开
+ # 然后用这些地址拼接成一个浏览器地址，再使用下面的命令来打开
 silent excute '!chrome' get_adr
 ```
 
-## 1 vim的自定义函数
+## 10 vim的自定义函数
 
 如果想要`vim`调用一个函数而不是输出回车就生效，最好的办法是使用`silent`命令。比如：
 ```vim
 autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 ```
-## 2 vscode
+## 11 vscode
 
 在`vscode`中也是可以使用`vim`的，安装`vscodevim`插件即可。这里是我的`vscode`的配置文件的备份：
 
@@ -495,7 +520,7 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 
 上面的配置中，最后面就是关于`vscodevim`插件的配置。
 
-### 2.1 easymotion插件的一些说明
+### 11.1 easymotion插件的一些说明
 
 ```vim
 " 向下跳转一个字符

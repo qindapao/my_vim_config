@@ -141,13 +141,49 @@ function! GenSectionNum(file_type)
     echo out
 endfunc
 
+" 获取选择模式下当前行选择的文本
+function! GetVisualLine()
+    let line = getline('.')
+    let start = getpos("'<")[2] - 1
+    let end = getpos("'>")[2] - 2
+    return line[start:end]
+endfunction
+
+" 替换函数
+function! MyReplaceWord(now_mode)
+   if a:now_mode == 'n'
+    let old_word = expand("<cword>")
+elseif a:now_mode == 'v'
+     let old_word = GetVisualLine()
+endif
+    let new_word = input("Replace " . old_word . " with: ")
+    execute '%s/' . old_word . '/' . new_word . '/gc'
+endfunction
+
+" 打开git远端上的分支
+" function GitGetCurrentBranchRemoteUrl()
+
+"     let remote_branch_info = system('git.exe rev-parse --abbrev-ref --symbolic-full-name @{upstream}')
+"     let [remote_name, branch_name] = split(remote_branch_info, '/')
+    
+"     let init_addr = system('git.exe config --get remote.origin.url')
+"     let middle_info = substitute(init_addr, 'xx.yy.com:2222', 'xx.yy.com'" 'g')
+"     let middle_info = split(middle_info, '@')[1]
+"     let middle_info = split(middle_info, '.git')[0]
+    
+"     let get_adr = 'http://' . middle_info . '/file?ref=' . branch_name
+    
+"     silent execute '!chrome' get_adr
+" endfunction
+
+
 " below are my personal settings
 " 基本设置区域 {
 
 if has('gui_running')
     " 目前这里无法回到上次的中文输入法,不知道原因
     set imactivatekey=C
-    inoremap <ESC> <ESC>:set iminsert=2<CR>
+    inoremap <ESC> <ESC>: set iminsert=2<CR>
 endif
 
 
@@ -172,6 +208,9 @@ set ruler
 set colorcolumn=81,121
 
 set nowrap
+
+" 开启命令行的自动补全
+set wildmenu
 
 " 设置文件的编码顺序
 set fileencoding=utf-8
@@ -203,6 +242,9 @@ set scrolloff=3
 
 " search highlight
 set hlsearch
+" 暂时取消搜索高亮
+noremap <leader>noh :nohlsearch<CR>
+
 
 set tabstop=4
 set softtabstop=4
@@ -232,7 +274,7 @@ nnoremap OO O<Esc>
 " 由于环境变量的问题,下面这行暂时不使用
 " command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw            " 搜索git关注的文件 :Sch xx
 " 把目录切换到当前文件所在目录
-nnoremap <silent> <leader>. :cd %:p:h<CR>
+nnoremap <silent> <leader>. :cd %:p:h<CR>:pwd<CR>
 
 set autoread                                                                     " 自动加载文件变化
 
@@ -278,8 +320,11 @@ nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>
 " 设置grep默认显示行号
 set grepprg=grep\ -n
 
-" 这句话暂时不能设置,会导致perl文件打开异常
-" set shell=bash
+" Quickfix窗口按键映射
+nnoremap <leader>q :copen<CR>
+nnoremap <leader>x :cclose<CR>
+nnoremap <leader>n :cnext<CR>
+nnoremap <leader>p :cprev<CR>
 
 
 " 基本设置区域 }
@@ -320,6 +365,8 @@ Plug 'azabiong/vim-highlighter'                                                "
 
 Plug 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
 Plug 'Yggdroot/LeaderF'                                                        " 模糊搜索插件
+Plug 'dyng/ctrlsf.vim'                                                         " 全局搜索替换插件
+Plug 'brooth/far.vim'                                                          " 另外一个全局替换插件
 Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
 Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
 Plug 'frazrepo/vim-rainbow'                                                    " 彩虹括号
@@ -351,10 +398,17 @@ Plug 'dbakker/vim-paragraph-motion'                                            "
 " syntax off
 " syntax on
 " 依次要执行上面两条指令
-Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                             " 使用我稍微修改过的分支
+Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                              " 使用我稍微修改过的分支
 
 Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
-
+Plug 'mbbill/undotree'
+Plug 'kshenoy/vim-signature'
+Plug 'bling/vim-bufferline'
+Plug 'sk1418/QFGrep'                                                           " Quickfix窗口过滤
+Plug 'markonm/traces.vim'                                                      " 搜索效果显示
+Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
+Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
+Plug 'airblade/vim-rooter'                                                     " root目录设置插件
 
 call plug#end()
 " 插件 }
@@ -378,7 +432,6 @@ let g:airline#extensions#ale#enabled = 1
 let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
 " 错误提示的虚拟文本只在当前行出现
 let g:ale_virtualtext_cursor = 'current'
-
 
 " dense-analysis/ale }
 
@@ -418,6 +471,8 @@ nmap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
 " NERDTree的修改文件的界面使用更小的界面显示
 let NERDTreeMinimalMenu = 1
 let NERDTreeShowHidden = 1
+let NERDTreeAutoDeleteBuffer = 1
+
 " NERDTree }
 
 " vim-gitgutter {
@@ -426,7 +481,7 @@ let g:gitgutter_max_signs = -1                                                  
 " vim-gitgutter }
 
 " vim-guifont {
-let guifontpp_size_increment=2
+let guifontpp_size_increment=1
 let guifontpp_smaller_font_map="<F10>"
 let guifontpp_larger_font_map="<C-S-F10>"
 let guifontpp_original_font_map="<C-F10>"
@@ -535,6 +590,13 @@ noremap <leader>frr :LeaderfRgRecall<cr>
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+" 关闭leaderf的预览窗口
+" 我很想关闭这个，但是关闭这个后当保存_vimrc的时候会报错，原因未知
+" 想关闭这个主要是因为保持搜索窗口不动的情况下，无法编辑上面的文本
+" 算了这个功能就不用这个Leaderf插件了，用ctrlsf
+" let g:Lf_PreviewResult = 0
+
 
 " leaderf不要自动生成标签,用gentags插件生成
 
@@ -634,6 +696,23 @@ let g:vmt_auto_update_on_save = 1
 let g:bookmark_save_per_working_dir = 0
 " 这里不能设置自动保存，不然会在很多目录保存书签，目前不知道原因
 let g:bookmark_auto_save = 1
+
+" 不要使用默认的按键映射
+let g:bookmark_no_default_key_mappings = 1
+  nmap <Leader><Leader>bt <Plug>BookmarkToggle
+  nmap <Leader><Leader>bi <Plug>BookmarkAnnotate
+  nmap <Leader><Leader>ba <Plug>BookmarkShowAll
+  nmap <Leader><Leader>bj <Plug>BookmarkNext
+  nmap <Leader><Leader>bk <Plug>BookmarkPrev
+  nmap <Leader><Leader>bc <Plug>BookmarkClear
+  nmap <Leader><Leader>bx <Plug>BookmarkClearAll
+
+  " these will also work with a [count] prefix
+  nmap <Leader>kk <Plug>BookmarkMoveUp
+  nmap <Leader>jj <Plug>BookmarkMoveDown
+  nmap <Leader>g <Plug>BookmarkMoveToLine
+
+
 " vim-bookmarks 书签插件配置 }
 
 " indentLine 插件配置 {
@@ -642,6 +721,33 @@ let g:indentLine_concealcursor = ""
 let g:indentLine_conceallevel = "2"
 " indentLine 插件配置 }
 
+" undotree 的配置 {
+nnoremap <F5> :UndotreeToggle<CR>
+" undotree 的配置 }
+
+" vim-bufferline 的配置 {
+let g:bufferline_echo = 1
+let g:bufferline_active_buffer_left = '['
+let g:bufferline_modified = '+'
+let g:bufferline_show_bufnr = 1
+let g:bufferline_rotate = 1
+let g:bufferline_fixed_index =  1
+let g:bufferline_inactive_highlight = 'StatusLineNC'
+let g:bufferline_active_highlight = 'StatusLine'
+ let g:bufferline_pathshorten = 1
+" vim-bufferline 的配置 }
+
+" vim-rooter 插件配置
+" 需要打印目录
+let g:rooter_silent_chdir = 0
+" 手动设置root目录
+let g:rooter_manual_only = 1
+let g:rooter_patterns = ['.root', '.svn', '.git', '.hg', '.project']
+
+" vim-rooter 插件配置 {
+nnoremap <leader>foo :Rooter<CR>
+" vim-rooter 插件配置 }
+
 
 " 插件配置 }
 
@@ -649,5 +755,12 @@ let g:indentLine_conceallevel = "2"
 " 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown/zimwiki文件加上目录序号
 autocmd BufWritePost *.md silent call GenSectionNum('markdown')
 autocmd BufWritePost *.txt silent call GenSectionNum('zim')
+
+" 替换函数快捷方式
+noremap <leader>r :call MyReplaceWord('n')<CR>
+vnoremap <leader>r :call MyReplaceWord('v')<CR>
+
+" 打开git远端上的分支
+" noremap <silent> <leader>git :call GitGetCurrentBranchRemoteUrl()<CR>
 
 
