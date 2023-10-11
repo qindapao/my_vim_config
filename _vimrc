@@ -160,6 +160,19 @@ endif
     execute '%s/' . old_word . '/' . new_word . '/gc'
 endfunction
 
+" vim进入可视模式选择一块和默认寄存器中一样大的区域
+function! VisualBlock()
+    let regtype = getregtype()
+    let regcontent = getreg()
+    let blockwidth = str2nr(regtype[1:])
+    let blockheight = len(split(regcontent, "\n"))
+    execute "normal! \<C-S-V>"
+    execute "normal! " . (blockheight - 1) . "j"
+    execute "normal! " . blockwidth . "l"
+endfunction
+
+
+
 " 打开git远端上的分支
 " function GitGetCurrentBranchRemoteUrl()
 
@@ -167,7 +180,7 @@ endfunction
 "     let [remote_name, branch_name] = split(remote_branch_info, '/')
     
 "     let init_addr = system('git.exe config --get remote.origin.url')
-"     let middle_info = substitute(init_addr, 'xx.yy.com:2222', 'xx.yy.com'" 'g')
+"     let middle_info = substitute(init_addr, 'xx.yy.com:2222', 'xx.yy.com', 'g')
 "     let middle_info = split(middle_info, '@')[1]
 "     let middle_info = split(middle_info, '.git')[0]
     
@@ -194,7 +207,7 @@ let g:terminal_shell = 'bash'
 
 filetype plugin indent on                                                        " 打开文件类型检测
 set history=1000
-let mapleader="\\"
+let mapleader=";"
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx FileType text
 
@@ -326,6 +339,16 @@ nnoremap <leader>x :cclose<CR>
 nnoremap <leader>n :cnext<CR>
 nnoremap <leader>p :cprev<CR>
 
+" 本地列表映射
+nnoremap <leader>lo :lopen<CR>
+nnoremap <leader>lc :lclose<CR>
+nnoremap <leader>ln :lnext<CR>
+nnoremap <leader>lp :lprev<CR>
+
+" 下面这个映射后面有一个空格,在可视模式下剪切一块区域,并且把原区域中的字符都替换成空格
+vnoremap xc ygvgr 
+
+nnoremap <leader>xv :call VisualBlock()<cr>
 
 " 基本设置区域 }
 
@@ -389,7 +412,8 @@ Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 Plug 'mhinz/vim-startify'                                                      " vim的开始页
 Plug 'farmergreg/vim-lastplace'                                                " 打开文件的上次位置
 Plug 'rickhowe/diffchar.vim'                                                   " 更明显的对比
-Plug 'terryma/vim-multiple-cursors'                                            " vim的多光标插件
+" Plug 'terryma/vim-multiple-cursors'                                            " vim的多光标插件
+Plug 'mg979/vim-visual-multi'                                                  " 这个插件比上面插件更轻便更快
 Plug 'lilydjwg/colorizer'                                                      " vim中显示16进制颜色
 Plug 'michaeljsmith/vim-indent-object'                                         " 基于缩进的文本对象，用于python等语言
 Plug 'dbakker/vim-paragraph-motion'                                            " 增强{  }段落选择的功能,可以用全空格行作为段落
@@ -409,6 +433,13 @@ Plug 'markonm/traces.vim'                                                      "
 Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
 Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
+Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
+Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
+Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
+Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
+Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
+Plug 'muellan/am-colors'                                                       " 主题插件
+Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
 
 call plug#end()
 " 插件 }
@@ -430,8 +461,8 @@ let g:ale_echo_msg_format = '[%linter%] %s [%severity%]'
 let g:airline#extensions#ale#enabled = 1
 " 让浮动窗口的边框更好看
 let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
-" 错误提示的虚拟文本只在当前行出现
-let g:ale_virtualtext_cursor = 'current'
+" 禁用ale的虚拟文本行
+let g:ale_virtualtext_cursor = 0
 
 " dense-analysis/ale }
 
@@ -513,15 +544,25 @@ let g:rainbow_active = 1                                                        
 " colorscheme toast
 " " toast主题 }
 
-" vim-colors-github 主题 {
-let g:github_colors_soft = 1
-set background=light
-let g:github_colors_block_diffmark = 0
-colorscheme github
-let g:airline_theme = "github"
-" 切换亮和暗主题
-call github_colors#togglebg_map('<f5>')
-" vim-colors-github 主题 }
+" " vim-colors-github 主题 {
+" let g:github_colors_soft = 1
+" set background=light
+" let g:github_colors_block_diffmark = 0
+" colorscheme github
+" let g:airline_theme = "github"
+" " 切换亮和暗主题
+" call github_colors#togglebg_map('<f5>')
+" " vim-colors-github 主题 }
+
+colorscheme amlight
+
+" " papercolor-theme 主题 {
+" set t_Co=256   " This is may or may not needed.
+" set background=light
+" colorscheme PaperColor
+" " papercolor-theme 主题 }
+
+
 
 " LeaderF 配置 {
 
@@ -592,11 +633,7 @@ noremap <leader>frr :LeaderfRgRecall<cr>
 xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 " 关闭leaderf的预览窗口
-" 我很想关闭这个，但是关闭这个后当保存_vimrc的时候会报错，原因未知
-" 想关闭这个主要是因为保持搜索窗口不动的情况下，无法编辑上面的文本
-" 算了这个功能就不用这个Leaderf插件了，用ctrlsf
-" let g:Lf_PreviewResult = 0
-
+let g:LF_PreviewInPopup = 0
 
 " leaderf不要自动生成标签,用gentags插件生成
 
@@ -699,18 +736,18 @@ let g:bookmark_auto_save = 1
 
 " 不要使用默认的按键映射
 let g:bookmark_no_default_key_mappings = 1
-  nmap <Leader><Leader>bt <Plug>BookmarkToggle
-  nmap <Leader><Leader>bi <Plug>BookmarkAnnotate
-  nmap <Leader><Leader>ba <Plug>BookmarkShowAll
-  nmap <Leader><Leader>bj <Plug>BookmarkNext
-  nmap <Leader><Leader>bk <Plug>BookmarkPrev
-  nmap <Leader><Leader>bc <Plug>BookmarkClear
-  nmap <Leader><Leader>bx <Plug>BookmarkClearAll
+nmap <Leader><Leader>bt <Plug>BookmarkToggle
+nmap <Leader><Leader>bi <Plug>BookmarkAnnotate
+nmap <Leader><Leader>ba <Plug>BookmarkShowAll
+nmap <Leader><Leader>bj <Plug>BookmarkNext
+nmap <Leader><Leader>bk <Plug>BookmarkPrev
+nmap <Leader><Leader>bc <Plug>BookmarkClear
+nmap <Leader><Leader>bx <Plug>BookmarkClearAll
 
-  " these will also work with a [count] prefix
-  nmap <Leader>kk <Plug>BookmarkMoveUp
-  nmap <Leader>jj <Plug>BookmarkMoveDown
-  nmap <Leader>g <Plug>BookmarkMoveToLine
+" these will also work with a [count] prefix
+nmap <Leader>kk <Plug>BookmarkMoveUp
+nmap <Leader>jj <Plug>BookmarkMoveDown
+nmap <Leader>g <Plug>BookmarkMoveToLine
 
 
 " vim-bookmarks 书签插件配置 }
@@ -748,16 +785,47 @@ let g:rooter_patterns = ['.root', '.svn', '.git', '.hg', '.project']
 nnoremap <leader>foo :Rooter<CR>
 " vim-rooter 插件配置 }
 
+" vim-linebox 插件配置 {
+" 使用默认配置
+let g:linebox_default_maps = 1
+" vim-linebox 插件配置 }
+
+" vim-textmanip 插件配置 {
+let g:textmainip_startup_mode = 'replace'
+vnoremap <C-d> <Plug>(textmanip-duplicate-down)
+vnoremap <C-u> <Plug>(textmanip-duplicate-up)
+
+vnoremap <C-j> <Plug>(textmanip-move-down)
+vnoremap <C-k> <Plug>(textmanip-move-up)
+vnoremap <C-h> <Plug>(textmanip-move-left)
+vnoremap <C-l> <Plug>(textmanip-move-right)
+
+" toggle insert/replace with <F10>
+nmap <C-F10> <Plug>(textmanip-toggle-mode)
+
+" use allow key to force replace movement
+vnoremap  <Up>     <Plug>(textmanip-move-up-r)
+vnoremap  <Down>   <Plug>(textmanip-move-down-r)
+vnoremap  <Left>   <Plug>(textmanip-move-left-r)
+vnoremap  <Right>  <Plug>(textmanip-move-right-r)
+" vim-textmanip 插件配置 }
+
+" vim-box-draw 插件配置 {
+" 在有字符的情况下中间会多一条竖线，在纯ve=all的无字符的地方是正常的方框
+vnoremap xxb: call box#Draw()<CR>
+" vim-box-draw 插件配置 }
+
 
 " 插件配置 }
+
 
 
 " 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown/zimwiki文件加上目录序号
 autocmd BufWritePost *.md silent call GenSectionNum('markdown')
 autocmd BufWritePost *.txt silent call GenSectionNum('zim')
 
-" 替换函数快捷方式
-noremap <leader>r :call MyReplaceWord('n')<CR>
+" 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突
+noremap <leader><leader>r :call MyReplaceWord('n')<CR>
 vnoremap <leader>r :call MyReplaceWord('v')<CR>
 
 " 打开git远端上的分支
