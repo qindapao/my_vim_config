@@ -274,7 +274,7 @@ set cursorline                                                                  
 set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
-set guifont=Yahei\ Fira\ Icon\ Hybrid:h13
+set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
 
 set noundofile
 set nobackup
