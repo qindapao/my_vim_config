@@ -18,7 +18,7 @@
 * [6 编辑](#6-编辑)
     - [6.1 可视模式](#6.1-可视模式)
         + [6.1.1 虚拟编辑模式](#6.1.1-虚拟编辑模式)
-        + [可视模式下的复制](#可视模式下的复制)
+        + [6.1.2 可视模式下的复制](#6.1.2-可视模式下的复制)
 * [7 文件操作](#7-文件操作)
     - [7.1 打开历史文件](#7.1-打开历史文件)
 * [8 未整理](#8-未整理)
@@ -33,6 +33,8 @@
 * [11 vim的自定义函数](#11-vim的自定义函数)
 * [12 vscode](#12-vscode)
     - [12.1 easymotion插件的一些说明](#12.1-easymotion插件的一些说明)
+* [13 关于使用vim来画字符画](#13-关于使用vim来画字符画)
+* [- 另外一个ascii-draw，它的github链接。](#--另外一个ascii-draw，它的github链接。)
 
 <!-- vim-markdown-toc -->
 
@@ -316,7 +318,7 @@ leaderf rg -f *.py -e xx
 设置`set ve=all`可以让编辑器进入可视虚拟编辑模式，可以在超出边界的位置编辑，适合用用于绘制图表。比如用`vim`可以绘制简单的文本图。  
 默认情况下这个值为空，即`set ve=`
 
-#### 可视模式下的复制
+#### 6.1.2 可视模式下的复制
 
 在`vim9`中，在可视模式下，可以使用`P`来粘贴内容，不会影响默认寄存器中的内容。
 
@@ -553,7 +555,53 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
 <leader><leader>f
 " 往上搜索一个字符,同上面一样，敲击后输入需要查找的字符
 <leader><leader>F
+```
 
+## 13 关于使用vim来画字符画
+
+设置`:set ve=all`后vim在可视模式下就获取了横向的无限画布。然后可以使用自己的映射或者是类似与`DrawIt`或者是`TabMode`这样的软件来绘图。甚至可以直接调用外部程序，比如`diagon`。
+
+在`vim`中使用`diagon`的方法也比较简单。只需要选择我们需要转换的文字，然后在命令行调用`diagon`对应的功能即可。举个例子，比如我们想生成一个文件树。我们先在vim中生成下面的文字：
+
+```bash
+Linux
+    Suse
+    androd
+Windows
+    windows98
+    windowsxp
 
 ```
+
+然后我们直接选择这些文字，在命令行输入以下的命令(命令前面加一个!表示这是一个外部命令)：
+
+```vim
+:!diagon Tree
+
+```
+
+文本就会自动切换成这样：
+
+```bash
+
+Linux
+ ├──Suse
+ └──androd
+Windows
+ ├──windows98
+ └──windowsxp
+
+```
+
+如果想使用`diagon`的其它功能，也是类似。同样对应`Figlet`工具也可以类似的处理。
+
+
+
+
+**一些第三方的画字符画的软件**:
+
+- [ascii-draw](https://github.com/Nokse22/ascii-draw)
+- [asciio](https://github.com/nkh/P5-App-Asciio)，它的`TUI`接口可以轻易在`vim`中调用。
+- [另外一个ascii-draw](https://www.ascii-draw.com/)，它的[github链接](https://github.com/huytd/ascii-d)。
+-
 

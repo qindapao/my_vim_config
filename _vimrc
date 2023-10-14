@@ -167,7 +167,9 @@ function! VisualBlock()
     let blockwidth = str2nr(regtype[1:])
     let blockheight = len(split(regcontent, "\n"))
     execute "normal! \<C-S-V>"
-    execute "normal! " . (blockheight - 1) . "j"
+    if blockheight != 1
+        execute "normal! " . (blockheight - 1) . "j"
+    endif
     execute "normal! " . blockwidth . "l"
 endfunction
 
@@ -554,7 +556,8 @@ let g:rainbow_active = 1                                                        
 " call github_colors#togglebg_map('<f5>')
 " " vim-colors-github 主题 }
 
-colorscheme amlight
+set t_Co=256
+colorscheme amdark
 
 " " papercolor-theme 主题 {
 " set t_Co=256   " This is may or may not needed.
@@ -633,7 +636,7 @@ noremap <leader>frr :LeaderfRgRecall<cr>
 xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 " 关闭leaderf的预览窗口
-let g:LF_PreviewInPopup = 0
+let g:Lf_PreviewInPopup = 0
 
 " leaderf不要自动生成标签,用gentags插件生成
 
