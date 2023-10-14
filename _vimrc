@@ -456,7 +456,7 @@ Plug 'hari-rangarajan/CCTree'                                                  "
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
 Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
 Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
-" Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
+Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
 Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
 Plug 'muellan/am-colors'                                                       " 主题插件
