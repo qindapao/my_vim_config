@@ -593,6 +593,9 @@ Windows
 
 ```
 
+还有个[视频](https://www.youtube.com/watch?v=WTnMft_wvZU)来说明这个用法。视频的后面还介绍了一个插件，不过我倒是觉得这个插件并没有多大作用。
+
+
 如果想使用`diagon`的其它功能，也是类似。同样对应`Figlet`工具也可以类似的处理。
 
 

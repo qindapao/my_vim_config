@@ -151,19 +151,30 @@ endfunction
 
 " 替换函数
 function! MyReplaceWord(now_mode)
-   if a:now_mode == 'n'
-    let old_word = expand("<cword>")
-elseif a:now_mode == 'v'
-     let old_word = GetVisualLine()
-endif
+    if a:now_mode == 'n'
+        let old_word = expand("<cword>")
+    elseif a:now_mode == 'v'
+        let old_word = GetVisualLine()
+    endif
     let new_word = input("Replace " . old_word . " with: ")
     execute '%s/' . old_word . '/' . new_word . '/gc'
 endfunction
 
-" vim进入可视模式选择一块和默认寄存器中一样大的区域
-function! VisualBlock()
-    let regtype = getregtype()
-    let regcontent = getreg()
+" vim enters visual mode and selects an area the same size as the x register
+" ctrl j k h l move this selection area
+function! VisualBlockMove(derection)
+    if a:derection == 'j'
+        normal 1j
+    elseif a:derection == 'k'
+        normal 1k
+    elseif a:derection == 'h'
+        normal 1h
+    elseif a:derection == 'l'
+        normal 1l
+    endif
+    
+    let regtype = getregtype("x")
+    let regcontent = getreg("x")
     let blockwidth = str2nr(regtype[1:])
     let blockheight = len(split(regcontent, "\n"))
     execute "normal! \<C-S-V>"
@@ -171,8 +182,8 @@ function! VisualBlock()
         execute "normal! " . (blockheight - 1) . "j"
     endif
     execute "normal! " . blockwidth . "l"
+    execute 'normal! o'
 endfunction
-
 
 
 " 打开git远端上的分支
@@ -347,10 +358,18 @@ nnoremap <leader>lc :lclose<CR>
 nnoremap <leader>ln :lnext<CR>
 nnoremap <leader>lp :lprev<CR>
 
-" 下面这个映射后面有一个空格,在可视模式下剪切一块区域,并且把原区域中的字符都替换成空格
-vnoremap xc ygvgr 
+" There is a space after the mapping below. In visual mode, 
+" a region is cut and saved in the x register, and all characters in the 
+" original region are replaced with spaces.
+vnoremap xc "xygvgr 
 
-nnoremap <leader>xv :call VisualBlock()<cr>
+nnoremap <leader>xv :call VisualBlockMove("null")<cr>
+vnoremap <C-j> <Esc>:call VisualBlockMove("j")<cr>
+vnoremap <C-k> <Esc>:call VisualBlockMove("k")<cr>
+vnoremap <C-h> <Esc>:call VisualBlockMove("h")<cr>
+vnoremap <C-l> <Esc>:call VisualBlockMove("l")<cr>
+vnoremap <leader>p "xp
+
 
 " 基本设置区域 }
 
@@ -437,7 +456,7 @@ Plug 'hari-rangarajan/CCTree'                                                  "
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
 Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
 Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
-Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
+" Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
 Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
 Plug 'muellan/am-colors'                                                       " 主题插件
@@ -798,10 +817,10 @@ let g:textmainip_startup_mode = 'replace'
 vnoremap <C-d> <Plug>(textmanip-duplicate-down)
 vnoremap <C-u> <Plug>(textmanip-duplicate-up)
 
-vnoremap <C-j> <Plug>(textmanip-move-down)
-vnoremap <C-k> <Plug>(textmanip-move-up)
-vnoremap <C-h> <Plug>(textmanip-move-left)
-vnoremap <C-l> <Plug>(textmanip-move-right)
+vnoremap <C-S-j> <Plug>(textmanip-move-down)
+vnoremap <C-S-k> <Plug>(textmanip-move-up)
+vnoremap <C-S-h> <Plug>(textmanip-move-left)
+vnoremap <C-S-l> <Plug>(textmanip-move-right)
 
 " toggle insert/replace with <F10>
 nmap <C-F10> <Plug>(textmanip-toggle-mode)
