@@ -438,9 +438,9 @@ C:\Users\pc>
 在编辑器中命令行输入`UltiSnipsEdit`，然后就会出现我们当前使用的文件对应的`snippets`
 文件的路径，一般情况下是语言特定的文件。
 
-
 目录看起来是这样的:
-```
+
+```txt
 C:\Users\pc\.vim\plugged\vim-snippets\UltiSnips
 ```
 
