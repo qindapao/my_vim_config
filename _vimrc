@@ -352,10 +352,10 @@ nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>
 set grepprg=grep\ -n
 
 " Quickfix窗口按键映射
-nnoremap <leader>q :copen<CR>
-nnoremap <leader>x :cclose<CR>
-nnoremap <leader>n :cnext<CR>
-nnoremap <leader>p :cprev<CR>
+nnoremap <leader>qo :copen<CR>
+nnoremap <leader>qc :cclose<CR>
+nnoremap <leader>qn :cnext<CR>
+nnoremap <leader>qp :cprev<CR>
 
 " 本地列表映射
 nnoremap <leader>lo :lopen<CR>
@@ -468,6 +468,8 @@ Plug 'muellan/am-colors'                                                       "
 Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
 Plug 'scwood/vim-hybrid'                                                       " 主题插件
 Plug 'yous/vim-open-color'                                                     " vim的主题
+Plug 'SirVer/ultisnips'                                                        " 代码片段管理
+Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 
 call plug#end()
 " 插件 }
@@ -852,6 +854,13 @@ vnoremap  <Right>  <Plug>(textmanip-move-right-r)
 " 在有字符的情况下中间会多一条竖线，在纯ve=all的无字符的地方是正常的方框
 vnoremap xxb: call box#Draw()<CR>
 " vim-box-draw 插件配置 }
+
+" vim-snippets 插件配置 {
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+let g:UltiSnipsSnippetDirectories=["UltiSnips"]
+" vim-snippets 插件配置 }
 
 
 " 插件配置 }
