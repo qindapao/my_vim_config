@@ -206,11 +206,16 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 
+if has('termguicolors')
+    set termguicolors
+endif
+
 if has('gui_running')
     " 目前这里无法回到上次的中文输入法,不知道原因
     set imactivatekey=C
     inoremap <ESC> <ESC>: set iminsert=2<CR>
 endif
+
 
 
 " 设置默认的终端为bash
@@ -220,7 +225,7 @@ let g:terminal_shell = 'bash'
 
 filetype plugin indent on                                                        " 打开文件类型检测
 set history=1000
-let mapleader=";"
+let mapleader=" "
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx FileType text
 
@@ -293,10 +298,10 @@ set noundofile
 set nobackup
 set guioptions+=b                                                                " 添加水平滚动条
 
-" 映射普通模式下面插入一行
-nnoremap oo o<Esc>
-" 映射普通模式上面插入一行
-nnoremap OO O<Esc>
+" 映射普通模式下面插入一行,这里不能设置为oo,这会导致o命令的延迟
+nnoremap <leader>o o<Esc>
+" 映射普通模式上面插入一行,这里不能设置为OO,这会导致O命令的延迟
+nnoremap <leader>O O<Esc>
 " 由于环境变量的问题,下面这行暂时不使用
 " command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw            " 搜索git关注的文件 :Sch xx
 " 把目录切换到当前文件所在目录
@@ -458,9 +463,11 @@ Plug 'vim-scripts/DrawIt'                                                      "
 Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
 Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
 Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
-Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
+" Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
 Plug 'muellan/am-colors'                                                       " 主题插件
 Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
+Plug 'scwood/vim-hybrid'                                                       " 主题插件
+Plug 'yous/vim-open-color'                                                     " vim的主题
 
 call plug#end()
 " 插件 }
@@ -575,8 +582,8 @@ let g:rainbow_active = 1                                                        
 " call github_colors#togglebg_map('<f5>')
 " " vim-colors-github 主题 }
 
-set t_Co=256
-colorscheme amdark
+" set t_Co=256
+" colorscheme amdark
 
 " " papercolor-theme 主题 {
 " set t_Co=256   " This is may or may not needed.
@@ -584,7 +591,15 @@ colorscheme amdark
 " colorscheme PaperColor
 " " papercolor-theme 主题 }
 
+" " vim-hybrid 主题 {
+" set background=light
+" colorscheme hybrid
+" " vim-hybrid 主题 }
 
+" vim-open-color 主题配置 {
+set background=dark
+colorscheme open-color
+" vim-open-color 主题配置 }
 
 " LeaderF 配置 {
 
@@ -726,8 +741,8 @@ map <Leader><Leader>k <Plug>(easymotion-k)
 map <Leader><leader>h <Plug>(easymotion-linebackward)
 map <Leader><leader>l <Plug>(easymotion-lineforward)
 map <Leader><leader>. <Plug>(easymotion-repeat)
-map <Leader>W <Plug>(easymotion-bd-w)
-map <Leader>w <Plug>(easymotion-overwin-w)
+map <Leader>w <Plug>(easymotion-bd-w)
+map <Leader>W <Plug>(easymotion-overwin-w)
 map <Leader>f <Plug>(easymotion-bd-f)
 map <Leader>F <Plug>(easymotion-overwin-f)
 " vim-easymotion 的配置 }
@@ -787,6 +802,7 @@ nnoremap <F5> :UndotreeToggle<CR>
 " vim-bufferline 的配置 {
 let g:bufferline_echo = 1
 let g:bufferline_active_buffer_left = '['
+let g:bufferline_active_buffer_right = ']'
 let g:bufferline_modified = '+'
 let g:bufferline_show_bufnr = 1
 let g:bufferline_rotate = 1
