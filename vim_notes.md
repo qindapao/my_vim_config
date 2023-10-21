@@ -449,6 +449,28 @@ C:\Users\pc\.vim\plugged\vim-snippets\UltiSnips
 等等就可以放在这里。
 
 
+**如果我想定义多个`all.snippets`那么应该怎么操作呢？**
+
+```vim
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
+```
+
+只需要在这个参数中加上我会自定义的目录即可。这个目录和模拟的片段目录平级即可。也
+就是说是这样的目录结构：
+
+```bash
+UltiSnips
+ ├──all.snippets
+ ├──python.snippets
+ └──...
+mysub
+ ├──all.snippets
+ ├──python,snippets
+ └──...
+
+```
+
+
 
 ## 10 git
 

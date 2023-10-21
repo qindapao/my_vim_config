@@ -859,7 +859,7 @@ vnoremap xxb: call box#Draw()<CR>
 let g:UltiSnipsExpandTrigger="<tab>"
 let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
-let g:UltiSnipsSnippetDirectories=["UltiSnips"]
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
 " vim-snippets 插件配置 }
 
 
