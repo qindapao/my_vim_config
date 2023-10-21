@@ -470,6 +470,7 @@ mysub
 
 ```
 
+这个插件有[中文说明文档](https://github.com/Linfee/ultisnips-zh-doc/blob/master/doc/UltiSnips_zh.txt)。
 
 
 ## 10 git
