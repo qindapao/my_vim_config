@@ -185,6 +185,22 @@ function! VisualBlockMove(derection)
     execute 'normal! o'
 endfunction
 
+function! CloseHiddenBuffers()
+
+    let open_buffers = []
+    
+    for i in range(tabpagenr('$'))
+        call extend(open_buffers, tabpagebuflist(i + 1))
+    endfor
+    
+    for num in range(1, bufnr("$") + 1)
+        if buflisted(num) && index(open_buffers, num) == -1 && getbufvar(num, "&buftype") != #'terminal'
+            exec "bdelete ".num
+        endif
+    endfor
+endfunction
+
+" au BufEnter * call CloseHiddenBuffers()
 
 " 打开git远端上的分支
 " function GitGetCurrentBranchRemoteUrl()
@@ -470,6 +486,10 @@ Plug 'scwood/vim-hybrid'                                                       "
 Plug 'yous/vim-open-color'                                                     " vim的主题
 Plug 'SirVer/ultisnips'                                                        " 代码片段管理
 Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
+Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
+Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
+Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
+Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
 
 call plug#end()
 " 插件 }
@@ -598,10 +618,35 @@ let g:rainbow_active = 1                                                        
 " colorscheme hybrid
 " " vim-hybrid 主题 }
 
-" vim-open-color 主题配置 {
-set background=dark
-colorscheme open-color
-" vim-open-color 主题配置 }
+" " vim-open-color 主题配置 {
+" set background=light
+" colorscheme open-color
+" " vim-open-color 主题配置 }
+
+" " vim-colors-off 主题配置 {
+" colorscheme off
+" set background=light
+" " vim-colors-off 主题配置 }
+
+" " vim-colors-pencil 主题配置 {
+" colorscheme pencil
+" set background=light
+" " vim-colors-pencil 主题配置 }
+
+
+" " vim-humanoid-colorscheme 插件配置 {
+" colorscheme humanoid
+" set background=light
+" " vim-humanoid-colorscheme 插件配置 }
+
+
+" lucius 主题配置 {
+colorscheme lucius
+let g:lucius_style = 'light'
+set background=light
+let g:lucius_contrast = 'normal'
+let g:lucius_contrast_bg = 'high'
+" lucius 主题配置 }
 
 " LeaderF 配置 {
 
