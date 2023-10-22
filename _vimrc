@@ -195,6 +195,7 @@ function! CloseHiddenBuffers()
     
     for num in range(1, bufnr("$") + 1)
         if buflisted(num) && index(open_buffers, num) == -1 && getbufvar(num, "&buftype") != #'terminal'
+            " 这里使用bdelete命令比较安全,如果后面想换成bw命令也是可以的
             exec "bdelete ".num
         endif
     endfor
