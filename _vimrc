@@ -619,7 +619,7 @@ let g:rainbow_active = 1                                                        
 
 " papercolor-theme 主题 {
 set t_Co=256   " This is may or may not needed.
-set background=dark
+set background=light
 colorscheme PaperColor
 " papercolor-theme 主题 }
 
@@ -918,8 +918,8 @@ let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
 " vim-snippets 插件配置 }
 
 " airline {
-let g:airline_theme = 'catppuccin_latte'
-let g:airline_theme_dark = 'catppuccin_latte'
+let g:airline_theme = 'catppuccin_frappe'
+let g:airline_theme_dark = 'catppuccin_frappe'
 let g:airline_powerline_fonts = 1
 " airline }
 
