@@ -194,14 +194,20 @@ function! CloseHiddenBuffers()
     endfor
     
     for num in range(1, bufnr("$") + 1)
-        if buflisted(num) && index(open_buffers, num) == -1 && getbufvar(num, "&buftype") != #'terminal'
+        if buflisted(num) && index(open_buffers, num) == -1 && getbufvar(num, "&buftype") !=#'terminal'
             " 这里使用bdelete命令比较安全,如果后面想换成bw命令也是可以的
             exec "bdelete ".num
         endif
     endfor
 endfunction
 
-" au BufEnter * call CloseHiddenBuffers()
+au BufEnter * call CloseHiddenBuffers()
+
+function! AddBufferBr()
+    let g:bufferline_active_buffer_left = '['
+    let g:bufferline_active_buffer_right = ']'
+endfunction
+
 
 " 打开git远端上的分支
 " function GitGetCurrentBranchRemoteUrl()
@@ -223,6 +229,9 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 
+" 设置vim的窗口分割竖线的形状
+set fillchars=vert:▒
+
 if has('termguicolors')
     set termguicolors
 endif
@@ -242,7 +251,7 @@ let g:terminal_shell = 'bash'
 
 filetype plugin indent on                                                        " 打开文件类型检测
 set history=1000
-let mapleader=" "
+let mapleader="\\"
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx FileType text
 
@@ -608,11 +617,11 @@ let g:rainbow_active = 1                                                        
 " set t_Co=256
 " colorscheme amdark
 
-" " papercolor-theme 主题 {
-" set t_Co=256   " This is may or may not needed.
-" set background=light
-" colorscheme PaperColor
-" " papercolor-theme 主题 }
+" papercolor-theme 主题 {
+set t_Co=256   " This is may or may not needed.
+set background=dark
+colorscheme PaperColor
+" papercolor-theme 主题 }
 
 " " vim-hybrid 主题 {
 " set background=light
@@ -641,13 +650,13 @@ let g:rainbow_active = 1                                                        
 " " vim-humanoid-colorscheme 插件配置 }
 
 
-" lucius 主题配置 {
-colorscheme lucius
-let g:lucius_style = 'light'
-set background=light
-let g:lucius_contrast = 'normal'
-let g:lucius_contrast_bg = 'high'
-" lucius 主题配置 }
+" " lucius 主题配置 {
+" colorscheme lucius
+" let g:lucius_style = 'light'
+" set background=light
+" let g:lucius_contrast = 'normal'
+" let g:lucius_contrast_bg = 'high'
+" " lucius 主题配置 }
 
 " LeaderF 配置 {
 
@@ -784,10 +793,10 @@ autocmd FileType markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :c
 
 " vim-easymotion 的配置 {
 let g:EasyMotion_smartcase = 1
-map <Leader><Leader>j <Plug>(easymotion-j)
-map <Leader><Leader>k <Plug>(easymotion-k)
-map <Leader><leader>h <Plug>(easymotion-linebackward)
-map <Leader><leader>l <Plug>(easymotion-lineforward)
+map <Leader>j <Plug>(easymotion-j)
+map <Leader>k <Plug>(easymotion-k)
+map <Leader>h <Plug>(easymotion-linebackward)
+map <Leader>l <Plug>(easymotion-lineforward)
 map <Leader><leader>. <Plug>(easymotion-repeat)
 map <Leader>w <Plug>(easymotion-bd-w)
 map <Leader>W <Plug>(easymotion-overwin-w)
@@ -854,7 +863,7 @@ let g:bufferline_active_buffer_right = ']'
 let g:bufferline_modified = '+'
 let g:bufferline_show_bufnr = 1
 let g:bufferline_rotate = 1
-let g:bufferline_fixed_index =  1
+let g:bufferline_fixed_index =  0
 let g:bufferline_inactive_highlight = 'StatusLineNC'
 let g:bufferline_active_highlight = 'StatusLine'
  let g:bufferline_pathshorten = 1
@@ -908,6 +917,12 @@ let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
 " vim-snippets 插件配置 }
 
+" airline {
+let g:airline_theme = 'catppuccin_latte'
+let g:airline_theme_dark = 'catppuccin_latte'
+let g:airline_powerline_fonts = 1
+" airline }
+
 
 " 插件配置 }
 
@@ -920,6 +935,8 @@ autocmd BufWritePost *.txt silent call GenSectionNum('zim')
 " 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突
 noremap <leader><leader>r :call MyReplaceWord('n')<CR>
 vnoremap <leader>r :call MyReplaceWord('v')<CR>
+
+nnoremap <leader>br :call AddBufferBr()<CR>
 
 " 打开git远端上的分支
 " noremap <silent> <leader>git :call GitGetCurrentBranchRemoteUrl()<CR>
