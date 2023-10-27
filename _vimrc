@@ -204,6 +204,7 @@ endfunction
 au BufEnter * call CloseHiddenBuffers()
 
 function! AddBufferBr()
+    " 因为airline的原因,下面两个参数会默认被设置为空,所以需要显示要自己重新设置下
     let g:bufferline_active_buffer_left = '['
     let g:bufferline_active_buffer_right = ']'
 endfunction
@@ -524,6 +525,19 @@ let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '�
 " 禁用ale的虚拟文本行
 let g:ale_virtualtext_cursor = 0
 
+" java检查相关设置
+" 不确定是否需要手动设置
+" let g:ale_java_javac_classpath = 'src:lib/foo.jar:lib/bar.jar'
+" 暂时不知道-cp "lib/*"的含义
+" let g:ale_java_javac_options = '-encoding utf8 -cp "lib/*"'
+" 指定javac使用的编码防止乱码,但是发现配置了并没有作用
+let g:ale_java_javac_options = '-encoding utf8 -verbose'
+" let g:ale_java_javac_executable = 'C:\Program Files\Java\jdk-18.0.2\bin\javac.exe'
+" 当前使用coc的这个版本的javac.exe才没有中文乱码问题,使用系统默认的还有问题(上面这个)
+" 应该是因为jdk的版本和工具的版本必须一致,当前我使用的jdk是17的,就要用17的这个javac
+" 只有当有问题的时候才需要指定这个路径
+let g:ale_java_javac_executable = 'C:\Users\pc\.vim\coc\extensions\coc-java-data\jdk-17.0.8\javajre-windows-64\jre\bin\javac.exe'
+
 " dense-analysis/ale }
 
 " vim-gutentags {
@@ -552,6 +566,8 @@ let g:gutentags_auto_add_gtags_cscope = 0
 
 let g:gutentags_plus_switch = 0                                                  " 是否自动将光标定位到自动修复列表位置 0:禁用 1:打开
 
+" 下面这行是调试用的,当生成的tag出了问题,需要用这行来调试
+" let g:gutentags_define_advanced_commands = 1
 " vim-gutentags }
 
 
@@ -611,7 +627,7 @@ let g:rainbow_active = 1                                                        
 " colorscheme github
 " let g:airline_theme = "github"
 " " 切换亮和暗主题
-" call github_colors#togglebg_map('<f5>')
+" call github_colors#togglebg_map('<f6>')
 " " vim-colors-github 主题 }
 
 " set t_Co=256
@@ -726,7 +742,7 @@ noremap <leader>frr :LeaderfRgRecall<cr>
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
-" 关闭leaderf的预览窗口
+" 关闭leaderf的预览窗口,不然会影响-stayOpen模式,预览窗口无法关闭,也无法编辑新的文件
 let g:Lf_PreviewInPopup = 0
 
 " leaderf不要自动生成标签,用gentags插件生成
