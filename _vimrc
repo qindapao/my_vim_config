@@ -272,7 +272,7 @@ set wildmenu
 " 设置文件的编码顺序
 set fileencoding=utf-8
 set encoding=utf-8
-set fileencodings=ucs-bom,utf-8,cp936,gb18030,big5,latin1
+set fileencodings=utf-8,ucs-bom,cp936,gb18030,big5,latin1
 
 
 " 如果是markdown文件设置wrap
@@ -690,23 +690,23 @@ let g:Lf_RootMarkers = ['.git', '.svn', '.hg', '.project', '.root']             
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜索. -F 搜索字符串而不是正则表达式. -w 搜索只匹配有边界的词.)
 " 命令行显示:Leaderf rg -e,然后等待输入正则表达式
-nmap <unique> <leader>fr <Plug>LeaderfRgPrompt
+nmap <leader>fr <Plug>LeaderfRgPrompt
 " 查询光标或者可视模式下所在的词,非全词匹配
-nmap <unique> <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary
+nmap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary
 " 查询光标或者可视模式下所在的词,全词匹配
-nmap <unique> <leader>frw <Plug>LeaderfRgCwordLiteralBoundary
+nmap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary
 " 查询光标或者可视模式下所在的正则表达式，非全词匹配
-nmap <unique> <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary
+nmap <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary
 " 查询光标或者可视模式下所在的正则表达式，全词匹配
-nmap <unique> <leader>frew <Plug>LeaderfRgCwordRegexBoundary
+nmap <leader>frew <Plug>LeaderfRgCwordRegexBoundary
 " 上面解释了
-vmap <unique> <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary
+vmap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary
 " 上面解释了
-vmap <unique> <leader>frw <Plug>LeaderfRgVisualLiteralBoundary
+vmap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary
 " 上面解释了
-vmap <unique> <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary
+vmap <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary
 " 上面解释了
-vmap <unique> <leader>frew <Plug>LeaderfRgVisualRegexBoundary
+vmap <leader>frew <Plug>LeaderfRgVisualRegexBoundary
 
 " 跳到字符串搜索的下一个结果
 noremap ]n :Leaderf rg --next<CR>
@@ -730,16 +730,17 @@ xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#vi
 let g:Lf_PreviewInPopup = 0
 
 " leaderf不要自动生成标签,用gentags插件生成
+" unique的意思是vim是否检查映射已经存在,如果存在会报错,当前暂时不需要这个功能
+" nmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
+nmap <leader>fgd <Plug>LeaderfGtagsDefinition
+nmap <leader>fgr <Plug>LeaderfGtagsReference
+nmap <leader>fgs <Plug>LeaderfGtagsSymbol
+nmap <leader>fgg <Plug>LeaderfGtagsGrep
 
-nmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
-nmap <unique> <leader>fgr <Plug>LeaderfGtagsReference
-nmap <unique> <leader>fgs <Plug>LeaderfGtagsSymbol
-nmap <unique> <leader>fgg <Plug>LeaderfGtagsGrep
-
-vmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
-vmap <unique> <leader>fgr <Plug>LeaderfGtagsReference
-vmap <unique> <leader>fgs <Plug>LeaderfGtagsSymbol
-vmap <unique> <leader>fgg <Plug>LeaderfGtagsGrep
+vmap <leader>fgd <Plug>LeaderfGtagsDefinition
+vmap <leader>fgr <Plug>LeaderfGtagsReference
+vmap <leader>fgs <Plug>LeaderfGtagsSymbol
+vmap <leader>fgg <Plug>LeaderfGtagsGrep
 
 noremap <leader>fgo :<C-U><C-R>=printf("Leaderf! gtags --recall %s", "")<CR><CR>
 noremap <leader>fgn :<C-U><C-R>=printf("Leaderf gtags --next %s", "")<CR><CR>
@@ -806,6 +807,8 @@ map <Leader>F <Plug>(easymotion-overwin-f)
 
 " coc补全插件的一些配置 {
 inoremap <silent><expr> <S-TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+" 定义coc插件和数据的目录
+let g:coc_data_home = '~/.vim/coc'
 " coc补全插件的一些配置 }
 
 " vim-gitgutter 插件配置 {

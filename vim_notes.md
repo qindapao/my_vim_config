@@ -32,6 +32,9 @@
     - [9.3 coc 补全框架](#9.3-coc-补全框架)
         + [9.3.1 coc框架下的c语言补全](#9.3.1-coc框架下的c语言补全)
         + [9.3.2 coc补全和代码片段管理工具的集成](#9.3.2-coc补全和代码片段管理工具的集成)
+        + [9.3.3 支持java语言](#9.3.3-支持java语言)
+    - [9.4 ale代码检查](#9.4-ale代码检查)
+        + [9.4.1 java语言](#9.4.1-java语言)
 * [10 git](#10-git)
     - [10.1 配置终端中使用的git工具](#10.1-配置终端中使用的git工具)
     - [10.2 使用浏览器打开当前文件的远程文件](#10.2-使用浏览器打开当前文件的远程文件)
@@ -396,11 +399,14 @@ endif
 
 ### 9.3 coc 补全框架
 
-目前遇到的问问题是，补全的第一个选项无法选择，都必须通过选择下一个再选择上一个来实现。设置了下面这行也没用。
+`coc`自己的插件的安装位置：
 
-```vim
-let g:coc_snippet_next = '<tab>'
-```
+- windows系统下是`%LOCALAPPDATA%\nvim-data\coc-extensions`
+- vim8是`~/.vim/coc-extensions1`
+- neovim是`~/.config/nvim/coc-extensions1`
+
+在我的电脑上，这个路径是： **C:\Users\pc\AppData\Local\coc**
+
 
 #### 9.3.1 coc框架下的c语言补全
 
@@ -476,6 +482,26 @@ mysub
 ```
 
 这个插件有[中文说明文档](https://github.com/Linfee/ultisnips-zh-doc/blob/master/doc/UltiSnips_zh.txt)。
+
+#### 9.3.3 支持java语言
+
+在编辑器中运行`:CocInstall coc-java`安装这个扩展。安装完成激活后随便打开一个`java`文件，就会自动下载 **JDT Language Server** 和相关的依赖文件。
+
+下载的东西可能比较多，比较占用硬盘空间。
+
+
+
+### 9.4 ale代码检查
+
+#### 9.4.1 java语言
+
+需要在系统中配置`javac`的默认编码方式，不然代码中的错误提示乱码。需要配置以下的参数：
+
+```txt
+JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8
+```
+
+如果是`windows`操作系统，直接加到用户环境变量或者系统环境变量中即可，这个参数影响所有的`java`二进制工具的默认编码格式。注意下这个环境变量修改后需要重新启动`OS`才能生效。
 
 
 ## 10 git
