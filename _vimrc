@@ -844,7 +844,7 @@ nmap <Leader><Leader>bx <Plug>BookmarkClearAll
 " these will also work with a [count] prefix
 nmap <Leader>kk <Plug>BookmarkMoveUp
 nmap <Leader>jj <Plug>BookmarkMoveDown
-nmap <Leader>g <Plug>BookmarkMoveToLine
+nmap <Leader>gl <Plug>BookmarkMoveToLine
 
 
 " vim-bookmarks 书签插件配置 }
