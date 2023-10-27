@@ -536,6 +536,8 @@ let g:ale_java_javac_options = '-encoding utf8 -verbose'
 " 当前使用coc的这个版本的javac.exe才没有中文乱码问题,使用系统默认的还有问题(上面这个)
 " 应该是因为jdk的版本和工具的版本必须一致,当前我使用的jdk是17的,就要用17的这个javac
 " 只有当有问题的时候才需要指定这个路径
+" 使用~/.vim/这种路径也是不行的,不知道原因
+" let g:ale_java_javac_executable = '~/.vim/coc/extensions/coc-java-data/jdk-17.0.8/javajre-windows-64/jre/bin/javac.exe'
 let g:ale_java_javac_executable = 'C:\Users\pc\.vim\coc\extensions\coc-java-data\jdk-17.0.8\javajre-windows-64\jre\bin\javac.exe'
 
 " dense-analysis/ale }
