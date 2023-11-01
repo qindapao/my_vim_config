@@ -230,6 +230,9 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 
+" 设置自动切换到当前操作的文件的目录(可能被别人覆盖,进入编辑器后需要手动设置一次)
+set autochdir
+
 " 设置vim的窗口分割竖线的形状
 set fillchars=vert:▒
 
@@ -402,6 +405,10 @@ vnoremap <C-h> <Esc>:call VisualBlockMove("h")<cr>
 vnoremap <C-l> <Esc>:call VisualBlockMove("l")<cr>
 vnoremap <leader>p "xp
 
+" 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
+" 位于autoload目录下(这个目录下可能还有不少好东西)
+autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
+autocmd FileType css set omnifunc=csscomplete#CompleteCSS
 
 " 基本设置区域 }
 
@@ -501,6 +508,7 @@ Plug 'pbrisbin/vim-colors-off'                                                 "
 Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
 Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
+" Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 
 call plug#end()
 " 插件 }
@@ -526,12 +534,12 @@ let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '�
 let g:ale_virtualtext_cursor = 0
 
 " java检查相关设置
-" 不确定是否需要手动设置
+" 指定javac使用的编码防止乱码,但是发现配置了并没有作用
+let g:ale_java_javac_options = '-encoding utf8 -verbose'
 " let g:ale_java_javac_classpath = 'src:lib/foo.jar:lib/bar.jar'
 " 暂时不知道-cp "lib/*"的含义
 " let g:ale_java_javac_options = '-encoding utf8 -cp "lib/*"'
-" 指定javac使用的编码防止乱码,但是发现配置了并没有作用
-let g:ale_java_javac_options = '-encoding utf8 -verbose'
+let g:ale_java_javac_classpath = '.'
 " let g:ale_java_javac_executable = 'C:\Program Files\Java\jdk-18.0.2\bin\javac.exe'
 " 当前使用coc的这个版本的javac.exe才没有中文乱码问题,使用系统默认的还有问题(上面这个)
 " 应该是因为jdk的版本和工具的版本必须一致,当前我使用的jdk是17的,就要用17的这个javac
@@ -786,7 +794,7 @@ let g:tagbar_sort = 0
 " tagbar 配置 }
 
 " auto-pairs 配置 {
-au Filetype markdown let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
+au Filetype markdown,html let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
 " auto-pairs 配置 }
 
 
@@ -944,6 +952,14 @@ let g:airline_theme_dark = 'catppuccin_frappe'
 let g:airline_powerline_fonts = 1
 " airline }
 
+" vim-javacomplete2 {
+" 自动导包?这行配置并不一定有作用,其它的配置也不一定有作用
+" let g:JavaComplete_AutoImport = 1
+" <C-]> 跳转到类或者方法定义处
+" <C-t>返回跳转前位置
+" <Plug>(JavaComplete-Impports-Rename)重命名当前光标下的变量或者方法，自动更新所有引用
+" <Plug>(JavaComplete-Imports-Organize)自动格式化
+" vim-javacomplete2 }
 
 " 插件配置 }
 
