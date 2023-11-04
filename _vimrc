@@ -209,6 +209,30 @@ function! AddBufferBr()
     let g:bufferline_active_buffer_right = ']'
 endfunction
 
+function DisplayHTML()
+    if &filetype == 'html'
+        execute 'w'
+        silent execute '!chrome' expand('%:p')
+    endif
+endfunction
+
+" 设置多个omni函数的范例
+function! OmniFuncPython(findstart, base)
+    let l:res1 = python3complete#Complete(a:findstart, a:base)
+    " 目前这个gtagsomnicomplete相当若,作用不是很大
+    let l:res2 = gtagsomnicomplete#Complete(a:findstart, a:base)
+    
+    if ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0) && ((type(l:res2) == 3 && !empty(l:res2)))
+        return l:res2
+    elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && ((type(l:res1) == 3 && !empty(l:res1))) 
+        return l:res1
+    elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0)
+        return 0
+    else
+        return l:res1 + l:res2
+    endif
+endfunction
+
 
 " 打开git远端上的分支
 " function GitGetCurrentBranchRemoteUrl()
@@ -257,7 +281,7 @@ filetype plugin indent on                                                       
 set history=1000
 let mapleader="\\"
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
-au! vimrcEx FileType text
+au! vimrcEx filetype text
 
 set nu                                                                           " 打开当前行号显示
 set rnu                                                                          " 打开相对行号
@@ -280,7 +304,7 @@ set fileencodings=utf-8,ucs-bom,cp936,gb18030,big5,latin1
 
 
 " 如果是markdown文件设置wrap
-autocmd FileType markdown set wrap
+autocmd filetype markdown set wrap
 
 " 设置标签页的显示格式
 set guitablabel=%N%M%t
@@ -312,7 +336,7 @@ set softtabstop=4
 set shiftwidth=4
 set expandtab                                                                    " 用空格替换TAB
 " perl格式的文件,TAB就是TAB, 不要替换
-autocmd FileType perl setlocal noexpandtab
+autocmd filetype perl setlocal noexpandtab
 
 " 设置星号不要自动跳转,只高亮
 nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>
@@ -407,8 +431,20 @@ vnoremap <leader>p "xp
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
 " 位于autoload目录下(这个目录下可能还有不少好东西)
-autocmd FileType html set omnifunc=htmlcomplete#CompleteTags
-autocmd FileType css set omnifunc=csscomplete#CompleteCSS
+autocmd filetype html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
+autocmd filetype css setlocal omnifunc=csscomplete#CompleteCSS
+autocmd filetype javascript setlocal omnifunc=javascriptcomplete#CompleteJS
+autocmd filetype xml setlocal omnifunc=xmlcomplete#CompleteTags
+autocmd filetype python setlocal omnifunc=OmniFuncPython
+
+
+
+" C语言的编译和调试
+" 打开termdebug
+packadd termdebug
+set makeprg=gcc\ -Wall\ -o\ %<\ %
+
+
 
 " 基本设置区域 }
 
@@ -509,12 +545,31 @@ Plug 'preservim/vim-colors-pencil'                                             "
 Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
+Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
+Plug 'puremourning/vimspector'                                                 " 调试插件
+Plug 'github/copilot.vim'                                                      " 只能补全,只是尝试下功能
 
 call plug#end()
 " 插件 }
 
 " 插件配置 {
 " dense-analysis/ale {
+" 开启或者关闭ALE
+" :ALEToggle
+" 禁用ALE
+" ALEDisable
+
+" 注意coc.nvim插件也有语法检查功能(某些情况下也需要关闭,比如调试)
+" 关闭
+" :CocCommand eslint.disable
+" 打开
+" :CocCommand eslint.enable
+" 如果上面的命令没有效果，可以直接关闭coc整个插件
+" :CocDisable
+" 要重新打开,使用
+" CocEnable
+
+
 " 设置格式化器
 let g:ale_fixers = {
 \   'sh': ['shfmt'],
@@ -532,6 +587,9 @@ let g:airline#extensions#ale#enabled = 1
 let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
 " 禁用ale的虚拟文本行
 let g:ale_virtualtext_cursor = 0
+let g:ale_lint_on_save = 1
+" 不保存历史记录
+let g:ale_history_enabled = 0
 
 " java检查相关设置
 " 指定javac使用的编码防止乱码,但是发现配置了并没有作用
@@ -577,12 +635,12 @@ let g:gutentags_auto_add_gtags_cscope = 0
 let g:gutentags_plus_switch = 0                                                  " 是否自动将光标定位到自动修复列表位置 0:禁用 1:打开
 
 " 下面这行是调试用的,当生成的tag出了问题,需要用这行来调试
-" let g:gutentags_define_advanced_commands = 1
+let g:gutentags_define_advanced_commands = 1
 " vim-gutentags }
 
 
 " NERDTree {
-nmap <F8> :NERDTreeToggle<CR>
+nmap <leader><leader><F8> :NERDTreeToggle<CR>
 " 刷新NERDTree的状态
 nmap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
 " NERDTree的修改文件的界面使用更小的界面显示
@@ -599,14 +657,14 @@ let g:gitgutter_max_signs = -1                                                  
 
 " vim-guifont {
 let guifontpp_size_increment=1
-let guifontpp_smaller_font_map="<F10>"
+let guifontpp_smaller_font_map="<F7>"
 let guifontpp_larger_font_map="<C-S-F10>"
 let guifontpp_original_font_map="<C-F10>"
 " vim-guifont }
 
 " gtagsomnicomplete {
 " https://github.com/ragcatshxu/gtagsomnicomplete 原始的位置,我修改了下，当前使用的是我修改后的
-autocmd FileType c,python,sh,perl set omnifunc=gtagsomnicomplete#Complete
+autocmd filetype c,python,sh,perl set omnifunc=gtagsomnicomplete#Complete
 " gtagsomnicomplete }
 
 " vim-rainbow {
@@ -775,7 +833,7 @@ noremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR
 " LeaderF 配置 }
 
 " tagbar 配置 {
-map <F4> :TagbarToggle<CR>
+map <leader><F4> :TagbarToggle<CR>
 let g:tagbar_type_zim = {
     \ 'ctagstype' : 'zim',
     \ 'kinds' : [
@@ -794,7 +852,7 @@ let g:tagbar_sort = 0
 " tagbar 配置 }
 
 " auto-pairs 配置 {
-au Filetype markdown,html let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
+au filetype markdown,html let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
 " auto-pairs 配置 }
 
 
@@ -813,9 +871,9 @@ let g:vim_markdown_folding_disabled = 1
 " vim-markdown }
 
 " img-paste {
-autocmd FileType zim,txt let g:mdip_imgdir = expand('%:t:r')
-autocmd FileType zim,txt let g:PasteImageFunction = 'g:ZimwikiPasteImage'
-autocmd FileType markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
+autocmd filetype zim,txt let g:mdip_imgdir = expand('%:t:r')
+autocmd filetype zim,txt let g:PasteImageFunction = 'g:ZimwikiPasteImage'
+autocmd filetype markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
 " img-paste }
 
 " vim-easymotion 的配置 {
@@ -924,8 +982,8 @@ vnoremap <C-S-k> <Plug>(textmanip-move-up)
 vnoremap <C-S-h> <Plug>(textmanip-move-left)
 vnoremap <C-S-l> <Plug>(textmanip-move-right)
 
-" toggle insert/replace with <F10>
-nmap <C-F10> <Plug>(textmanip-toggle-mode)
+" toggle insert/replace with <F4>
+nmap <C-F4> <Plug>(textmanip-toggle-mode)
 
 " use allow key to force replace movement
 vnoremap  <Up>     <Plug>(textmanip-move-up-r)
@@ -961,6 +1019,37 @@ let g:airline_powerline_fonts = 1
 " <Plug>(JavaComplete-Imports-Organize)自动格式化
 " vim-javacomplete2 }
 
+" completor 插件配置 {
+" 设置completor的补全时的触发为任意字母
+let g:completot_java_omni_trigger = '(\.l::)?\w*'
+
+
+" completor 插件配置 {
+
+" vimspector 调试插件配置 {
+let g:vimspector_install_gadgets = [ 'vscode-python', 'vscode-cpptools']
+let g:vimspector_enable_mappings = 'HUMAN'
+
+" 这是调试C语言默认的按键，其它的防止和它冲突
+" F5	<Plug>VimspectorContinue	When debugging, continue. Otherwise start debugging.
+" F3	<Plug>VimspectorStop	Stop debugging.
+" F4	<Plug>VimspectorRestart	Restart debugging with the same configuration.
+" F6	<Plug>VimspectorPause	Pause debuggee.
+" F9	<Plug>VimspectorToggleBreakpoint	Toggle line breakpoint on the current line.
+" <leader>F9	<Plug>VimspectorToggleConditionalBreakpoint	Toggle conditional line breakpoint or logpoint on the current line.
+" F8	<Plug>VimspectorAddFunctionBreakpoint	Add a function breakpoint for the expression under cursor
+" <leader>F8	<Plug>VimspectorRunToCursor	Run to Cursor
+" F10	<Plug>VimspectorStepOver	Step Over
+" F11	<Plug>VimspectorStepInto	Step Into
+" F12	<Plug>VimspectorStepOut	Step out of current function scope
+" 全局配置文件的路径在这里
+" C:\Users\pc\.vim\plugged\vimspector\configurations\windows\C
+" 针对具体的项目需要单独配置
+
+
+
+" vimspector 调试插件配置 {
+
 " 插件配置 }
 
 
@@ -977,5 +1066,9 @@ nnoremap <leader>br :call AddBufferBr()<CR>
 
 " 打开git远端上的分支
 " noremap <silent> <leader>git :call GitGetCurrentBranchRemoteUrl()<CR>
+
+" 浏览器中打开当前编辑的html文件
+nnoremap <leader><F9> :call DisplayHTML()<CR>
+
 
 

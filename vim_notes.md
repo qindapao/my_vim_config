@@ -19,6 +19,7 @@
         + [5.3.1 加入参数列表](#5.3.1-加入参数列表)
         + [5.3.2 对参数列表中的文件进行替换操作](#5.3.2-对参数列表中的文件进行替换操作)
     - [5.4 使用插件进行替换](#5.4-使用插件进行替换)
+        + [5.4.1 ctrlsf](#5.4.1-ctrlsf)
 * [6 编辑](#6-编辑)
     - [6.1 可视模式](#6.1-可视模式)
         + [6.1.1 虚拟编辑模式](#6.1.1-虚拟编辑模式)
@@ -46,10 +47,16 @@
     - [13.2 实用的命令行小工具](#13.2-实用的命令行小工具)
     - [13.3 R模式和gR模式](#13.3-r模式和gr模式)
 * [14 git](#14-git)
-    - [14.1 fugitive](#14.1-fugitive)
-        + [14.1.1 Gvdiffsplit](#14.1.1-gvdiffsplit)
-        + [14.1.2 修改点的跳转](#14.1.2-修改点的跳转)
-        + [14.1.3 如何实现预览所有的变更](#14.1.3-如何实现预览所有的变更)
+    - [14.1 登录wsl后的别名设置](#14.1-登录wsl后的别名设置)
+    - [14.2 fugitive](#14.2-fugitive)
+        + [14.2.1 Gvdiffsplit](#14.2.1-gvdiffsplit)
+        + [14.2.2 修改点的跳转](#14.2.2-修改点的跳转)
+        + [14.2.3 如何实现预览所有的变更](#14.2.3-如何实现预览所有的变更)
+* [15 调试](#15-调试)
+    - [15.1 vimspector方案](#15.1-vimspector方案)
+    - [15.2 安装vimspector插件](#15.2-安装vimspector插件)
+    - [15.3 安装需要的调试适配器](#15.3-安装需要的调试适配器)
+* [16 代码智能建议](#16-代码智能建议)
 
 <!-- vim-markdown-toc -->
 
@@ -148,7 +155,7 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 ```
 可以匹配这个字符串：`sB xx8`
 
-
+```txt
 {querytype} 取值有以下:
 | 命令   | 快捷键     | 含义                          |
 |--------|------------|-------------------------------|
@@ -162,7 +169,7 @@ command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw
 | 8 or i | <leader>ci | 查找文件包括光标下的文件名    |
 | 9 or a | <leader>ca | 查找分配当前符号的位置        |
 | z      | <leader>cz | 在ctags的数据库中查找当前单词 |
-
+```
 
 如果使用过程中遇到了异常，使用下面的方法来解决：
 比如抛出下面的异常:
@@ -195,6 +202,12 @@ To see the gtags log.
 更完整的说明可以看这里：
 [补充](https://github.com/skywind3000/gutentags_plus)
 
+**另外还有两个地方需要注意的：**
+
+(1). 系统中的`gtags.exe`可执行文件在系统中最好只放一个，因为`vim`中的插件自己去找可执行文件，可能找到不是我们预期的那个。我当前是放置在`C:\Users\pc\.vim\gtags\bin\gtags.exe`，那么系统中就保持这一个就好，放置无法预期的错误。
+
+(2). 如果系统中安装的`python3`不只有一个版本，比如既有`3.7`，也有`3.11`，那么要确保`guentags`插件使用的`python3`版本是安装了`pygments`模块的版本。不然会导致`native-pygments`找不到相应的模块报错。有一个简单的方法是在系统的环境变量中把安装了这个模块的`python3`的环境变量放在前面，这样插件寻找`python3`的可执行路径的时候就能先找到它。
+
 ### 3.2 CCTree
 
 利用`vim`的`CCTree`插件，可以模拟`source insight`的代码树。插件需要安装[cscope](https://code.google.com/archive/p/cscope-win32/downloads)和[ccglue](https://sourceforge.net/projects/ccglue/files/latest/download)(解压出来有`ccglue.exe`和`ccglue_tracer.exe`两个可执行程序)工具。这里是`windows`版本的工具，选择`64`位的下载。
@@ -211,10 +224,7 @@ To see the gtags log.
 
 跟踪`main`函数的调用：`CCTreeTraceForward main`
 
-
 >具体的步骤见插件的帮助文档。
-
-
 
 ## 4 leaderf
 
@@ -222,7 +232,7 @@ To see the gtags log.
 
 [使用说明](https://retzzz.github.io/dc9af5aa/)
 
-- **特别说明**
+* **特别说明**
 
 如果需要在保持搜索框不自动关闭的情况下能动态打开文件，需要这样发命令:
 
@@ -232,23 +242,23 @@ To see the gtags log.
 
 上面这个命令的意思是：在保持搜索框不自动关闭的情况下，不要显示预览窗口(**如果有预览窗口就无法正常的打开文件！**)，然后正则搜索`mouse`字符串。
 
-- 固定搜索某些目录
+* 固定搜索某些目录
 
 `Leaderf rg -e xxx aaa bbb`
 在`aaa`和`bbb`目录中搜索xxx字符串。参考`rg`指令的语法。
 
-- 排除掉某些目录
+* 排除掉某些目录
 
 `Leaderf rg -e xxx -g=!src/`
 
 排除掉`src`目录。
 
-- 搜索当前文件中的行
+* 搜索当前文件中的行
 
 `leaderfLine`
 
 
-- 进入`leaderf`后的操作
+* 进入`leaderf`后的操作
 
 | 快捷键                     | 说明                                         |
 | -------------------------- | -------------------------------------------- |
@@ -267,7 +277,6 @@ To see the gtags log.
 | `<C-Down>`                 | 在预览popup窗口里滚动向下                    |
 |                            |                                              |
 
-
 按`<TAB>`键后可以进入`leaderf`的普通模式。`F1`可以查看这些普通命令的使用说明。再按`<TAB>`键就退出普通模式，又可以输入。
 
 当前预览框最多显示的条目数量是**200**个，目前我自己改了下：
@@ -282,8 +291,7 @@ def getInitialWinHeight(self):
 
 上面的`200`改成了`2000`.有空可以问下原作者这里是否可以调整。
 
-
-- leaderf和gtags的配合
+* leaderf和gtags的配合
 
 ```vim
 let g:Lf_CacheDirectory = expand('~')
@@ -293,7 +301,7 @@ let g:gutentags_cache_dir = expand(g:Lf_CacheDirectory.'/LeaderF/gtags')
 
 最重要的就是上面的配置，_vimrc中已经说明了，需要和`vim-gutentags`插件公用相关的`gtags`路径，所以只能这样配置。
 
-- leaderf和rg配置搜索字符串时限定文件名过滤
+* leaderf和rg配置搜索字符串时限定文件名过滤
 
 ```vim
 leaderf rg -f *.py -e xx
@@ -332,7 +340,12 @@ leaderf rg -f *.py -e xx
 
 ### 5.4 使用插件进行替换
 
+#### 5.4.1 ctrlsf
+
 `ctrlsf`这个插件也可以方便进行全局替换操作，打开替换窗口后，按`o`直接打开文件，如果想保持替换窗口不动打开文件，使用`O`。
+
+**特别注意**：这个插件是把当前的`pwd`的目录作为项目的根目录的，所以如果想在项目中进行全局搜索，最好是先运行`Rooter`命令(这是一个插件提供的)后，再执行`ctrlsf keywords`的查找，这样才是全局结果。
+
 
 ## 6 编辑
 
@@ -633,7 +646,7 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
       "commands": [
         ":close"
       ]
-    },
+    }
   ]
 }
 ```
@@ -720,20 +733,31 @@ Windows
 
 ## 14 git
 
-### 14.1 fugitive
+### 14.1 登录wsl后的别名设置
 
-#### 14.1.1 Gvdiffsplit
+由于我的git是在windows系统下使用，但是`wsl`的linux中也有一个git可执行程序。为了在运行`git`的时候是指向的`windows`系统下的可执行程序，在`wsl`的`.bashrc`文件中加上下面这句话。
+
+```bash
+alias git="git.exe"
+```
+
+这样运行`git`的时候就会自动指向windows下的`git.exe`，而不会使用wsl环境中的`/usr/bin/git`。
+
+
+### 14.2 fugitive
+
+#### 14.2.1 Gvdiffsplit
 
 在这种对比模式下，如果想要撤销某个变更点的更改，可以在变更点上用下面命令：
 
-- do 把另外一遍的变更点合并到当前文件
-- dp 把当前的变更合并到另一个文件
-- 使用:Gwrite命令将当前文件写入Git索引。
-- 使用:Gread命令将Git索引中的内容读入当前文件。
+* do 把另外一遍的变更点合并到当前文件
+* dp 把当前的变更合并到另一个文件
+* 使用:Gwrite命令将当前文件写入Git索引。
+* 使用:Gread命令将Git索引中的内容读入当前文件。
 
 后面这两个命令不怎么常用。
 
-#### 14.1.2 修改点的跳转
+#### 14.2.2 修改点的跳转
 
 主要是`gitgutter`插件的功能。
 
@@ -741,11 +765,159 @@ Windows
 
 `[c` 跳转到上一个修改。
 
-#### 14.1.3 如何实现预览所有的变更
+#### 14.2.3 如何实现预览所有的变更
 
 如果想看有哪些文件改动，使用：`Git difftool --name-only`，或者`Git difftool --name-status`。具体见`fugitive`插件的帮助文档。
 
 如果是想看所有的变更，使用：`Git difftool -y`，所有的变更都会以新的`TAB`页方式打开。
 
 这两组命令后面也可以跟具体的参数，比如某个`commit id`或者是某个分支名，如果没有参数，默认当前分支最新比较。
+
+## 15 调试
+
+### 15.1 vimspector方案
+
+### 15.2 安装vimspector插件
+
+去插件的[官方主页](https://github.com/puremourning/vimspector)，然后用插件管理器安装。
+
+### 15.3 安装需要的调试适配器
+
+(1). 安装某种语言的调试适配器
+
+这里以 **C** 语言举例：
+
+```vim
+:VimspectorInstall vscode-cpptools
+```
+
+具体支持的语言和需要发送的参数，看[这个链接](https://github.com/puremourning/vimspector#supported-languages)。
+
+这个安装的时间可能会长一点，请耐心等待。
+
+其它语言的可以去插件的主页查看。如果后续需要更新安装的这些适配器，使用下面的命令更新：
+
+```vim
+:VimspectorUpdate
+```
+
+(2). 配置适配器对应的快捷键
+
+官方提供了两套快捷键方案：
+
+```vim
+let g:vimspector_enable_mappings = 'HUMAN'
+let g:vimspector_enable_mappings = 'VISUAL_STUDIO'
+```
+
+我们使用第一种，把它配置到`vimcrc`中。
+
+
+(3). 调试适配器的配置
+
+这个配置在上面我们安装和打开对某个语言的支持的时候就已经设置好，存放在`your-path-to-vimspector/gadgets/linux/.gadgets.json`文件中，文件中的内容大致如下：
+
+```json
+{
+  "adapters": {
+    "vscode-cpptools": {
+      "attach": {
+        "pidProperty": "processId",
+        "pidSelect": "ask"
+      },
+      "command": [
+        "${gadgetDir}/vscode-cpptools/debugAdapters/OpenDebugAD7"
+      ],
+      "name": "cppdbg"
+    }
+  }
+}
+```
+
+既然它已经配置好，那么我们不去管它。其它的详细可以查看[这里](https://www.cnblogs.com/kongj/p/12831690.html)。如果不进行远程调试，一般情况下不需要修改默认配置。
+
+(4). 调试会话配置
+
+项目调试会话文件位于以下两个位置：
+
+* `<your-path-to-vimspector>/configurations/<os>/<filetype>/*.json`，比如在我的电脑上就是：`C:\Users\pc\.vim\plugged\vimspector\configurations\windows\C\vimspector.json`
+* 项目根目录中的 `.vimspector.json`
+
+项目根目录下的文件的优先级比插件根目录下的权限高。
+
+
+(5). 调试会话配置的相关选项
+
+```txt
+vimspector.json 中只能包含一个对象，其中包含以下子对象：
+
+adapters：调试适配器配置，如果不是进行远程调试，一般不需要设置
+configurations：调试程序时的配置
+configurations主要包含以下以下字段：
+
+adapter:使用的调试配置器名称，该名称必须出现在adapters块或其他调试适配器配置中。
+
+variables：用户定义的变量
+configuration：配置名，如configuration1
+remote-request,remote-cmdLine：远程调试使用
+其中adapter和configuration是必须的。
+
+configuration需要包含的字段和使用的 DAP 有关，我使用vscode-cpptools。configuration必须包含以下字段：
+
+request：调试的类型，lauch或attach
+type：cppdgb(GDB/LLDB)或cppvsdbg(Visutal Studio Windows debugger)
+除了以上的选项，还可以设置程序路径、参数、环境变量、调试器路径等，更详细的信息可以查看 vscode-cpptools 文档launch-json-reference。
+
+上面的选项构成了 vimspector 配置文件的主体框架，完整的选项参考vimspector.schema.json。
+```
+
+完整的选项参考可以看这个范例：[vimspector范例](https://puremourning.github.io/vimspector/schema/vimspector.schema.json)
+
+关于`C`语言的配置，可以在[这里](https://ljqaq233.github.io/2023/04/21/VimSpector_Intro_and_Use/)找到一个范例。
+
+```json
+{
+  "configurations": {
+    "Launch": {
+      "adapter": "vscode-cpptools",
+      "configuration": {
+        "request": "launch",
+        "program": "E:\\code\\C\\helloworld.exe", // 要调试的可执行文件路径
+      }
+    }
+  }
+}
+
+```
+(6). 调试快捷键备忘
+
+```txt
+F5	<Plug>VimspectorContinue	When debugging, continue. Otherwise start debugging.
+F3	<Plug>VimspectorStop	Stop debugging.
+F4	<Plug>VimspectorRestart	Restart debugging with the same configuration.
+F6	<Plug>VimspectorPause	Pause debuggee.
+F9	<Plug>VimspectorToggleBreakpoint	Toggle line breakpoint on the current line.
+<leader>F9	<Plug>VimspectorToggleConditionalBreakpoint	Toggle conditional line breakpoint or logpoint on the current line.
+F8	<Plug>VimspectorAddFunctionBreakpoint	Add a function breakpoint for the expression under cursor
+<leader>F8	<Plug>VimspectorRunToCursor	Run to Cursor
+F10	<Plug>VimspectorStepOver	Step Over
+F11	<Plug>VimspectorStepInto	Step Into
+F12	<Plug>VimspectorStepOut	Step out of current function scope
+```
+
+这套快捷键有个问题是把我当前配置中的某些默认配置覆盖了。
+
+
+## 16 代码智能建议
+
+vim有`copilot.vim`插件。使用插件管理器安装完成后需要进行设置。
+
+```vim
+:Copilot setup
+```
+设置过程中会登录浏览器，然后弹出双向校验。双向校验完成后，会在`gvim`的命令栏弹出一个 **8位数** 的校验码，这个校验码需要回填回浏览器，然后本地的`Copilot`插件就被授权了。
+
+但是即使配置了这个，也还不能直接使用`Copilot`功能，因为`github`上还需要被授权。也就是在`github`上需要订阅相关的服务。由于当前并没有大量的编码需求，暂时不订阅了。
+
+
 
