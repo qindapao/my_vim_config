@@ -548,6 +548,7 @@ Plug 'jonathanfilip/vim-lucius'                                                "
 Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
 Plug 'puremourning/vimspector'                                                 " 调试插件
 Plug 'github/copilot.vim'                                                      " 只能补全,只是尝试下功能
+Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
 
 call plug#end()
 " 插件 }
@@ -701,11 +702,28 @@ let g:rainbow_active = 1                                                        
 " set t_Co=256
 " colorscheme amdark
 
-" papercolor-theme 主题 {
-set t_Co=256   " This is may or may not needed.
+" " papercolor-theme 主题 {
+" " 这个主题用于git对比效果很好
+" set t_Co=256   " This is may or may not needed.
+" set background=light
+" colorscheme PaperColor
+" " papercolor-theme 主题 }
+
+" 为diff的时候单独设置一个颜色方案
+" 不过目前这个并没有效果(不知道原因)
+" 可以在对比的时候手动设置主题即可
+if &diff
+    set t_Co=256   " This is may or may not needed.
+    set background=light
+    colorscheme PaperColor
+endif
+
+" intellij 主题 {
+" 这个主题编码可以,但是用于git对比效果不好
 set background=light
-colorscheme PaperColor
-" papercolor-theme 主题 }
+colorscheme intellij
+" let g:lightline.colorscheme='intellij'
+" intellij 主题 {
 
 " " vim-hybrid 主题 {
 " set background=light
