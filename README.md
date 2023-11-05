@@ -3,18 +3,18 @@
 vim configuration file for my personal use
 
 
-<!-- vim-markdown-toc Marked -->
+<!-- vim-markdown-toc GFM -->
 
 + [vim最新的安装包下载](#vim最新的安装包下载)
 + [特殊插件安装备忘](#特殊插件安装备忘)
     * [1 vim-plug](#1-vim-plug)
-    * [2 rbong/vim-flog](#2-rbong/vim-flog)
-    * [3 coc.nvim](#3-coc.nvim)
+    * [2 rbong/vim-flog](#2-rbongvim-flog)
+    * [3 coc.nvim](#3-cocnvim)
     * [4 markdown2ctags](#4-markdown2ctags)
 + [语法检查和格式化器](#语法检查和格式化器)
-    * [5 bash](#5-bash)
-        - [5.1 shell-check](#5.1-shell-check)
-        - [5.2 shfmt](#5.2-shfmt)
+    * [1 bash](#1-bash)
+        - [1.1 shell-check](#11-shell-check)
+        - [1.2 shfmt](#12-shfmt)
 + [在windows下为vim的配置文件创建符号链接](#在windows下为vim的配置文件创建符号链接)
 + [交换esc和caps lock的键位](#交换esc和caps-lock的键位)
 + [gtags](#gtags)
@@ -119,8 +119,8 @@ C:\Users\pc\.vim
     shfmt.exe
 ```
 
-## 5 bash
-### 5.1 shell-check
+## 1 bash
+### 1.1 shell-check
 >bash的语法检查器
 
 https://www.shellcheck.net/
@@ -130,7 +130,7 @@ https://github.com/koalaman/shellcheck
 **windows**: shellcheck-v0.9.0.zip
 set shellcheck.exe to PATH
 
-### 5.2 shfmt
+### 1.2 shfmt
 >bash的自动化格式器
 
 https://github.com/mvdan/sh => shfmt_v3.7.0_windows_amd64.exe
