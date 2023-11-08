@@ -222,9 +222,9 @@ function! OmniFuncPython(findstart, base)
     " 目前这个gtagsomnicomplete相当若,作用不是很大
     let l:res2 = gtagsomnicomplete#Complete(a:findstart, a:base)
     
-    if ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0) && ((type(l:res2) == 3 && !empty(l:res2)))
+    if ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0) && (type(l:res2) == 3 && !empty(l:res2))
         return l:res2
-    elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && ((type(l:res1) == 3 && !empty(l:res1))) 
+    elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && (type(l:res1) == 3 && !empty(l:res1)) 
         return l:res1
     elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0)
         return 0
@@ -329,6 +329,7 @@ set scrolloff=3
 set hlsearch
 " 暂时取消搜索高亮
 noremap <leader>noh :nohlsearch<CR>
+noremap # :nohlsearch<CR>
 
 
 set tabstop=4
@@ -340,6 +341,8 @@ autocmd filetype perl setlocal noexpandtab
 
 " 设置星号不要自动跳转,只高亮
 nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>
+" 星号切换打开和关闭高亮(暂时不使用)
+" nnoremap <silent> * :if &hlsearch \| let @/= '\<' . expand('<cword>') . '\>' \| set nohls \| else \| let @/= '\<' . expand('<cword>') . '\>' \| set hls \| endif <cr>
 
 set cursorline                                                                   " highlight current line
 " cursor not blinking
@@ -549,6 +552,7 @@ Plug 'terryma/vim-expand-region'                                               "
 Plug 'puremourning/vimspector'                                                 " 调试插件
 Plug 'github/copilot.vim'                                                      " 只能补全,只是尝试下功能
 Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
+Plug 'simeji/winresizer'                                                       " 调整窗口
 
 call plug#end()
 " 插件 }
@@ -1039,13 +1043,13 @@ let g:airline_powerline_fonts = 1
 
 " completor 插件配置 {
 " 设置completor的补全时的触发为任意字母
-let g:completot_java_omni_trigger = '(\.l::)?\w*'
+let g:completot_java_omni_trigger = '(\.|::)?\w*'
 
 
 " completor 插件配置 {
 
 " vimspector 调试插件配置 {
-let g:vimspector_install_gadgets = [ 'vscode-python', 'vscode-cpptools']
+let g:vimspector_install_gadgets = [ 'debugpy', 'vscode-cpptools']
 let g:vimspector_enable_mappings = 'HUMAN'
 
 " 这是调试C语言默认的按键，其它的防止和它冲突
