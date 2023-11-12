@@ -420,6 +420,15 @@ nnoremap <leader>lc :lclose<CR>
 nnoremap <leader>ln :lnext<CR>
 nnoremap <leader>lp :lprev<CR>
 
+" 窗口操作
+" 之所以绑定两个字母为了快速响应
+nnoremap <leader>cw :close<CR>
+nnoremap <leader>ss :split<CR>
+nnoremap <leader>vv :vsplit<CR>
+nnoremap <leader>ow :only<CR>
+
+
+
 " There is a space after the mapping below. In visual mode, 
 " a region is cut and saved in the x register, and all characters in the 
 " original region are replaced with spaces.
@@ -439,7 +448,6 @@ autocmd filetype css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd filetype javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd filetype xml setlocal omnifunc=xmlcomplete#CompleteTags
 autocmd filetype python setlocal omnifunc=OmniFuncPython
-
 
 
 " C语言的编译和调试
@@ -1071,6 +1079,12 @@ let g:vimspector_enable_mappings = 'HUMAN'
 
 
 " vimspector 调试插件配置 {
+
+" ctrlsf 插件配置 {
+" 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
+nnoremap <leader>cf :Rooter<cr> :CtrlSF <C-r><C-w>
+
+" ctrlsf 插件配置 }
 
 " 插件配置 }
 
