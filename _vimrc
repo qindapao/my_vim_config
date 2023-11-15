@@ -328,8 +328,8 @@ set scrolloff=3
 " search highlight
 set hlsearch
 " 暂时取消搜索高亮
-noremap <leader>noh :nohlsearch<CR>
-noremap # :nohlsearch<CR>
+noremap <silent> <leader>noh :nohlsearch<CR>
+noremap <silent> # :nohlsearch<CR>
 
 
 set tabstop=4
@@ -499,6 +499,7 @@ Plug 'dyng/ctrlsf.vim'                                                         "
 Plug 'brooth/far.vim'                                                          " 另外一个全局替换插件
 Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
 Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
+Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
 Plug 'frazrepo/vim-rainbow'                                                    " 彩虹括号
 Plug 'tpope/vim-commentary'                                                    " 简洁注释
 Plug 'rakr/vim-one'                                                            " vim-one主题
@@ -542,7 +543,8 @@ Plug 'hari-rangarajan/CCTree'                                                  "
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
 Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
 Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
-Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
+" 中文处理有问题,屏蔽
+" Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
 Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 " Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
 Plug 'muellan/am-colors'                                                       " 主题插件
@@ -663,6 +665,22 @@ let NERDTreeAutoDeleteBuffer = 1
 
 " NERDTree }
 
+" nerdtree-git-plugin 插件 {
+let g:NERDTreeGitStatusIndicatorMapCustom = {
+                \ 'Modified'  :'*',
+                \ 'Staged'    :'+',
+                \ 'Untracked' :'-',
+                \ 'Renamed'   :'^',
+                \ 'Unmerged'  :'=',
+                \ 'Deleted'   :'X',
+                \ 'Dirty'     :'x',
+                \ 'Ignored'   :'.',
+                \ 'Clean'     :'@',
+                \ 'Unknown'   :'!',
+                \ }
+
+" nerdtree-git-plugin 插件 }
+
 " vim-gitgutter {
 let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " git可执行文件路径
 let g:gitgutter_max_signs = -1                                                   " 标记的数量为无限
@@ -673,6 +691,8 @@ let guifontpp_size_increment=1
 let guifontpp_smaller_font_map="<F7>"
 let guifontpp_larger_font_map="<C-S-F10>"
 let guifontpp_original_font_map="<C-F10>"
+
+nnoremap <leader><C-t> :setlocal guifont=Yahei\ Fira\ Icon\ Hybrid:h
 " vim-guifont }
 
 " gtagsomnicomplete {
@@ -840,6 +860,12 @@ noremap <leader>frr :LeaderfRgRecall<cr>
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+
+" 保持文件搜索窗口不关闭
+nnoremap <leader><C-P> :Leaderf file --stayOpen<CR>
+
+
+
 " 关闭leaderf的预览窗口,不然会影响-stayOpen模式,预览窗口无法关闭,也无法编辑新的文件
 let g:Lf_PreviewInPopup = 0
 
@@ -1076,13 +1102,24 @@ let g:vimspector_enable_mappings = 'HUMAN'
 " C:\Users\pc\.vim\plugged\vimspector\configurations\windows\C
 " 针对具体的项目需要单独配置
 
-
+" 插件的根目录(一般不用设置)
+" let g:vimspector_base_dir='C:\Users\pc\.vim\plugged\vimspector'
+nnoremap <leader>db <Plug>VimspectorBreakpoints
 
 " vimspector 调试插件配置 {
 
 " ctrlsf 插件配置 {
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
-nnoremap <leader>cf :Rooter<cr> :CtrlSF <C-r><C-w>
+nnoremap <leader><leader>cf :Rooter<cr> :CtrlSF <C-r><C-w>
+nnoremap <leader><leader>ccf :CtrlSF <C-r><C-w>
+nnoremap <leader><leader>cdf :CtrlSF <C-r><C-w> ./
+nnoremap <leader><leader>cff :CtrlSF <C-r><C-w> %
+let g:ctrlsf_case_sensitive = 'yes'
+let g:ctrlsf_follow_symlinks = 0
+let g:ctrls_ignore_dir = ['docs/bak.md', '.gitignore']
+let g:ctrlsf_backend = 'rg'
+let g:ctrlsf_search_mode = 'async'
+let g:ctrlsf_winsize = '30%'
 
 " ctrlsf 插件配置 }
 
