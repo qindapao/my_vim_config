@@ -63,6 +63,7 @@
     - [15.4 关于C语言调试](#154-关于c语言调试)
 * [16 代码智能建议](#16-代码智能建议)
 * [17 收缩效果文本隐藏](#17-收缩效果文本隐藏)
+* [18 obsidian](#18-obsidian)
 
 <!-- vim-markdown-toc -->
 
@@ -999,8 +1000,15 @@ set conceallevel=3
 
 另外一个有趣的文本图插件：[drawx](https://www.vim.org/scripts/script.php?script_id=5915)
 
+## 18 obsidian
 
+`obsidian`编辑器也可以使用`vim`模式。需要安装的插件是：
 
+* jump to link
+* vimrc
+* relative line numbers
+
+其中`jump to link`中的`jump to anywhere`可以这样配置：`[^\s。，“”‘’！？【】（）《》「」：；]+`，这样就保证中文的断句也能跳转。`vimrc`插件的配置文件`.obsidian.vimrc`也已经归档，然后通过软链接的形式提供给`obsidian`使用。里面已经配置了和`surround`类似的功能。
 
 
 
