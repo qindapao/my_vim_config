@@ -233,6 +233,43 @@ function! OmniFuncPython(findstart, base)
     endif
 endfunction
 
+function! DeleteTerminalBuffers()
+    for l:bufnr in range(1, bufnr('$'))
+        if buflisted(l:bufnr) && getbufvar(l:bufnr, '&buftype') == 'terminal'
+            execute 'bdelete!' l:bufnr
+        endif
+    endfor
+endfunction
+
+function! MyTabLine()
+    let s = ''
+    for i in range(tabpagenr('$'))
+        if i + 1 == tabpagenr()
+            let s .= '%#TabLineSel#'
+        else
+            let s .= '%#TabLine#'
+        endif
+    
+        let s .= ' ' . (i + 1) . ' '
+        let bufnr = tabpagebuflist(i+1)[tabpagewinnr(i+1) - 1]
+        let filename = fnamemodify(bufname(bufnr), ':t')
+        if strchars(filename) > 8
+            let filename = strcharpart(filename, 0, 8) . '..'
+        endif
+        
+        let s .= filename
+        if getbufvar(bufnr, "&modified")
+            let s .= ' +'
+        endif
+        
+        let s .= ' |'
+    endfor
+    
+    let s .= '%#TabLineFill#%T'
+    return s
+endfunction
+
+
 
 " 打开git远端上的分支
 " function GitGetCurrentBranchRemoteUrl()
@@ -254,6 +291,15 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 
+nnoremap <leader>dbt :call DeleteTerminalBuffers()<cr>
+
+nnoremap <leader>pwd :pwd<cr>
+
+set guioptions-=e
+set tabline=%!MyTabLine()
+
+
+
 " 设置自动切换到当前操作的文件的目录(可能被别人覆盖,进入编辑器后需要手动设置一次)
 set autochdir
 
@@ -274,6 +320,9 @@ endif
 
 " 设置默认的终端为bash
 let g:terminal_cwd = 1
+" 如果不使用全路径，那么找到的bash可能是wsl中的，需要输入密码，比较麻烦
+" 另外还要注意下要用which命令看下这个bash的路径是不是当前默认的bash，而不是cygwin子环境中的bash
+" 目前使用cygwin指定系统安装的bash显示没有设置用户名和邮箱，所以还是要用wsl中的
 let g:terminal_shell = 'bash'
 
 
@@ -312,6 +361,8 @@ set guitablabel=%N%M%t
 noremap tn :tabnew<CR>
 noremap tc :tabclose<CR>
 noremap to :tabonly<CR>
+nnoremap <Tab> gt<cr>
+nnoremap <S-Tab> gT<cr>
 :nn <M-1> 1gt
 :nn <M-2> 2gt
 :nn <M-3> 3gt
@@ -653,6 +704,29 @@ let g:gutentags_plus_switch = 0                                                 
 let g:gutentags_define_advanced_commands = 1
 " vim-gutentags }
 
+" gutentags_plus 插件配置 {
+let g:gutentags_plus_nomap = 1
+noremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
+noremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
+noremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
+noremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
+noremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
+noremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
+noremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
+noremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
+noremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
+
+vnoremap <leader>gs y:GscopeFind s <c-r>"
+vnoremap <leader>gg y:GscopeFind g <c-r>"
+vnoremap <leader>gc y:GscopeFind c <c-r>"
+vnoremap <leader>gt y:GscopeFind t <c-r>"
+vnoremap <leader>ge y:GscopeFind e <c-r>"
+vnoremap <leader>gd y:GscopeFind d <c-r>"
+vnoremap <leader>ga y:GscopeFind a <c-r>"
+vnoremap <leader>gf y:GscopeFind f <c-r>"
+vnoremap <leader>gi y:GscopeFind i <c-r>"
+
+" gutentags_plus 插件配置 }
 
 " NERDTree {
 nmap <leader><leader><F8> :NERDTreeToggle<CR>
@@ -731,8 +805,9 @@ let g:rainbow_active = 1                                                        
 " call github_colors#togglebg_map('<f6>')
 " " vim-colors-github 主题 }
 
-" set t_Co=256
-" colorscheme amdark
+set t_Co=256
+" 还有amdard
+colorscheme amlight
 
 " " papercolor-theme 主题 {
 " " 这个主题用于git对比效果很好
@@ -741,21 +816,21 @@ let g:rainbow_active = 1                                                        
 " colorscheme PaperColor
 " " papercolor-theme 主题 }
 
-" 为diff的时候单独设置一个颜色方案
-" 不过目前这个并没有效果(不知道原因)
-" 可以在对比的时候手动设置主题即可
-if &diff
-    set t_Co=256   " This is may or may not needed.
-    set background=light
-    colorscheme PaperColor
-endif
+" " 为diff的时候单独设置一个颜色方案
+" " 不过目前这个并没有效果(不知道原因)
+" " 可以在对比的时候手动设置主题即可
+" if &diff
+"     set t_Co=256   " This is may or may not needed.
+"     set background=light
+"     colorscheme PaperColor
+" endif
 
-" intellij 主题 {
-" 这个主题编码可以,但是用于git对比效果不好
-set background=light
-colorscheme intellij
-" let g:lightline.colorscheme='intellij'
-" intellij 主题 {
+" " intellij 主题 {
+" " 这个主题编码可以,但是用于git对比效果不好
+" set background=light
+" colorscheme intellij
+" " let g:lightline.colorscheme='intellij'
+" " intellij 主题 {
 
 " " vim-hybrid 主题 {
 " set background=light
@@ -858,8 +933,8 @@ noremap <leader>fw :LeaderfWindow<cr>
 noremap <leader>frr :LeaderfRgRecall<cr>
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
-xnoremap gf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
-xnoremap gnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+xnoremap lgf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+xnoremap lgnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 
 " 保持文件搜索窗口不关闭
 nnoremap <leader><C-P> :Leaderf file --stayOpen<CR>
@@ -1112,10 +1187,18 @@ nnoremap <leader>db <Plug>VimspectorBreakpoints
 
 " ctrlsf 插件配置 {
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
-nnoremap <leader><leader>cf :Rooter<cr> :CtrlSF <C-r><C-w>
-nnoremap <leader><leader>ccf :CtrlSF <C-r><C-w>
-nnoremap <leader><leader>cdf :CtrlSF <C-r><C-w> ./
-nnoremap <leader><leader>cff :CtrlSF <C-r><C-w> %
+nnoremap <leader>cfr :Rooter<cr> :CtrlSF <C-r><C-w>
+nnoremap <leader>cfc :CtrlSF <C-r><C-w>
+nnoremap <leader>cfd :CtrlSF <C-r><C-w> ./
+nnoremap <leader>cff :CtrlSF <C-r><C-w> %
+
+
+vnoremap <leader>cfr y:Rooter<cr> :CtrlSF <C-r>"
+vnoremap <leader>cfc y:CtrlSF <c-r>"
+vnoremap <leader>cfd y:CtrlSF <C-r>" ./
+vnoremap <leader>cff y:CtrlSF <C-r>" %
+
+
 let g:ctrlsf_case_sensitive = 'yes'
 let g:ctrlsf_follow_symlinks = 0
 let g:ctrls_ignore_dir = ['docs/bak.md', '.gitignore']
