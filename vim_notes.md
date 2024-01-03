@@ -64,6 +64,7 @@
 * [16 代码智能建议](#16-代码智能建议)
 * [17 收缩效果文本隐藏](#17-收缩效果文本隐藏)
 * [18 obsidian](#18-obsidian)
+* [19 unicode](#19-unicode)
 
 <!-- vim-markdown-toc -->
 
@@ -1010,5 +1011,10 @@ set conceallevel=3
 
 其中`jump to link`中的`jump to anywhere`可以这样配置：`[^\s。，“”‘’！？【】（）《》「」：；]+`，这样就保证中文的断句也能跳转。`vimrc`插件的配置文件`.obsidian.vimrc`也已经归档，然后通过软链接的形式提供给`obsidian`使用。里面已经配置了和`surround`类似的功能。
 
+## 19 unicode
+
+https://github.com/fabrizioschiavi/pragmatapro/blob/master/useful_files/All_chars.txt
+
+这里有`PUA`，用户定义的私有字符，目前我发现这些字符中有些很有意思，补充了制表符中缺失的部分，可以用于绘制非常复杂的线路图，目前发现在`linux`的文本编辑器或者app中可以正常显示，但是在windows下无法正常显示，目前不知道原因。由于这些字符太特殊，而且依赖于非常特定的字体，所以不打算在`asciio`中实现这些字符的复杂交叉模式，可以考虑在钢笔模式下可以使用这些字符来画画，不过由于字符数量实在太多，估计使用其它也是相当麻烦。
 
 

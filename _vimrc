@@ -249,6 +249,9 @@ function! MyTabLine()
         else
             let s .= '%#TabLine#'
         endif
+
+        " 响应鼠标事件
+        let s .= '%' . (i+1) . 'T'
     
         let s .= ' ' . (i + 1) . ' '
         let bufnr = tabpagebuflist(i+1)[tabpagewinnr(i+1) - 1]
@@ -296,6 +299,10 @@ nnoremap <leader>dbt :call DeleteTerminalBuffers()<cr>
 nnoremap <leader>pwd :pwd<cr>
 
 set guioptions-=e
+
+" 禁用鼠标防止产生异常字符
+set mouse-=a
+
 set tabline=%!MyTabLine()
 
 
@@ -320,9 +327,7 @@ endif
 
 " 设置默认的终端为bash
 let g:terminal_cwd = 1
-" 如果不使用全路径，那么找到的bash可能是wsl中的，需要输入密码，比较麻烦
-" 另外还要注意下要用which命令看下这个bash的路径是不是当前默认的bash，而不是cygwin子环境中的bash
-" 目前使用cygwin指定系统安装的bash显示没有设置用户名和邮箱，所以还是要用wsl中的
+" 当前wsl下的免密输入已经搞定,所以就使用wsl下的环境
 let g:terminal_shell = 'bash'
 
 
@@ -400,7 +405,14 @@ set cursorline                                                                  
 set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
-set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
+" set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
+set guifont=微软雅黑\ PragmataPro\ Mono:h8
+" set guifont=Microsoft\ YaHei\ Mono:h8
+" set guifont=PragmataPro\ Mono:h8
+" set guifont=PragmataPro:h8
+
+
+
 
 set noundofile
 set nobackup
@@ -520,7 +532,8 @@ Plug 'preservim/nerdtree'                                                      "
 Plug 'Xuyuanp/nerdtree-git-plugin'                                             " nerdtree中显示git变化
 Plug 'tpope/vim-surround'                                                      " 单词包围
 Plug 'tpope/vim-repeat'                                                        " vim重复插件,可以重复surround的内容
-Plug 'WolfgangMehner/bash-support'                                             " bash开发支持
+" 暂时用不着
+" Plug 'WolfgangMehner/bash-support'                                             " bash开发支持
 Plug 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
 Plug 'dense-analysis/ale'                                                      " 异步语法检查和自动格式化框架
 Plug 'vim-airline/vim-airline'                                                 " 漂亮的状态栏
@@ -528,7 +541,8 @@ Plug 'godlygeek/tabular'                                                       "
 Plug 'Yggdroot/indentLine'                                                     " 对齐参考线插件
 Plug 'tpope/vim-fugitive'                                                      " vim的git集成插件
 Plug 'tpope/vim-rhubarb'                                                       " 用于打开gi的远程
-Plug 'junegunn/gv.vim'                                                         " git树显示插件
+" 这个插件功能和vim-flog重复,先屏蔽
+" Plug 'junegunn/gv.vim'                                                         " git树显示插件
 Plug 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
 Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
 Plug 'yianwillis/vimcdoc'                                                      " vim的中文文档
@@ -547,16 +561,13 @@ Plug 'azabiong/vim-highlighter'                                                "
 Plug 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
 Plug 'Yggdroot/LeaderF'                                                        " 模糊搜索插件
 Plug 'dyng/ctrlsf.vim'                                                         " 全局搜索替换插件
-Plug 'brooth/far.vim'                                                          " 另外一个全局替换插件
+" 有ctrlsf插件够用,这个功能重复
+" Plug 'brooth/far.vim'                                                          " 另外一个全局替换插件
 Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
 Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
 Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
 Plug 'frazrepo/vim-rainbow'                                                    " 彩虹括号
 Plug 'tpope/vim-commentary'                                                    " 简洁注释
-Plug 'rakr/vim-one'                                                            " vim-one主题
-Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  " catppuccin 主题
-Plug 'jsit/toast.vim'                                                          " toast 主题
-Plug 'cormacrelf/vim-colors-github'                                            " github 主题
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
 Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 " 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟,这个插件还有个问题是,git对比的时候也弄得乱七八糟,所以先直接禁用掉
@@ -592,28 +603,39 @@ Plug 'markonm/traces.vim'                                                      "
 Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
 Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
-Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
-Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
+" 画图插件,用处不大
+" Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
+" 画图插件,用处不大
+" Plug 'yoshi1123/vim-linebox'                                                   " 可以画unicode方框图和线条
 " 中文处理有问题,屏蔽
 " Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
-Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
+" 画盒子的插件,用处不大
+" Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 " Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
-Plug 'muellan/am-colors'                                                       " 主题插件
-Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
-Plug 'scwood/vim-hybrid'                                                       " 主题插件
-Plug 'yous/vim-open-color'                                                     " vim的主题
 Plug 'SirVer/ultisnips'                                                        " 代码片段管理
 Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
-Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
-Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
-Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
-Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
 Plug 'puremourning/vimspector'                                                 " 调试插件
 Plug 'github/copilot.vim'                                                      " 只能补全,只是尝试下功能
-Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
 Plug 'simeji/winresizer'                                                       " 调整窗口
+
+
+" 主题相关
+Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
+Plug 'cormacrelf/vim-colors-github'                                            " github 主题
+Plug 'jsit/toast.vim'                                                          " toast 主题
+Plug 'rakr/vim-one'                                                            " vim-one主题
+Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  " catppuccin 主题
+Plug 'muellan/am-colors'                                                       " 主题插件
+Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
+Plug 'scwood/vim-hybrid'                                                       " 主题插件
+Plug 'yous/vim-open-color'                                                     " vim的主题
+Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
+Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
+Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
+Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
+
 
 call plug#end()
 " 插件 }
@@ -706,15 +728,15 @@ let g:gutentags_define_advanced_commands = 1
 
 " gutentags_plus 插件配置 {
 let g:gutentags_plus_nomap = 1
-noremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
-noremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
-noremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
-noremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
-noremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
-noremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
-noremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
-noremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
-noremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
+nnoremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
+nnoremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
+nnoremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
+nnoremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
+nnoremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
+nnoremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
+nnoremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
+nnoremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
+nnoremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
 
 vnoremap <leader>gs y:GscopeFind s <c-r>"
 vnoremap <leader>gg y:GscopeFind g <c-r>"
@@ -805,9 +827,9 @@ let g:rainbow_active = 1                                                        
 " call github_colors#togglebg_map('<f6>')
 " " vim-colors-github 主题 }
 
-set t_Co=256
-" 还有amdard
-colorscheme amlight
+" set t_Co=256
+" " 还有amdard
+" colorscheme amlight
 
 " " papercolor-theme 主题 {
 " " 这个主题用于git对比效果很好
@@ -853,10 +875,12 @@ colorscheme amlight
 " " vim-colors-pencil 主题配置 }
 
 
-" " vim-humanoid-colorscheme 插件配置 {
-" colorscheme humanoid
-" set background=light
-" " vim-humanoid-colorscheme 插件配置 }
+" vim-humanoid-colorscheme 插件配置 {
+colorscheme humanoid
+set background=light
+" 这里需要单独设置光标不闪烁
+set guicursor+=a:blinkon0
+" vim-humanoid-colorscheme 插件配置 }
 
 
 " " lucius 主题配置 {
@@ -933,8 +957,8 @@ noremap <leader>fw :LeaderfWindow<cr>
 noremap <leader>frr :LeaderfRgRecall<cr>
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
-xnoremap lgf :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
-xnoremap lgnf :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+xnoremap gfl :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+xnoremap gnfl :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 
 " 保持文件搜索窗口不关闭
 nnoremap <leader><C-P> :Leaderf file --stayOpen<CR>
@@ -1207,6 +1231,11 @@ let g:ctrlsf_search_mode = 'async'
 let g:ctrlsf_winsize = '30%'
 
 " ctrlsf 插件配置 }
+
+" vim-terminal-help 插件配置 {
+let g:terminal_height = 20
+
+" vim-terminal-help 插件配置 }
 
 " 插件配置 }
 
