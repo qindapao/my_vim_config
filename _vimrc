@@ -1286,6 +1286,6 @@ nnoremap <leader>br :call AddBufferBr()<CR>
 nnoremap <leader><F9> :call DisplayHTML()<CR>
 
 " 配置json文件不要收缩(目前好像不起作用)
-autocmd BuffEnter *.json silent set conceallevel=0
+autocmd BufEnter *.json silent set conceallevel=0
 
 
