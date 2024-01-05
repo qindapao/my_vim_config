@@ -221,7 +221,12 @@ function! OmniFuncPython(findstart, base)
     let l:res1 = python3complete#Complete(a:findstart, a:base)
     " 目前这个gtagsomnicomplete相当若,作用不是很大
     let l:res2 = gtagsomnicomplete#Complete(a:findstart, a:base)
-    
+
+    " 打印两个函数的返回结果
+    " echom 'python3complete#Complete returns: ' . string(l:res1)
+    " echom ' gtagsomnicomplete#Complete returns: ' . string(l:res2)
+    " 3是列表 0是数字
+   
     if ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0) && (type(l:res2) == 3 && !empty(l:res2))
         return l:res2
     elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && (type(l:res1) == 3 && !empty(l:res1)) 
@@ -241,6 +246,7 @@ function! DeleteTerminalBuffers()
     endfor
 endfunction
 
+" 禁用关闭按钮，这样关闭按钮就不会覆盖我定义的标签页的样式
 function! MyTabLine()
     let s = ''
     for i in range(tabpagenr('$'))
@@ -256,8 +262,8 @@ function! MyTabLine()
         let s .= ' ' . (i + 1) . ' '
         let bufnr = tabpagebuflist(i+1)[tabpagewinnr(i+1) - 1]
         let filename = fnamemodify(bufname(bufnr), ':t')
-        if strchars(filename) > 8
-            let filename = strcharpart(filename, 0, 8) . '..'
+        if strchars(filename) > 13
+            let filename = strcharpart(filename, 0, 13) . '..'
         endif
         
         let s .= filename
@@ -268,6 +274,7 @@ function! MyTabLine()
         let s .= ' |'
     endfor
     
+    " after the last tab fill with TabLineFill and reset tab page nr
     let s .= '%#TabLineFill#%T'
     return s
 endfunction
@@ -577,8 +584,8 @@ Plug 'mzlogin/vim-markdown-toc'                                                "
 
 " 这个也没啥用,先禁用掉
 " Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
-" 安装vim 文档插件
-Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
+" 最强大的文档插件,暂时屏蔽
+" Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
 Plug 'mhinz/vim-startify'                                                      " vim的开始页
 Plug 'farmergreg/vim-lastplace'                                                " 打开文件的上次位置
 Plug 'rickhowe/diffchar.vim'                                                   " 更明显的对比
@@ -595,13 +602,15 @@ Plug 'dbakker/vim-paragraph-motion'                                            "
 Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                              " 使用我稍微修改过的分支
 
 Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
-Plug 'mbbill/undotree'
+" 用处不大,暂时屏蔽
+" Plug 'mbbill/undotree'
 Plug 'kshenoy/vim-signature'
 Plug 'bling/vim-bufferline'
 Plug 'sk1418/QFGrep'                                                           " Quickfix窗口过滤
 Plug 'markonm/traces.vim'                                                      " 搜索效果显示
 Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
-Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
+" 暂时用不上先屏蔽
+" Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
 " 画图插件,用处不大
 " Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
@@ -612,12 +621,12 @@ Plug 'airblade/vim-rooter'                                                     "
 " 画盒子的插件,用处不大
 " Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 " Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
-Plug 'SirVer/ultisnips'                                                        " 代码片段管理
+Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
 Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
 Plug 'puremourning/vimspector'                                                 " 调试插件
-Plug 'github/copilot.vim'                                                      " 只能补全,只是尝试下功能
+" Plug 'github/copilot.vim'                                                    " 智能补全,只是尝试下功能
 Plug 'simeji/winresizer'                                                       " 调整窗口
 
 
@@ -641,6 +650,13 @@ call plug#end()
 " 插件 }
 
 " 插件配置 {
+
+" table-mode {
+noremap <leader>tm :TableModeToggle<CR>
+let g:table_mode_corner='|'
+
+" table-mode }
+
 " dense-analysis/ale {
 " 开启或者关闭ALE
 " :ALEToggle
@@ -682,6 +698,7 @@ let g:ale_history_enabled = 0
 " java检查相关设置
 " 指定javac使用的编码防止乱码,但是发现配置了并没有作用
 let g:ale_java_javac_options = '-encoding utf8 -verbose'
+" 不确定是否需要手动注释
 " let g:ale_java_javac_classpath = 'src:lib/foo.jar:lib/bar.jar'
 " 暂时不知道-cp "lib/*"的含义
 " let g:ale_java_javac_options = '-encoding utf8 -cp "lib/*"'
@@ -692,6 +709,7 @@ let g:ale_java_javac_classpath = '.'
 " 只有当有问题的时候才需要指定这个路径
 " 使用~/.vim/这种路径也是不行的,不知道原因
 " let g:ale_java_javac_executable = '~/.vim/coc/extensions/coc-java-data/jdk-17.0.8/javajre-windows-64/jre/bin/javac.exe'
+" 如果当前的配置就可以，如果当前默认的javac就是对的，那么这里暂时就不用修改,如果无法找到正确的就需要修改
 let g:ale_java_javac_executable = 'C:\Users\pc\.vim\coc\extensions\coc-java-data\jdk-17.0.8\javajre-windows-64\jre\bin\javac.exe'
 
 " dense-analysis/ale }
@@ -699,6 +717,7 @@ let g:ale_java_javac_executable = 'C:\Users\pc\.vim\coc\extensions\coc-java-data
 " vim-gutentags {
 " 这两句非常重要是缺一不可的,并且配置文件的路径一定不能写错
 let $GTAGSLABEL = 'native-pygments'                                              " 让非C语言使用这个生成符号表
+" 这里的路径注意下一定要是绝对路径
 let $GTAGSCONF = 'C:/Users/pc/.vim/gtags/share/gtags/gtags.conf'                 " gtags的配置文件的路径
 
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']      " gutentags 搜索工程目录的标志，当前文件路径向上递归直到碰到这些文件/目录名
@@ -765,14 +784,14 @@ let NERDTreeAutoDeleteBuffer = 1
 let g:NERDTreeGitStatusIndicatorMapCustom = {
                 \ 'Modified'  :'*',
                 \ 'Staged'    :'+',
-                \ 'Untracked' :'-',
+                \ 'Untracked' :'o',
                 \ 'Renamed'   :'^',
                 \ 'Unmerged'  :'=',
                 \ 'Deleted'   :'X',
                 \ 'Dirty'     :'x',
                 \ 'Ignored'   :'.',
-                \ 'Clean'     :'@',
-                \ 'Unknown'   :'!',
+                \ 'Clean'     :'v',
+                \ 'Unknown'   :'?',
                 \ }
 
 " nerdtree-git-plugin 插件 }
@@ -815,6 +834,7 @@ let g:rainbow_active = 1                                                        
 " " toast主题 {
 " set background=light
 " colorscheme toast
+" ser guicursor+=a:blinkon0
 " " toast主题 }
 
 " " vim-colors-github 主题 {
@@ -957,7 +977,10 @@ noremap <leader>fw :LeaderfWindow<cr>
 noremap <leader>frr :LeaderfRgRecall<cr>
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
+" 这个不开启二次过滤
+" 这里要注意下不能l键映射到最前面，不然会导致可视模式下自动往后多选择一个字符
 xnoremap gfl :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
+" 这个开启二次过滤
 xnoremap gnfl :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>
 
 " 保持文件搜索窗口不关闭
@@ -1009,6 +1032,10 @@ let g:tagbar_sort = 0
 " auto-pairs 配置 {
 au filetype markdown,html let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
 " auto-pairs 配置 }
+
+" doq的配置 {
+let g:pydocstring_doq_path = 'D:/python/Script/doq'
+" doq的配置 }
 
 
 
@@ -1097,7 +1124,7 @@ let g:indentLine_conceallevel = "2"
 " indentLine 插件配置 }
 
 " undotree 的配置 {
-nnoremap <F5> :UndotreeToggle<CR>
+nnoremap <leader><F5> :UndotreeToggle<CR>
 " undotree 的配置 }
 
 " vim-bufferline 的配置 {
@@ -1124,35 +1151,35 @@ let g:rooter_patterns = ['.root', '.svn', '.git', '.hg', '.project']
 nnoremap <leader>foo :Rooter<CR>
 " vim-rooter 插件配置 }
 
-" vim-linebox 插件配置 {
-" 使用默认配置
-let g:linebox_default_maps = 1
-" vim-linebox 插件配置 }
+" " vim-linebox 插件配置 {
+" " 使用默认配置
+" let g:linebox_default_maps = 1
+" " vim-linebox 插件配置 }
 
-" vim-textmanip 插件配置 {
-let g:textmainip_startup_mode = 'replace'
-vnoremap <C-d> <Plug>(textmanip-duplicate-down)
-vnoremap <C-u> <Plug>(textmanip-duplicate-up)
+" " vim-textmanip 插件配置 {
+" let g:textmainip_startup_mode = 'replace'
+" vnoremap <C-d> <Plug>(textmanip-duplicate-down)
+" vnoremap <C-u> <Plug>(textmanip-duplicate-up)
 
-vnoremap <C-S-j> <Plug>(textmanip-move-down)
-vnoremap <C-S-k> <Plug>(textmanip-move-up)
-vnoremap <C-S-h> <Plug>(textmanip-move-left)
-vnoremap <C-S-l> <Plug>(textmanip-move-right)
+" vnoremap <C-S-j> <Plug>(textmanip-move-down)
+" vnoremap <C-S-k> <Plug>(textmanip-move-up)
+" vnoremap <C-S-h> <Plug>(textmanip-move-left)
+" vnoremap <C-S-l> <Plug>(textmanip-move-right)
 
-" toggle insert/replace with <F4>
-nmap <C-F4> <Plug>(textmanip-toggle-mode)
+" " toggle insert/replace with <F4>
+" nmap <C-F4> <Plug>(textmanip-toggle-mode)
 
-" use allow key to force replace movement
-vnoremap  <Up>     <Plug>(textmanip-move-up-r)
-vnoremap  <Down>   <Plug>(textmanip-move-down-r)
-vnoremap  <Left>   <Plug>(textmanip-move-left-r)
-vnoremap  <Right>  <Plug>(textmanip-move-right-r)
-" vim-textmanip 插件配置 }
+" " use allow key to force replace movement
+" vnoremap  <Up>     <Plug>(textmanip-move-up-r)
+" vnoremap  <Down>   <Plug>(textmanip-move-down-r)
+" vnoremap  <Left>   <Plug>(textmanip-move-left-r)
+" vnoremap  <Right>  <Plug>(textmanip-move-right-r)
+" " vim-textmanip 插件配置 }
 
-" vim-box-draw 插件配置 {
-" 在有字符的情况下中间会多一条竖线，在纯ve=all的无字符的地方是正常的方框
-vnoremap xxb: call box#Draw()<CR>
-" vim-box-draw 插件配置 }
+" " vim-box-draw 插件配置 {
+" " 在有字符的情况下中间会多一条竖线，在纯ve=all的无字符的地方是正常的方框
+" vnoremap xxb: call box#Draw()<CR>
+" " vim-box-draw 插件配置 }
 
 " vim-snippets 插件配置 {
 let g:UltiSnipsExpandTrigger="<tab>"
@@ -1178,7 +1205,7 @@ let g:airline_powerline_fonts = 1
 
 " completor 插件配置 {
 " 设置completor的补全时的触发为任意字母
-let g:completot_java_omni_trigger = '(\.|::)?\w*'
+let g:completor_java_omni_trigger = '(\.|::)?\w*'
 
 
 " completor 插件配置 {
@@ -1218,17 +1245,18 @@ nnoremap <leader>cff :CtrlSF <C-r><C-w> %
 
 
 vnoremap <leader>cfr y:Rooter<cr> :CtrlSF <C-r>"
-vnoremap <leader>cfc y:CtrlSF <c-r>"
+vnoremap <leader>cfc y:CtrlSF <C-r>"
 vnoremap <leader>cfd y:CtrlSF <C-r>" ./
 vnoremap <leader>cff y:CtrlSF <C-r>" %
 
 
 let g:ctrlsf_case_sensitive = 'yes'
 let g:ctrlsf_follow_symlinks = 0
-let g:ctrls_ignore_dir = ['docs/bak.md', '.gitignore']
+let g:ctrlsf_ignore_dir = ['docs/bak.md', '.gitignore']
 let g:ctrlsf_backend = 'rg'
 let g:ctrlsf_search_mode = 'async'
 let g:ctrlsf_winsize = '30%'
+let g:ctrlsf_regex_pattern = 1
 
 " ctrlsf 插件配置 }
 
@@ -1252,10 +1280,12 @@ vnoremap <leader>r :call MyReplaceWord('v')<CR>
 nnoremap <leader>br :call AddBufferBr()<CR>
 
 " 打开git远端上的分支
-" noremap <silent> <leader>git :call GitGetCurrentBranchRemoteUrl()<CR>
+" nnoremap <silent> <leader>git :call GitGetCurrentBranchRemoteUrl()<CR>
 
 " 浏览器中打开当前编辑的html文件
 nnoremap <leader><F9> :call DisplayHTML()<CR>
 
+" 配置json文件不要收缩(目前好像不起作用)
+autocmd BuffEnter *.json silent set conceallevel=0
 
 
