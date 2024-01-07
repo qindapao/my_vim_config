@@ -1217,7 +1217,8 @@ let g:airline_powerline_fonts = 1
 " completor 插件配置 {
 " 设置completor的补全时的触发为任意字母
 let g:completor_java_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
-let g:completor_zim_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
+" let g:completor_zim_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
+let g:completor_zim_omni_trigger = '(\S+)$'
 " 可以关闭preview,这样不和自定义的补全的弹出窗口重复
 " :TODO: 这里可以根据文件类型不同打开不同的参数
 " let g:completor_complete_options = 'menuone,noselect,preview'
@@ -1304,14 +1305,15 @@ nnoremap <leader><F9> :call DisplayHTML()<CR>
 autocmd BufEnter *.json silent set conceallevel=0
 
 " 针对特种文件格式的自定义补全 {
+" 暂时未验证是否和coc或者completor冲突
 
 function! OmniCompleteZim(findstart, base)
     if a:findstart
         " locate the start of the word
         let line = getline('.')
         let start = col('.') - 1
-        " 检查是否是一个字母,如果是字母开始补全
-        while start > 0 && line[start - 1] =~ '\a'
+        " 检查是否是一个字母,如果是字母开始补全(\a只能匹配ascii \S可以匹配中文字符)
+        while start > 0 && line[start - 1] =~ '\S'
             let start -= 1
         endwhile
         return start
@@ -1337,7 +1339,11 @@ function! OmniCompleteZim(findstart, base)
                     \ ]
         for item in complete_list
             " 匹配不区分大小写
-            if item['word'] =~ '\c^' . a:base
+            " 据说matchstr效率更高
+            " if item['word'] =~ '\c^' . a:base
+            let pattern = item['icase'] ? '\c' . a:base : '\C' . a:base
+            if item['word'] =~ pattern
+            " if matchstr(item['word'], pattern) != ''
                 " add more information to the completion menu
                 call add(res, item)
             endif
@@ -1386,7 +1392,7 @@ vnoremap <leader>rca :s/\%x00/\r/g
 
 " :TODO: 后面可以支持跨字母匹配,比如 wind  输入wd,匹配它
 
-" 针对特种文件格式的自定义补全 {
+" 针对特种文件格式的自定义补全 }
 
 
 
