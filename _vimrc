@@ -1306,6 +1306,8 @@ autocmd BufEnter *.json silent set conceallevel=0
 
 " 针对特种文件格式的自定义补全 {
 " 暂时未验证是否和coc或者completor冲突
+" 加载补全全局列表 g:complete_list
+autocmd filetype zim,txt source zim_complete_list
 
 function! OmniCompleteZim(findstart, base)
     if a:findstart
@@ -1330,16 +1332,9 @@ function! OmniCompleteZim(findstart, base)
         " dup: 如果设置为1标识允许添加重复项(只要word相同就能添加)(需要后面的代码处理否则没有作用)
         " :TODO: 这个变量移动到单独的字典文件中,然后每个语言一个文件,在vimrc中source进来(不是对应文件的字典清空,节省内存,要考虑字典文件的内存使用问题)
         " 还需要看下内存xnhc
-        let complete_list = [
-                    \ {'word': 'foo'                    , 'abbr': 'foo'   , 'menu': '* 一个补全的范例'   , 'info': "预览的详细信息\n有换行的情况\n" , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
-                    \ {'word': 'kind2'                  , 'abbr': 'kind2' , 'menu': '* 第二个补全的范例' , 'info': "另一\n个预览的详细信息\n"       , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
-                    \ {'word': 'kind3'                  , 'abbr': 'kind3' , 'menu': '- 第3个补全的范例'  , 'info': ''                               , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
-                    \ {'word': '中文不行的吧'           , 'abbr': 'kind3' , 'menu': '- 中文范例'         , 'info': "这个可以有\n"                   , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
-                    \ {'word': "中文不行的吧\n换行符号\ndggeg\n" , 'abbr': 'kind3' , 'menu': '- 中文范例'         , 'info': "这个可以有\n"                   , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
-                    \ ]
-        for item in complete_list
+        for item in g:complete_list
             " 匹配不区分大小写
-            " 据说matchstr效率更高
+            " 据说matchstr效率更高?
             " if item['word'] =~ '\c^' . a:base
             let pattern = item['icase'] ? '\c' . a:base : '\C' . a:base
             if item['word'] =~ pattern
