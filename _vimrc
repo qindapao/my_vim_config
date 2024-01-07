@@ -518,6 +518,7 @@ autocmd filetype css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd filetype javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd filetype xml setlocal omnifunc=xmlcomplete#CompleteTags
 autocmd filetype python setlocal omnifunc=OmniFuncPython
+autocmd filetype zim setlocal omnifunc=OmniCompleteZim
 
 
 " C语言的编译和调试
@@ -525,6 +526,13 @@ autocmd filetype python setlocal omnifunc=OmniFuncPython
 packadd termdebug
 set makeprg=gcc\ -Wall\ -o\ %<\ %
 
+" 设置conceallevel的收缩级别
+nnoremap <leader>cc0 :set conceallevel=0<cr>
+nnoremap <leader>cc2 :set conceallevel=2<cr>
+
+" 设置虚拟文本
+nnoremap <leader>vea :set ve=all<cr>
+nnoremap <leader>ven :set ve=<cr>
 
 
 " 基本设置区域 }
@@ -554,6 +562,7 @@ Plug 'rbong/vim-flog'                                                          "
 Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
 Plug 'yianwillis/vimcdoc'                                                      " vim的中文文档
 if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md'
+    " 这里要注意下,这个插件会导致preview预览涂鸦窗口无法关闭,影响自定义补全
     Plug 'maralla/completor.vim'                                               " 主要是用它的中文补全功能
 else
     " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
@@ -621,6 +630,7 @@ Plug 'airblade/vim-rooter'                                                     "
 " 画盒子的插件,用处不大
 " Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 " Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
+" 当前这个插件会导致编辑txt和zim文件变得很卡,所以只用于特定的编程语言
 Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
 Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
@@ -698,7 +708,7 @@ let g:ale_history_enabled = 0
 " java检查相关设置
 " 指定javac使用的编码防止乱码,但是发现配置了并没有作用
 let g:ale_java_javac_options = '-encoding utf8 -verbose'
-" 不确定是否需要手动注释
+" 不确定是否需要手动设置
 " let g:ale_java_javac_classpath = 'src:lib/foo.jar:lib/bar.jar'
 " 暂时不知道-cp "lib/*"的含义
 " let g:ale_java_javac_options = '-encoding utf8 -cp "lib/*"'
@@ -832,6 +842,7 @@ let g:rainbow_active = 1                                                        
 " " catppuccin主题 }
 
 " " toast主题 {
+" set termguicolors
 " set background=light
 " colorscheme toast
 " ser guicursor+=a:blinkon0
@@ -1205,8 +1216,12 @@ let g:airline_powerline_fonts = 1
 
 " completor 插件配置 {
 " 设置completor的补全时的触发为任意字母
-let g:completor_java_omni_trigger = '(\.|::)?\w*'
-
+let g:completor_java_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
+let g:completor_zim_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
+" 可以关闭preview,这样不和自定义的补全的弹出窗口重复
+" :TODO: 这里可以根据文件类型不同打开不同的参数
+" let g:completor_complete_options = 'menuone,noselect,preview'
+let g:completor_complete_options = 'menuone,noselect'
 
 " completor 插件配置 {
 
@@ -1287,5 +1302,91 @@ nnoremap <leader><F9> :call DisplayHTML()<CR>
 
 " 配置json文件不要收缩(目前好像不起作用)
 autocmd BufEnter *.json silent set conceallevel=0
+
+" 针对特种文件格式的自定义补全 {
+
+function! OmniCompleteZim(findstart, base)
+    if a:findstart
+        " locate the start of the word
+        let line = getline('.')
+        let start = col('.') - 1
+        " 检查是否是一个字母,如果是字母开始补全
+        while start > 0 && line[start - 1] =~ '\a'
+            let start -= 1
+        endwhile
+        return start
+    else
+        " find matches for a:base
+        let res = []
+        " h complete-functions
+        " word: 补全的单词(无法多行,但是可以自己转换) 
+        " abbr: 补全菜单中显示的缩写 
+        " menu: 补全菜单中显示的额外信息(我加个*表示这项含有info预览信息 -表示没有)
+        " info: 在预览窗口中显示的详细信息(如果有信息要至少包含一个换行符)
+        " kind: 补全的类型 
+        " icase: 如果设置为1忽略大小写(需要后面的函数处理,否则无用) 
+        " dup: 如果设置为1标识允许添加重复项(只要word相同就能添加)(需要后面的代码处理否则没有作用)
+        " :TODO: 这个变量移动到单独的字典文件中,然后每个语言一个文件,在vimrc中source进来(不是对应文件的字典清空,节省内存,要考虑字典文件的内存使用问题)
+        " 还需要看下内存xnhc
+        let complete_list = [
+                    \ {'word': 'foo'                    , 'abbr': 'foo'   , 'menu': '* 一个补全的范例'   , 'info': "预览的详细信息\n有换行的情况\n" , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
+                    \ {'word': 'kind2'                  , 'abbr': 'kind2' , 'menu': '* 第二个补全的范例' , 'info': "另一\n个预览的详细信息\n"       , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
+                    \ {'word': 'kind3'                  , 'abbr': 'kind3' , 'menu': '- 第3个补全的范例'  , 'info': ''                               , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
+                    \ {'word': '中文不行的吧'           , 'abbr': 'kind3' , 'menu': '- 中文范例'         , 'info': "这个可以有\n"                   , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
+                    \ {'word': "中文不行的吧\n换行符号\ndggeg\n" , 'abbr': 'kind3' , 'menu': '- 中文范例'         , 'info': "这个可以有\n"                   , 'kind': 'w' , 'icase': 1 , 'dup': 1} ,
+                    \ ]
+        for item in complete_list
+            " 匹配不区分大小写
+            if item['word'] =~ '\c^' . a:base
+                " add more information to the completion menu
+                call add(res, item)
+            endif
+        endfor
+        return res
+    endif
+endfunction
+
+" 在补全时显示弹出窗口
+" 在补全时显示弹出窗口
+function! CompleteShowPopup(item)
+    " 如果已经存在弹出窗口，先关闭它
+    if exists('s:winid')
+        call popup_close(s:winid)
+    endif
+
+    if(!empty(v:completed_item) && !empty(a:item['info']))
+        " :help popup_create()
+        let popup_width_str = a:item['abbr'] . ' ' . a:item['kind'] . ' ' . a:item['menu']
+        let num_of_chinese_chars = substitute(popup_width_str, '[\u4E00-\u9FCC]', '', 'g')->len()
+        let chinese_chars_counted_as_two = strchars(popup_width_str) + num_of_chinese_chars
+        let text_list = split(a:item['info'])
+        " zindex设置为最高从而覆盖补全列表,防止显示不全
+        " :TODO: 当前弹出窗口的位置还不是那么合理,后面可以优化
+        let opts = {  'line': line('.'),
+                    \ 'col': col('.') + chinese_chars_counted_as_two,
+                    \ 'padding': [0,1,0,1], 
+                    \ 'wrap': v:true, 
+                    \ 'border': [], 
+                    \ 'close': 'click', 
+                    \ 'highlight': 'Pmenu', 
+                    \ 'zindex': 100}
+        let s:winid = popup_create(split(a:item['info'], '\n'), opts)
+    endif
+endfunction
+
+" 当补全项改变时，显示弹出窗口
+autocmd CompleteChanged * call CompleteShowPopup(v:completed_item)
+" 当退出插入模式时，关闭弹出窗口
+autocmd InsertLeave * if exists('s:winid') | call popup_close(s:winid) | endif
+" 当补全完成时，关闭弹出窗口
+autocmd CompleteDone * if exists('s:winid') | call popup_close(s:winid) | endif
+" 替换文本中的^@为换行
+nnoremap <leader>rca :%s/\%x00/\r/g
+vnoremap <leader>rca :s/\%x00/\r/g
+
+" :TODO: 后面可以支持跨字母匹配,比如 wind  输入wd,匹配它
+
+" 针对特种文件格式的自定义补全 {
+
 
 
