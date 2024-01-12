@@ -221,6 +221,7 @@ function! OmniFuncPython(findstart, base)
     let l:res1 = python3complete#Complete(a:findstart, a:base)
     " 目前这个gtagsomnicomplete相当若,作用不是很大
     let l:res2 = gtagsomnicomplete#Complete(a:findstart, a:base)
+    let l:res3 = OmniCompleteCustom(a:findstart, a:base)
 
     " 打印两个函数的返回结果
     " echom 'python3complete#Complete returns: ' . string(l:res1)
@@ -228,13 +229,13 @@ function! OmniFuncPython(findstart, base)
     " 3是列表 0是数字
    
     if ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0) && (type(l:res2) == 3 && !empty(l:res2))
-        return l:res2
+        return l:res2+l:res3
     elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && (type(l:res1) == 3 && !empty(l:res1)) 
-        return l:res1
+        return l:res1+l:res3
     elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0)
-        return 0
+        return l:res3
     else
-        return l:res1 + l:res2
+        return l:res1 + l:res2 + l:res3
     endif
 endfunction
 
@@ -315,6 +316,7 @@ set tabline=%!MyTabLine()
 
 
 " 设置自动切换到当前操作的文件的目录(可能被别人覆盖,进入编辑器后需要手动设置一次)
+" :TODO: 这个问题需要定位
 set autochdir
 
 " 设置vim的窗口分割竖线的形状
@@ -385,6 +387,9 @@ nnoremap <S-Tab> gT<cr>
 :nn <M-8> 8gt
 :nn <M-9> 9gt
 :nn <M-0> :tablast<CR>
+
+nnoremap <silent> <leader>new :new<cr>
+nnoremap <silent> <leader>enew :enew<cr>
 
 set scrolloff=3
 
@@ -517,8 +522,7 @@ autocmd filetype html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
 autocmd filetype css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd filetype javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd filetype xml setlocal omnifunc=xmlcomplete#CompleteTags
-autocmd filetype python setlocal omnifunc=OmniFuncPython
-autocmd filetype zim setlocal omnifunc=OmniCompleteZim
+autocmd filetype zim setlocal omnifunc=OmniCompleteCustom
 
 
 " C语言的编译和调试
@@ -533,6 +537,10 @@ nnoremap <leader>cc2 :set conceallevel=2<cr>
 " 设置虚拟文本
 nnoremap <leader>vea :set ve=all<cr>
 nnoremap <leader>ven :set ve=<cr>
+
+" 设置平滑滚动(vim9.1新增),不过目前没看出来效果是啥
+set smoothscroll
+
 
 
 " 基本设置区域 }
@@ -580,8 +588,10 @@ Plug 'dyng/ctrlsf.vim'                                                         "
 " 有ctrlsf插件够用,这个功能重复
 " Plug 'brooth/far.vim'                                                          " 另外一个全局替换插件
 Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
-Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
-Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
+" Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
+Plug 'monkoose/vim9-stargate'
+Plug 'unblevable/quick-scope'
+" Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
 Plug 'frazrepo/vim-rainbow'                                                    " 彩虹括号
 Plug 'tpope/vim-commentary'                                                    " 简洁注释
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
@@ -822,7 +832,8 @@ nnoremap <leader><C-t> :setlocal guifont=Yahei\ Fira\ Icon\ Hybrid:h
 
 " gtagsomnicomplete {
 " https://github.com/ragcatshxu/gtagsomnicomplete 原始的位置,我修改了下，当前使用的是我修改后的
-autocmd filetype c,python,sh,perl set omnifunc=gtagsomnicomplete#Complete
+autocmd filetype c,sh,perl set omnifunc=gtagsomnicomplete#Complete
+autocmd filetype python setlocal omnifunc=OmniFuncPython
 " gtagsomnicomplete }
 
 " vim-rainbow {
@@ -848,19 +859,20 @@ let g:rainbow_active = 1                                                        
 " ser guicursor+=a:blinkon0
 " " toast主题 }
 
-" " vim-colors-github 主题 {
-" let g:github_colors_soft = 1
-" set background=light
-" let g:github_colors_block_diffmark = 0
-" colorscheme github
-" let g:airline_theme = "github"
-" " 切换亮和暗主题
-" call github_colors#togglebg_map('<f6>')
-" " vim-colors-github 主题 }
+" vim-colors-github 主题 {
+let g:github_colors_soft = 1
+set background=light
+let g:github_colors_block_diffmark = 0
+colorscheme github
+let g:airline_theme = "github"
+" 切换亮和暗主题
+call github_colors#togglebg_map('<f6>')
+" vim-colors-github 主题 }
 
 " set t_Co=256
 " " 还有amdard
 " colorscheme amlight
+" set guicursor+=a:blinkon0
 
 " " papercolor-theme 主题 {
 " " 这个主题用于git对比效果很好
@@ -906,12 +918,12 @@ let g:rainbow_active = 1                                                        
 " " vim-colors-pencil 主题配置 }
 
 
-" vim-humanoid-colorscheme 插件配置 {
-colorscheme humanoid
-set background=light
-" 这里需要单独设置光标不闪烁
-set guicursor+=a:blinkon0
-" vim-humanoid-colorscheme 插件配置 }
+" " vim-humanoid-colorscheme 插件配置 {
+" colorscheme humanoid
+" set background=light
+" " 这里需要单独设置光标不闪烁
+" set guicursor+=a:blinkon0
+" " vim-humanoid-colorscheme 插件配置 }
 
 
 " " lucius 主题配置 {
@@ -1053,7 +1065,6 @@ let g:pydocstring_doq_path = 'D:/python/Script/doq'
 " vim-markdown {
 " 这个命令可能失效,需要在vim中手动执行这个命令,编辑markdown文件的时候
 let g:vim_markdown_emphasis_multiline = 0
-set conceallevel=2
 " 设置语法收缩
 let g:vim_markdown_conceal = 1
 " 设置代码块提示语法收缩
@@ -1069,20 +1080,21 @@ autocmd filetype zim,txt let g:PasteImageFunction = 'g:ZimwikiPasteImage'
 autocmd filetype markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
 " img-paste }
 
-" vim-easymotion 的配置 {
-let g:EasyMotion_smartcase = 1
-map <Leader>j <Plug>(easymotion-j)
-map <Leader>k <Plug>(easymotion-k)
-map <Leader>h <Plug>(easymotion-linebackward)
-map <Leader>l <Plug>(easymotion-lineforward)
-map <Leader><leader>. <Plug>(easymotion-repeat)
-" map <Leader>w <Plug>(easymotion-bd-w)
-map <C-;> <Plug>(easymotion-bd-w)
-" map <Leader>W <Plug>(easymotion-overwin-w)
-map <C-,> <Plug>(easymotion-overwin-w)
-map <Leader>f <Plug>(easymotion-bd-f)
-map <Leader>F <Plug>(easymotion-overwin-f)
-" vim-easymotion 的配置 }
+" 因为有星门vim9-stargate,所以easymotion暂时屏蔽
+" " vim-easymotion 的配置 {
+" let g:EasyMotion_smartcase = 1
+" map <Leader>j <Plug>(easymotion-j)
+" map <Leader>k <Plug>(easymotion-k)
+" map <Leader>h <Plug>(easymotion-linebackward)
+" map <Leader>l <Plug>(easymotion-lineforward)
+" map <Leader><leader>. <Plug>(easymotion-repeat)
+" " map <Leader>w <Plug>(easymotion-bd-w)
+" map <C-;> <Plug>(easymotion-bd-w)
+" " map <Leader>W <Plug>(easymotion-overwin-w)
+" map <C-,> <Plug>(easymotion-overwin-w)
+" map <Leader>f <Plug>(easymotion-bd-f)
+" map <Leader>F <Plug>(easymotion-overwin-f)
+" " vim-easymotion 的配置 }
 
 " coc补全插件的一些配置 {
 inoremap <silent><expr> <S-TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
@@ -1215,10 +1227,13 @@ let g:airline_powerline_fonts = 1
 " vim-javacomplete2 }
 
 " completor 插件配置 {
+" 这行并不能阻止预览窗口顶部弹出，只是某些场景不自动弹出
+let g:completor_auto_preview = 0
 " 设置completor的补全时的触发为任意字母
 let g:completor_java_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
 " let g:completor_zim_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
 let g:completor_zim_omni_trigger = '(\S+)$'
+let g:completor_python_omni_trigger = '(\S+)$'
 " 可以关闭preview,这样不和自定义的补全的弹出窗口重复
 " :TODO: 这里可以根据文件类型不同打开不同的参数
 " let g:completor_complete_options = 'menuone,noselect,preview'
@@ -1278,8 +1293,23 @@ let g:ctrlsf_regex_pattern = 1
 
 " vim-terminal-help 插件配置 {
 let g:terminal_height = 20
+tnoremap <Esc> <C-\><C-n>
+
 
 " vim-terminal-help 插件配置 }
+
+" quick-scope 插件 {
+highlight QuickScopePrimary ctermfg=red guifg=red
+highlight QuickScopeSecondary ctermfg=blue guifg=blue
+" quick-scope 插件 }
+
+" vim9-stargate 插件配置 {
+let g:stargate_limit = 600
+" vim9-stargate 插件配置 }
+
+" vim-fugitive 插件按键绑定 {
+nnoremap <silent> <leader>gitda :Git difftool -y<cr>
+" vim-fugitive 插件按键绑定 }
 
 " 插件配置 }
 
@@ -1302,14 +1332,34 @@ nnoremap <leader>br :call AddBufferBr()<CR>
 nnoremap <leader><F9> :call DisplayHTML()<CR>
 
 " 配置json文件不要收缩(目前好像不起作用)
-autocmd BufEnter *.json silent set conceallevel=0
+autocmd filetype json silent set conceallevel=0
+autocmd filetype zim,markdown silent set conceallevel=2
+
 
 " 针对特种文件格式的自定义补全 {
 " 暂时未验证是否和coc或者completor冲突
 " 加载补全全局列表 g:complete_list
-autocmd filetype zim,txt source zim_complete_list
+function! CustomCompleteList()
+    source $VIM/complete_list_all.vim
+    let g:word_to_complete = {}
+    let g:complete_list = []
+    if &filetype == 'zim' || &filetype == 'txt'
+        source $VIM/complete_list_zim.vim
+    elseif &filetype == 'python'
+        source $VIM/complete_list_python.vim
+    endif
 
-function! OmniCompleteZim(findstart, base)
+    if !empty(g:complete_list)
+        let g:complete_list_all += g:complete_list
+    endif
+    
+    let g:word_to_complete = extend(copy(g:word_to_complete_all), g:word_to_complete)
+    
+endfunction
+
+autocmd filetype * call CustomCompleteList()
+
+function! OmniCompleteCustom(findstart, base)
     if a:findstart
         " locate the start of the word
         let line = getline('.')
@@ -1332,20 +1382,32 @@ function! OmniCompleteZim(findstart, base)
         " dup: 如果设置为1标识允许添加重复项(只要word相同就能添加)(需要后面的代码处理否则没有作用)
         " :TODO: 这个变量移动到单独的字典文件中,然后每个语言一个文件,在vimrc中source进来(不是对应文件的字典清空,节省内存,要考虑字典文件的内存使用问题)
         " 还需要看下内存xnhc
-        for item in g:complete_list
+        for item in g:complete_list_all
             " 匹配不区分大小写
             " 据说matchstr效率更高?
             " if item['word'] =~ '\c^' . a:base
             let pattern = item['icase'] ? '\c' . a:base : '\C' . a:base
             if item['word'] =~ pattern
-            " if matchstr(item['word'], pattern) != ''
+                " if matchstr(item['word'], pattern) != ''
+                let item_copy = copy(item)
+
+                if has_key(g:word_to_complete, item_copy['word'])
+                    let item_copy['word'] = g:word_to_complete[item_copy['word']]
+                endif
+
+                if item_copy['kind'] == 'ic' || item_copy['kind'] == 'if'
+                    let item_copy['word'] = eval(item_copy['word'])
+                endif
                 " add more information to the completion menu
-                call add(res, item)
+                call add(res, item_copy)
             endif
         endfor
         return res
     endif
 endfunction
+
+" 设置默认的用户自定义补全函数
+set completefunc=OmniCompleteCustom
 
 " 在补全时显示弹出窗口
 " 在补全时显示弹出窗口
@@ -1358,13 +1420,12 @@ function! CompleteShowPopup(item)
     if(!empty(v:completed_item) && !empty(a:item['info']))
         " :help popup_create()
         let popup_width_str = a:item['abbr'] . ' ' . a:item['kind'] . ' ' . a:item['menu']
-        let num_of_chinese_chars = substitute(popup_width_str, '[\u4E00-\u9FCC]', '', 'g')->len()
-        let chinese_chars_counted_as_two = strchars(popup_width_str) + num_of_chinese_chars
-        let text_list = split(a:item['info'])
-        " zindex设置为最高从而覆盖补全列表,防止显示不全
-        " :TODO: 当前弹出窗口的位置还不是那么合理,后面可以优化
-        let opts = {  'line': line('.'),
-                    \ 'col': col('.') + chinese_chars_counted_as_two,
+        let word_len = strchars(a:item['word']) + strchars(substitute(a:item['word'], '[^\u4E00-\u9FCC]', '', 'g'))
+        let list_len = strchars(popup_width_str) + strchars(substitute(popup_width_str, '[^\u4E00-\u9FCC]', '', 'g'))
+        let width = list_len - word_len
+
+        let opts = { 'line': 'cursor+1',
+                    \'col': (width<0)?'cursor' . width:'cursor' . '+' . width,
                     \ 'padding': [0,1,0,1], 
                     \ 'wrap': v:true, 
                     \ 'border': [], 
@@ -1378,16 +1439,274 @@ endfunction
 " 当补全项改变时，显示弹出窗口
 autocmd CompleteChanged * call CompleteShowPopup(v:completed_item)
 " 当退出插入模式时，关闭弹出窗口
+" :TODO: 这里甚至可以执行特定的回调，回调的位置可以想办法指定
 autocmd InsertLeave * if exists('s:winid') | call popup_close(s:winid) | endif
 " 当补全完成时，关闭弹出窗口
 autocmd CompleteDone * if exists('s:winid') | call popup_close(s:winid) | endif
+autocmd CompleteDone * .s/\%x00/\r/ge
 " 替换文本中的^@为换行
-nnoremap <leader>rca :%s/\%x00/\r/g
-vnoremap <leader>rca :s/\%x00/\r/g
+nnoremap <leader>rca :%s/\%x00/\r/g<cr>
+vnoremap <leader>rca :s/\%x00/\r/g<cr>
 
 " :TODO: 后面可以支持跨字母匹配,比如 wind  输入wd,匹配它
 
 " 针对特种文件格式的自定义补全 }
 
+
+
+function! RemoveLastChar(str)
+    if len(a:str) > 0
+        let l:width = strchars(a:str) - 1
+        let l:result = strcharpart(a:str, 0, l:width)
+        return l:result
+    else
+        return a:str
+    endif
+endfunction
+
+" 按键补全帮助窗口 {
+
+let g:help_popup_highlight_colors = ['red', 'DarkGreen', 'DarkCyan', 'DarkMagenta', 'green']
+
+
+" 定义空格的高亮组
+
+hi HelpPopupKeywordHighLightBlank ctermfg=red guifg=white guibg=black
+if index(prop_type_list(), 'HelpPopupKeywordHighLightBlank') == -1
+    call prop_type_add('HelpPopupKeywordHighLightBlank', {'highlight': 'HelpPopupKeywordHighLightBlank'})
+endif
+
+
+for i in range(len(g:help_popup_highlight_colors))
+    let highlight_group = 'HelpPopupKeywordHighLight' . i
+    execute 'hi ' . highlight_group . ' ctermfg=' . g:help_popup_highlight_colors[i] . ' guifg=' . g:help_popup_highlight_colors[i]
+    if index(prop_type_list(), highlight_group) == -1
+        call prop_type_add(highlight_group, {'highlight': highlight_group})
+    endif
+endfor
+
+function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
+    if a:exec_mode == 'auto'
+        let user_command = a:exec_cmd
+    elseif a:exec_mode == 'manu'
+        let user_command = input('请输入一个命令:', '', 'command')
+    endif
+
+    if a:exec_mode != ''
+        let user_command_str = ''
+        try
+            if user_command[0] == '!'
+                let user_command_str = system(user_command[1:])
+            else
+                redir => user_command_str
+                silent execute user_command
+                redir END
+            endif
+        catch
+            user_command_str = "null"
+            echoerr "执行的命令无效: " . v:exception
+        endtry
+        
+        let user_command_utf8 = iconv(user_command_str, &encoding, 'utf-8')
+        let data_list = split(user_command_utf8, '\n')
+    else
+        let data_list = g:key_binding_list
+    endif
+
+
+    let opts = { 'line': 'cursor',
+        \ 'col': 'cursor',
+        \ 'padding': [0,1,0,1],
+        \ 'wrap': v:true,
+        \ 'border': [],
+        \ 'close': 'button',
+        \ 'highlight': 'Pmenu',
+        \ 'resize': 1,
+        \ 'zindex': 100,
+        \ 'maxheight': 20,
+        \ 'maxwidth': 80,
+        \ 'title': 'tips',
+        \ 'dragall': 1}
+    let help_win = popup_create([''], opts)
+    let help_win_nr = winbufnr(help_win)
+    
+    let input_str = ''
+    while 1
+        let c = getchar()
+        if c == 27
+            call popup_close(help_win)
+            break
+        elseif c == 9
+            call GetAllInfoInPopupWin(0)
+            break
+        elseif c == "\<BS>"
+            let input_str = RemoveLastChar(input_str)
+        elseif c == 13
+            let input_str = ''
+        elseif c != 0
+            let input_str .= nr2char(c)
+        endif
+        
+        let keyword_match = []
+        let text_property_list = []
+        let first_line_text_property = []
+        if(!empty(input_str))
+            let match_line_cnt = 1
+            let is_first_line = 1
+            for item in ['{' . help_win . '} ' . input_str] + data_list
+                let popup_str_in_bool = 0
+                let fit_bool = (a:search_mode == 'and')? 1 : 0
+                for sub_str in split(input_str, '\s\+')
+                    if (a:search_mode == 'and' && item !~ '\c' . sub_str) || (a:search_mode == 'or' && item =~ '\c' . sub_str)
+                        let fit_bool = 1 - fit_bool
+                        break
+                    endif
+                endfor
+                
+                for sub_item in split(item, '\n')
+                    if fit_bool
+                        if !popup_str_in_bool
+                            call extend(keyword_match, split(item, '\n'))
+                        endif
+                        if is_first_line
+                            let start = 0
+                            while 1
+                                let match_str = matchstrpos(sub_item, '\s\+', start)
+                                if match_str[0] == ''
+                                    break
+                                endif
+                                
+                                let start = match_str[2]
+                                call add(first_line_text_property, [1, match_str[1]+1, match_str[2] - match_str[1], 'HelpPopupKeywordHighLightBlank'])
+                            endwhile
+                            let is_first_line = 0
+                        endif
+                        
+                        " 循环高亮组
+                        let highlight_cnt = 0
+                        for input_str_regex in split(input_str, '\s\+')
+                            let start = 0
+                            while 1
+                                let match_str = matchstrpos(sub_item, '\c' . input_str_regex, start)
+                                if match_str[0] == ''
+                                    break
+                                endif
+                                
+                                let start = match_str[2]
+                                call add(text_property_list, [match_line_cnt, match_str[1]+1, match_str[2]-match_str[1], highlight_cnt % len(g:help_popup_highlight_colors)])
+                            endwhile
+                            let highlight_cnt += 1
+                        endfor
+                        let popup_str_in_bool = 1
+                    endif
+                    let match_line_cnt += 1
+                endfor
+                if !popup_str_in_bool
+                    let match_line_cnt -= len(split(item, '\n'))
+                endif
+            endfor
+        endif
+        
+        if (c != "\<Up>" && c != "\<Down>")
+            call popup_settext(help_win, keyword_match)
+            if !empty(text_property_list)
+                for text_property in text_property_list
+                    call prop_add(text_property[0], text_property[1], {'type': 'HelpPopupKeywordHighLight' . text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': 1})
+                endfor
+            endif
+            
+            if !empty(first_line_text_property)
+                for text_property in first_line_text_property
+                    call prop_add(text_property[0], text_property[1], {'type': text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': 1})
+                endfor
+            endif
+        else
+            let firstline = get(popup_getoptions(help_win), 'firstline', 1)
+            if c == "\<Up>" && firstline > 1
+                call popup_setoptions(help_win, #{ firstline: firstline - 1})
+            elseif c == "\<Down>"
+                call popup_setoptions(help_win, #{firstline: firstline + 1})
+            endif
+        endif
+        
+        redraw
+    endwhile
+endfunction
+
+
+source $VIM/keybinding_help.vim
+" :TODO: 如果列表中只有一个元素，可能再增加一个弹窗显示详情
+" :TODO: 可以支持类似fzf的模糊搜索功能
+" :TODO: 滚轮键只有在固定的时候可以使用，可以再处理下PgUp和PgDn
+" 如果要搜索所有的，输入.点号即可
+
+nnoremap <silent> <c-h> :call PopupMenuShowKeyBindings('and', '', '')<cr>
+nnoremap <silent> <c-s-h> :call PopupMenuShowKeyBindings('or', '', '')<cr>
+nnoremap <silent> <c-s-c> :call PopupMenuShowKeyBindings('and', 'auto', 'map')<cr>
+nnoremap <silent> <leader><leader>c :call PopupMenuShowKeyBindings('or', 'auto', 'map')<cr>
+
+nnoremap <leader>cpw :call popup_close(
+nnoremap <leader>cpwa :call popup_clear()<cr>
+
+function! GetAllInfoInPopupWin(paste_flag)
+    let all_popup_win_list = popup_list()
+    if all_popup_win_list != []
+        let first_register = 1
+        for winid in all_popup_win_list
+            let bufnr = winbufnr(winid)
+            let lines = getbufline(bufnr, 2, '$')
+            if first_register
+                let @a = join(lines, "\n") . "\n"
+                let first_register = 0
+            else
+                let @A = join(lines, "\n") . "\n"
+            endif
+        endfor
+        let @" = @a
+        let @+ = @a
+    
+        if a:paste_flag
+            normal! p
+        endif
+    endif
+
+endfunction
+
+" vim9-stargate插件的bug修复
+
+function! ClearAllNotTipsPopupWin()
+    let all_popup_win_list = popup_list()
+    if all_popup_win_list != []
+        for winid in all_popup_win_list
+            if get(popup_getoptions(winid), "title", "") != "tips"
+                call popup_close(winid)
+            endif
+        endfor
+    endif
+
+endfunction
+autocmd TabLeave * call ClearAllNotTipsPopupWin()
+
+
+nnoremap <silent> <leader>ypw :call GetAllInfoInPopupWin(0)<cr>
+nnoremap <silent> <leader>ypwp :call GetAllInfoInPopupWin(1)<cr>
+
+
+" 按键补全帮助窗口 }
+
+
+
+nnoremap <c-;> <Cmd>call stargate#OKvim('\<')<cr>
+nnoremap <leader>w <Cmd>call stargate#Galaxy()<cr>
+
+tnoremap <Esc> <C-\><C-n>
+
+
+" :TODO: vim脚本超过80列自动换行,设置了下面的配置也无用
+" :TODO: 这个设置无效会被覆盖需要定位
+set textwidth=0
+
+" :TODO: 所有需要映射的文件用一个windows下的批处理脚本来处理
+" :TODO: 目前不确定我自定义的补全是否会和coc还有completor的补全相冲突
 
 

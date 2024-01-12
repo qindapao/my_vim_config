@@ -149,6 +149,9 @@ D:\programes\Vim>mklink _vimrc E:\code\my_vim_config\_vimrc
 D:\programes\Vim>
 ```
 
+随着开发的进行，可能还会映射一些文件，用于放置一些全局变量等等。后续可以考虑写一个脚本来处理。
+
+
 # 交换esc和caps lock的键位
 
 参考链接：[=>](https://cloud.tencent.com/developer/article/1748870)
