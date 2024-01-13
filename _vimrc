@@ -418,7 +418,7 @@ set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
 " set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
-set guifont=微软雅黑\ PragmataPro\ Mono:h8
+set guifont=微软雅黑\ PragmataPro\ Mono:h12
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
@@ -580,6 +580,8 @@ Plug 'ludovicchabant/vim-gutentags'                                            "
 Plug 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
 Plug 'preservim/tagbar'                                                        " 当前文件的标签浏览器
 Plug 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
+" 另外一个书签标签管理器 :TODO: 待尝试
+Plug 'Yilin-Yang/vim-markbar'
 Plug 'azabiong/vim-highlighter'                                                " 多高亮标签插件
 
 Plug 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
@@ -790,9 +792,10 @@ vnoremap <leader>gi y:GscopeFind i <c-r>"
 " gutentags_plus 插件配置 }
 
 " NERDTree {
-nmap <leader><leader><F8> :NERDTreeToggle<CR>
-" 刷新NERDTree的状态
-nmap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
+nnoremap <leader><leader><F8> :NERDTreeToggle<CR>
+" 刷新NERDTree的状态(这里的窗口切换无效不知道原因)
+nnoremap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
+nnoremap <leader>ntf :NERDTreeFind<cr>R<c-w>W
 " NERDTree的修改文件的界面使用更小的界面显示
 let NERDTreeMinimalMenu = 1
 let NERDTreeShowHidden = 1
@@ -1294,6 +1297,9 @@ let g:ctrlsf_regex_pattern = 1
 " vim-terminal-help 插件配置 {
 let g:terminal_height = 20
 tnoremap <Esc> <C-\><C-n>
+" 重新映射Esc键的功能
+" <C-v>的默认功能是输出特殊字符,这里<C-S-->是不行的,不知道原因
+tnoremap <C-v> <C-S-_>"+
 
 
 " vim-terminal-help 插件配置 }
@@ -1301,6 +1307,13 @@ tnoremap <Esc> <C-\><C-n>
 " quick-scope 插件 {
 highlight QuickScopePrimary ctermfg=red guifg=red
 highlight QuickScopeSecondary ctermfg=blue guifg=blue
+" 这里设置的特殊字符好像无效
+let g:qs_accepted_chars = map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)') 
+            \+ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)') 
+            \+ map(range(char2nr('0'), char2nr('9')), 'nr2char(v:val)') 
+            \+ ['"', ',', '.', "'", '!', '@', '+', '-']
+" 终端中不要高亮
+let g:qs_buftype_blacklist = ['terminal', 'nofile']
 " quick-scope 插件 }
 
 " vim9-stargate 插件配置 {
@@ -1310,6 +1323,25 @@ let g:stargate_limit = 600
 " vim-fugitive 插件按键绑定 {
 nnoremap <silent> <leader>gitda :Git difftool -y<cr>
 " vim-fugitive 插件按键绑定 }
+
+" vim-markbar 插件配置 {
+" this is required for mark names to persist between editor sessions
+if has('nvim')
+    set shada+=!
+else
+    set viminfo+=!
+endif
+
+nmap <Leader>m <Plug>ToggleMarkbar
+
+" the following are unneeded if ToggleMarkbar is mapped
+nmap <Leader>mo <Plug>OpenMarkbar
+nmap <Leader>mc <Plug>CloseMarkbar
+nmap <Leader>www <Plug>WriteMarkbarRosters
+let g:markbar_print_time_on_shada_io = v:true
+
+
+" vim-markbar 插件配置 }
 
 " 插件配置 }
 
@@ -1485,6 +1517,7 @@ for i in range(len(g:help_popup_highlight_colors))
     endif
 endfor
 
+let g:help_win_text_prop_id = 1
 function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
     if a:exec_mode == 'auto'
         let user_command = a:exec_cmd
@@ -1563,6 +1596,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                     endif
                 endfor
                 
+                " :TODO: 这里可以优化性能,写一个总的正则,不用一个单词一个单词去匹配
                 for sub_item in split(item, '\n')
                     if fit_bool
                         if !popup_str_in_bool
@@ -1611,13 +1645,13 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
             call popup_settext(help_win, keyword_match)
             if !empty(text_property_list)
                 for text_property in text_property_list
-                    call prop_add(text_property[0], text_property[1], {'type': 'HelpPopupKeywordHighLight' . text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': 1})
+                    call prop_add(text_property[0], text_property[1], {'type': 'HelpPopupKeywordHighLight' . text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': g:help_win_text_prop_id})
                 endfor
             endif
             
             if !empty(first_line_text_property)
                 for text_property in first_line_text_property
-                    call prop_add(text_property[0], text_property[1], {'type': text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': 1})
+                    call prop_add(text_property[0], text_property[1], {'type': text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': g:help_win_text_prop_id})
                 endfor
             endif
         else
@@ -1699,7 +1733,6 @@ nnoremap <silent> <leader>ypwp :call GetAllInfoInPopupWin(1)<cr>
 nnoremap <c-;> <Cmd>call stargate#OKvim('\<')<cr>
 nnoremap <leader>w <Cmd>call stargate#Galaxy()<cr>
 
-tnoremap <Esc> <C-\><C-n>
 
 
 " :TODO: vim脚本超过80列自动换行,设置了下面的配置也无用
