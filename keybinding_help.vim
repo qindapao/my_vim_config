@@ -34,5 +34,32 @@ let g:key_binding_list = [
 \ "Git[c]      :Gvdiffsplit       [vim-fugitive]左右对比当前文本和最新提交的改变(后面可以跟参数也可以不跟,跟参数表示和特定git对象比较,比如commit id或者分支名或者其它)",
 \ "Git[n]      <leader>gitda      [vim-fugitive]和最新提交对比所有变更(git diff all)",
 \ "Git[c]      :h fugitive        [vim-fugitive]帮助手册查看",
+\ "标记[n]  [signature]\n\
+  \:h signature 帮助手册查看\n\
+  \mx           Toggle mark 'x' and display it in the leftmost column\n\
+  \dmx          Remove mark 'x' where x is a-zA-Z\n\
+  \m,           Place the next available mark\n\
+  \m.           If no mark on line, place the next available mark. Otherwise,\n\
+  \             remove (first) existing mark.\n\
+  \m-           Delete all marks from the current line\n\
+  \m<Space>     Delete all marks from the current buffer\n\
+  \]`           Jump to next mark\n\
+  \[`           Jump to prev mark\n\
+  \]'           Jump to start of next line containing a mark\n\
+  \['           Jump to start of prev line containing a mark\n\
+  \`]           Jump by alphabetical order to next mark\n\
+  \`[           Jump by alphabetical order to prev mark\n\
+  \']           Jump by alphabetical order to start of next line having a mark\n\
+  \'[           Jump by alphabetical order to start of prev line having a mark\n\
+  \m/           Open location list and display marks from current buffer\n\
+  \m[0-9]       Toggle the corresponding marker !@#$%^&*()\n\
+  \m<S-[0-9]>   Remove all markers of the same type\n\
+  \]-           Jump to next line having a marker of the same type\n\
+  \[-           Jump to prev line having a marker of the same type\n\
+  \]=           Jump to next line having a marker of any type\n\
+  \[=           Jump to prev line having a marker of any type\n\
+  \m?           Open location list and display markers from current buffer\n\
+  \m<BS>        Remove all markers\n",
+\ "日志定位[c] :messages clear           清除vim所有的messages日志",
 \]
 

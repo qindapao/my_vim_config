@@ -541,7 +541,8 @@ nnoremap <leader>ven :set ve=<cr>
 " 设置平滑滚动(vim9.1新增),不过目前没看出来效果是啥
 set smoothscroll
 
-
+" 关闭预览窗口(主要是自定义补全不冲突)
+set completeopt-=preview
 
 " 基本设置区域 }
 
@@ -580,7 +581,7 @@ Plug 'ludovicchabant/vim-gutentags'                                            "
 Plug 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
 Plug 'preservim/tagbar'                                                        " 当前文件的标签浏览器
 Plug 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
-" 另外一个书签标签管理器 :TODO: 待尝试
+" 另外一个标记管理器(这个是标记并不是书签,书签是持久化的,这个不是,并且只能字母,所以需要和书签配合起来使用)
 Plug 'Yilin-Yang/vim-markbar'
 Plug 'azabiong/vim-highlighter'                                                " 多高亮标签插件
 
@@ -1446,7 +1447,8 @@ set completefunc=OmniCompleteCustom
 " 在补全时显示弹出窗口
 function! CompleteShowPopup(item)
     " 如果已经存在弹出窗口，先关闭它
-    if exists('s:winid')
+    " 这里不太明白的是,为什么这里用单引号也可以
+    if exists("s:winid")
         call popup_close(s:winid)
     endif
 
@@ -1473,9 +1475,9 @@ endfunction
 autocmd CompleteChanged * call CompleteShowPopup(v:completed_item)
 " 当退出插入模式时，关闭弹出窗口
 " :TODO: 这里甚至可以执行特定的回调，回调的位置可以想办法指定
-autocmd InsertLeave * if exists('s:winid') | call popup_close(s:winid) | endif
+autocmd InsertLeave * if exists("s:winid") | call popup_close(s:winid) | endif
 " 当补全完成时，关闭弹出窗口
-autocmd CompleteDone * if exists('s:winid') | call popup_close(s:winid) | endif
+autocmd CompleteDone * if exists("s:winid") | call popup_close(s:winid) | endif
 autocmd CompleteDone * .s/\%x00/\r/ge
 " 替换文本中的^@为换行
 nnoremap <leader>rca :%s/\%x00/\r/g<cr>
@@ -1520,6 +1522,7 @@ endfor
 
 let g:help_win_text_prop_id = 1
 function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
+    " ! 开头的命令表示外部名 : 开头表示执行函数 其它表示执行vim内部表达式
     if a:exec_mode == 'auto'
         let user_command = a:exec_cmd
     elseif a:exec_mode == 'manu'
@@ -1531,13 +1534,15 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
         try
             if user_command[0] == '!'
                 let user_command_str = system(user_command[1:])
+            elseif user_command[0] == ':'
+                let user_command_str = eval(user_command[1:] . '()')
             else
                 redir => user_command_str
                 silent execute user_command
                 redir END
             endif
         catch
-            user_command_str = "null"
+            let user_command_str = "null"
             echoerr "执行的命令无效: " . v:exception
         endtry
         
@@ -1678,7 +1683,9 @@ source $VIM/keybinding_help.vim
 nnoremap <silent> <c-h> :call PopupMenuShowKeyBindings('and', '', '')<cr>
 nnoremap <silent> <c-s-h> :call PopupMenuShowKeyBindings('or', '', '')<cr>
 nnoremap <silent> <c-s-c> :call PopupMenuShowKeyBindings('and', 'auto', 'map')<cr>
-nnoremap <silent> <leader><leader>c :call PopupMenuShowKeyBindings('or', 'auto', 'map')<cr>
+nnoremap <silent> <leader><leader>ca :call PopupMenuShowKeyBindings('or', 'auto', 'map')<cr>
+" 输入命令 marks 可以显示当前所有的标记
+nnoremap <silent> <leader><leader>cm :call PopupMenuShowKeyBindings('and', 'manu', '')<cr>
 
 nnoremap <leader>cpw :call popup_close(
 nnoremap <leader>cpwa :call popup_clear()<cr>
@@ -1742,5 +1749,83 @@ set textwidth=0
 
 " :TODO: 所有需要映射的文件用一个windows下的批处理脚本来处理
 " :TODO: 目前不确定我自定义的补全是否会和coc还有completor的补全相冲突
+
+" :TODO: 自己写一个插件,在弹出窗口中显示小写字母标记和大写字母标记[marker]的上下文,并且自动更新,可以手动切换这个弹出窗口的显示与关闭,最好是还可以重命令,并且可以持久化保存弹出窗口中的名字相关的映射,这样下次打开还能使用
+" :TODO: 待实现标记窗口的上下文
+" 利用弹出窗口自己设计的标记系统 {
+" 标记的格式
+" 标记 行 列 文件/文本
+function! SortMarks()
+    redir => l:marks
+    silent marks
+    redir END
+
+    let l:lines = split(l:marks, '\n')
+    call filter(l:lines, 'v:val =~ "^\\s\\+[a-zA-Z]"')
+    call map(l:lines, 'split(v:val)')
+    call sort(l:lines, 'SortByLine')
+
+    " return join(map(copy(l:lines), 'join(v:val, " ")'), "\n")
+    return map(copy(l:lines), 'join(v:val, " ")')
+endfunction
+
+function! SortByLine(mark1, mark2)
+    return a:mark1[1] - a:mark2[1]
+endfunction
+
+" vim中执行异步的命令并且在弹出窗口中动态显示出来(用于监控一些重要信息)
+let s:timer = -1
+
+function! StartTimer()
+    if s:timer != -1
+        call timer_stop(s:timer)
+    endif
+
+    " 创建一个空的弹出窗口
+    let opts = { 'line': 'cursor',
+        \ 'col': 'cursor',
+        \ 'padding': [0,1,0,1],
+        \ 'wrap': v:true,
+        \ 'border': [],
+        \ 'close': 'none',
+        \ 'highlight': 'Pmenu',
+        \ 'resize': 1,
+        \ 'zindex': 100,
+        \ 'maxheight': 20,
+        \ 'maxwidth': 80,
+        \ 'title': 'tips',
+        \ 'dragall': 1}
+    let s:dynamic_content_win = popup_create([''], opts)
+
+    let s:timer = timer_start(1000, 'UploadDynamicPopupWin', {'repeat': -1})
+endfunction
+
+function! StopTimer()
+    if s:timer != -1
+        call timer_stop(s:timer)
+        let s:timer = -1
+        " if exists(s:dynamic_content_win) && !empty(popup_findinfo(s:dynamic_content_win))
+        call popup_close(s:dynamic_content_win)
+        " endif
+    endif
+endfunction
+
+function! UploadDynamicPopupWin(timer_id)
+    let dynamic_info_list = SortMarks()
+    " if exists(s:dynamic_content_win) && !empty(popup_findinfo(s:dynamic_content_win))
+    call popup_settext(s:dynamic_content_win, dynamic_info_list)
+    " endif
+endfunction
+
+
+" show marks
+nnoremap <silent> <leader><leader>sm :call PopupMenuShowKeyBindings('and', 'auto', ':SortMarks')<cr>
+nnoremap <silent> <leader>smt :call StartTimer()<cr>
+nnoremap <silent> <leader>tmt :call StopTimer()<cr>
+" 为了避免麻烦,在切换标签页前关闭
+" :TODO: 可以考虑给字母标记加注释,注释的内容可以持久化,并方便更新,字母标记也可以持久化
+autocmd BufLeave * call StopTimer()
+
+" 利用弹出窗口自己设计的标记系统 }
 
 
