@@ -1300,7 +1300,8 @@ tnoremap <Esc> <C-\><C-n>
 " 重新映射Esc键的功能
 " <C-v>的默认功能是输出特殊字符,这里<C-S-->是不行的,不知道原因
 tnoremap <C-v> <C-S-_>"+
-
+" 这个插件自定义了一个drop命令,但是使用有报错,可能是因为windows系统的换行符导致的
+" 有空可以定位下 :TODO:
 
 " vim-terminal-help 插件配置 }
 
@@ -1313,7 +1314,7 @@ let g:qs_accepted_chars = map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)
             \+ map(range(char2nr('0'), char2nr('9')), 'nr2char(v:val)') 
             \+ ['"', ',', '.', "'", '!', '@', '+', '-']
 " 终端中不要高亮
-let g:qs_buftype_blacklist = ['terminal', 'nofile']
+" let g:qs_buftype_blacklist = ['terminal', 'nofile']
 " quick-scope 插件 }
 
 " vim9-stargate 插件配置 {
