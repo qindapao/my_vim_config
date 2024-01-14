@@ -316,7 +316,7 @@ set tabline=%!MyTabLine()
 
 
 " 设置自动切换到当前操作的文件的目录(可能被别人覆盖,进入编辑器后需要手动设置一次)
-" :TODO: 这个问题需要定位
+" :TODO: 这个在家里OK了,但是公司的电脑上好像还有问题
 set autochdir
 
 " 设置vim的窗口分割竖线的形状
@@ -1745,6 +1745,8 @@ nnoremap <leader>w <Cmd>call stargate#Galaxy()<cr>
 " :TODO: vim脚本超过80列自动换行,设置了下面的配置也无用
 " :TODO: 这个设置无效会被覆盖需要定位
 set textwidth=0
+" 用这一行规避上面的问题
+autocmd filetype * set textwidth=0 
 
 " :TODO: 所有需要映射的文件用一个windows下的批处理脚本来处理
 " :TODO: 目前不确定我自定义的补全是否会和coc还有completor的补全相冲突
