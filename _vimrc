@@ -1444,10 +1444,9 @@ endfunction
 set completefunc=OmniCompleteCustom
 
 " 在补全时显示弹出窗口
-" 在补全时显示弹出窗口
+" :TODO: 补全的弹出窗口如果在别的文字上面显示会出现闪烁现象,需要定位下
 function! CompleteShowPopup(item)
-    " 如果已经存在弹出窗口，先关闭它
-    " 这里不太明白的是,为什么这里用单引号也可以
+    " 如果已经存在弹出窗口，先关闭它,这里之所以要用双引号是因为这里要检查的是以双引号引起来的字符串的名字作为变量名的变量是否存在,所以这里单引号也是可以的
     if exists("s:winid")
         call popup_close(s:winid)
     endif
