@@ -59,7 +59,7 @@ command! -nargs=? Diff call GitDiff(<q-args>)
 
 " 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
 " usage :call GenMarkdownSectionNum    给markdown/zimwiki 文件生成目录编号
-" 有一个BUG，如果markdown文件中有注释，会被认为是一级标题，规避的方法是在#前面加一个空格
+" 如果要在某些脚本代码中写注释,那么使用#----这种格式来过滤
 function! GenSectionNum(file_type)
     if &ft != a:file_type
         echohl Error
@@ -85,6 +85,10 @@ function! GenSectionNum(file_type)
         let line = getline(i)
         if a:file_type == 'markdown'
             let heading_lvl = strlen(substitute(line, '^\(#*\).*', '\1', ''))
+            " 如果格式是#-那么直接跳过(短杠可能有无数个,并且后面可能还有别的字符)
+            if line =~ '^#\+-\+.*'
+                continue
+            endif
         elseif a:file_type == 'zim'
             let heading_lvl = 7 - strlen(substitute(line, '^\(=*\).*', '\1', ''))
         endif
@@ -1713,20 +1717,22 @@ function! GetAllInfoInPopupWin(paste_flag)
 
 endfunction
 
-" vim9-stargate插件的bug修复
+" " 目前插件官方已经修复了这个BUG,这里屏蔽 {
+" " vim9-stargate插件的bug修复
 
-function! ClearAllNotTipsPopupWin()
-    let all_popup_win_list = popup_list()
-    if all_popup_win_list != []
-        for winid in all_popup_win_list
-            if get(popup_getoptions(winid), "title", "") != "tips"
-                call popup_close(winid)
-            endif
-        endfor
-    endif
+" function! ClearAllNotTipsPopupWin()
+"     let all_popup_win_list = popup_list()
+"     if all_popup_win_list != []
+"         for winid in all_popup_win_list
+"             if get(popup_getoptions(winid), "title", "") != "tips"
+"                 call popup_close(winid)
+"             endif
+"         endfor
+"     endif
 
-endfunction
-autocmd TabLeave * call ClearAllNotTipsPopupWin()
+" endfunction
+" autocmd TabLeave * call ClearAllNotTipsPopupWin()
+" " 目前插件官方已经修复了这个BUG,这里屏蔽 }
 
 
 nnoremap <silent> <leader>ypw :call GetAllInfoInPopupWin(0)<cr>
