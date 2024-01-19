@@ -243,6 +243,19 @@ function! OmniFuncPython(findstart, base)
     endif
 endfunction
 
+function! OmniFuncShell(findstart, base)
+    " 目前这个gtagsomnicomplete相当若,作用不是很大
+    let l:res2 = gtagsomnicomplete#Complete(a:findstart, a:base)
+    let l:res3 = OmniCompleteCustom(a:findstart, a:base)
+
+    if (type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0
+        return l:res3
+    else
+        return l:res2 + l:res3
+    endif
+endfunction
+
+
 function! DeleteTerminalBuffers()
     for l:bufnr in range(1, bufnr('$'))
         if buflisted(l:bufnr) && getbufvar(l:bufnr, '&buftype') == 'terminal'
@@ -319,8 +332,6 @@ set tabline=%!MyTabLine()
 
 
 
-" 设置自动切换到当前操作的文件的目录(可能被别人覆盖,进入编辑器后需要手动设置一次)
-" :TODO: 这个在家里OK了,但是公司的电脑上好像还有问题
 set autochdir
 
 " 设置vim的窗口分割竖线的形状
@@ -586,7 +597,8 @@ Plug 'skywind3000/gutentags_plus'                                              "
 Plug 'preservim/tagbar'                                                        " 当前文件的标签浏览器
 Plug 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
 " 另外一个标记管理器(这个是标记并不是书签,书签是持久化的,这个不是,并且只能字母,所以需要和书签配合起来使用)
-Plug 'Yilin-Yang/vim-markbar'
+" 不是很好用,直接屏蔽
+" Plug 'Yilin-Yang/vim-markbar'
 Plug 'azabiong/vim-highlighter'                                                " 多高亮标签插件
 
 Plug 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
@@ -637,6 +649,7 @@ Plug 'markonm/traces.vim'                                                      "
 Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
 " 暂时用不上先屏蔽
 " Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
+" 使用下面这个rooter是对的,另外的一个rooter会造成set autochdir命令失效
 Plug 'airblade/vim-rooter'                                                     " root目录设置插件
 " 画图插件,用处不大
 " Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
@@ -671,6 +684,7 @@ Plug 'pbrisbin/vim-colors-off'                                                 "
 Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
 Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
+Plug 'Mitgorakh/snow'
 
 
 call plug#end()
@@ -840,8 +854,9 @@ nnoremap <leader><C-t> :setlocal guifont=Yahei\ Fira\ Icon\ Hybrid:h
 
 " gtagsomnicomplete {
 " https://github.com/ragcatshxu/gtagsomnicomplete 原始的位置,我修改了下，当前使用的是我修改后的
-autocmd filetype c,sh,perl set omnifunc=gtagsomnicomplete#Complete
+autocmd filetype c,perl set omnifunc=gtagsomnicomplete#Complete
 autocmd filetype python setlocal omnifunc=OmniFuncPython
+autocmd filetype sh setlocal omnifunc=OmniFuncShell
 " gtagsomnicomplete }
 
 " vim-rainbow {
@@ -867,15 +882,21 @@ let g:rainbow_active = 1                                                        
 " ser guicursor+=a:blinkon0
 " " toast主题 }
 
-" vim-colors-github 主题 {
-let g:github_colors_soft = 1
+" " vim-colors-github 主题 {
+" let g:github_colors_soft = 1
+" set background=light
+" let g:github_colors_block_diffmark = 0
+" colorscheme github
+" let g:airline_theme = "github"
+" " 切换亮和暗主题
+" call github_colors#togglebg_map('<f6>')
+" " vim-colors-github 主题 }
+
+" Mitgorakh/snow 主题 {
+colorscheme snow
 set background=light
-let g:github_colors_block_diffmark = 0
-colorscheme github
-let g:airline_theme = "github"
-" 切换亮和暗主题
-call github_colors#togglebg_map('<f6>')
-" vim-colors-github 主题 }
+" Mitgorakh/snow 主题 {
+
 
 " set t_Co=256
 " " 还有amdard
@@ -1062,6 +1083,8 @@ let g:tagbar_sort = 0
 
 " auto-pairs 配置 {
 au filetype markdown,html let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
+" :TODO: 具体使用的时候在来调整,或者把公司中的配置同步过来
+au filetype zim let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
 " auto-pairs 配置 }
 
 " doq的配置 {
@@ -1330,24 +1353,30 @@ let g:stargate_limit = 600
 nnoremap <silent> <leader>gitda :Git difftool -y<cr>
 " vim-fugitive 插件按键绑定 }
 
-" vim-markbar 插件配置 {
-" this is required for mark names to persist between editor sessions
-if has('nvim')
-    set shada+=!
-else
-    set viminfo+=!
-endif
+" " vim-markbar 插件配置 {
+" " this is required for mark names to persist between editor sessions
+" if has('nvim')
+"     set shada+=!
+" else
+"     set viminfo+=!
+" endif
 
-nmap <Leader>m <Plug>ToggleMarkbar
+" nmap <Leader>m <Plug>ToggleMarkbar
 
-" the following are unneeded if ToggleMarkbar is mapped
-nmap <Leader>mo <Plug>OpenMarkbar
-nmap <Leader>mc <Plug>CloseMarkbar
-nmap <Leader>www <Plug>WriteMarkbarRosters
-let g:markbar_print_time_on_shada_io = v:true
+" " the following are unneeded if ToggleMarkbar is mapped
+" nmap <Leader>mo <Plug>OpenMarkbar
+" nmap <Leader>mc <Plug>CloseMarkbar
+" nmap <Leader>www <Plug>WriteMarkbarRosters
+" let g:markbar_print_time_on_shada_io = v:true
 
 
-" vim-markbar 插件配置 }
+" " vim-markbar 插件配置 }
+
+" markdown-preview 插件配置 {
+" let g:mkdp_markdown_css = $VIM . '\github-markdown-light.css'
+let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
+" markdown-preview 插件配置 }
+
 
 " 插件配置 }
 
@@ -1385,6 +1414,8 @@ function! CustomCompleteList()
         source $VIM/complete_list_zim.vim
     elseif &filetype == 'python'
         source $VIM/complete_list_python.vim
+    elseif &filetype == 'sh'
+        source $VIM/complete_list_sh.vim
     endif
 
     if !empty(g:complete_list)
@@ -1395,6 +1426,8 @@ function! CustomCompleteList()
     
 endfunction
 
+" 这里多调用一次是因为如果重新加载vimrc,希望能生效
+call CustomCompleteList()
 autocmd filetype * call CustomCompleteList()
 
 function! OmniCompleteCustom(findstart, base)

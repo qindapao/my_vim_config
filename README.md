@@ -138,6 +138,7 @@ https://github.com/mvdan/sh => shfmt_v3.7.0_windows_amd64.exe
 
 
 # 在windows下为vim的配置文件创建符号链接
+
 ```txt
 C:\Windows\System32>D:
 
@@ -149,7 +150,34 @@ D:\programes\Vim>mklink _vimrc E:\code\my_vim_config\_vimrc
 D:\programes\Vim>
 ```
 
-随着开发的进行，可能还会映射一些文件，用于放置一些全局变量等等。后续可以考虑写一个脚本来处理。
+随着开发的进行，可能还会映射一些文件，用于放置一些全局变量等等。 目前使用脚本自动化处理需要创建符号链接的文件：
+
+```powershell
+PS E:\code\my_vim_config> .\mklink.ps1 D:\programes\Vim E:\code\my_vim_config
+
+
+    目录: D:\programes\Vim
+
+
+Mode                 LastWriteTime         Length Name
+----                 -------------         ------ ----
+-a---l         2024/1/19     23:54              0 complete_list_all.vim
+-a---l         2024/1/19     23:54              0 complete_list_python.vim
+-a---l         2024/1/19     23:54              0 complete_list_sh.vim
+-a---l         2024/1/19     23:54              0 complete_list_zim.vim
+-a---l         2024/1/19     23:54              0 keybinding_help.vim
+-a---l         2024/1/19     23:54              0 complete_list_all.vim
+-a---l         2024/1/19     23:54              0 complete_list_python.vim
+-a---l         2024/1/19     23:54              0 complete_list_sh.vim
+-a---l         2024/1/19     23:54              0 complete_list_zim.vim
+-a---l         2024/1/19     23:54              0 keybinding_help.vim
+-a---l         2024/1/12     22:34              0 _vimrc
+
+
+PS E:\code\my_vim_config>
+```
+
+脚本归档在项目目录下：`mklink.ps1`
 
 
 # 交换esc和caps lock的键位
