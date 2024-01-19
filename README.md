@@ -152,7 +152,20 @@ D:\programes\Vim>
 
 随着开发的进行，可能还会映射一些文件，用于放置一些全局变量等等。 目前使用脚本自动化处理需要创建符号链接的文件：
 
+注意两点:
+
+1. 脚本的运行需要管理员权限，所以请以管理员启动`powershell`的终端
+2. 系统一般默认不运行脚本执行，所以在执行脚本前需要先临时关闭这个门禁
+
 ```powershell
+PS C:\WINDOWS\system32> cd E:\code\my_vim_config
+PS E:\code\my_vim_config> Set-ExecutionPolicy Unrestricted -Scope Process
+
+执行策略更改
+执行策略可帮助你防止执行不信任的脚本。更改执行策略可能会产生安全风险，如 https:/go.microsoft.com/fwlink/?LinkID=135170
+中的 about_Execution_Policies 帮助主题所述。是否要更改执行策略?
+[Y] 是(Y)  [A] 全是(A)  [N] 否(N)  [L] 全否(L)  [S] 暂停(S)  [?] 帮助 (默认值为“N”): Y
+PS E:\code\my_vim_config>
 PS E:\code\my_vim_config> .\mklink.ps1 D:\programes\Vim E:\code\my_vim_config
 
 
@@ -176,6 +189,8 @@ Mode                 LastWriteTime         Length Name
 
 PS E:\code\my_vim_config>
 ```
+
+为了安全起见，执行完脚本后应该恢复执行前的安全策略。可以在执行前使用这个获取当前的安全策略`Get-ExecutionPolicy`，然后使用`Set-ExecutionPolicy`设置回去。
 
 脚本归档在项目目录下：`mklink.ps1`
 

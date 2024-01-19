@@ -561,6 +561,10 @@ set completeopt-=preview
 
 " 基本设置区域 }
 
+" 加载插件前指定coc配置文件路径不使用默认的
+let g:coc_config_home = $VIM
+
+
 " 插件 {
 call plug#begin('~/.vim/plugged')
 
@@ -1128,7 +1132,10 @@ autocmd filetype markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :c
 " " vim-easymotion 的配置 }
 
 " coc补全插件的一些配置 {
-inoremap <silent><expr> <S-TAB> coc#pum#visible() ? coc#pum#confirm() : "\<CR>"
+" 这行配置已经没有意义,因为coc-settings.json中已经配置了"suggest.noselect": true
+" :TODO: 这里我的预期效果是要直接设置TAB，但是设置TAB无效，具体原因未知，不过这不是很重要,目前可以使用ctrl + n/p替代
+inoremap <silent><expr> <S-TAB> pumvisible() ? coc#pum#next(1) : "\<TAB>"
+
 " 定义coc插件和数据的目录
 let g:coc_data_home = '~/.vim/coc'
 " coc补全插件的一些配置 }

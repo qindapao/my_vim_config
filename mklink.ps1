@@ -27,6 +27,7 @@ New-SymbolicLink -Name "complete_list_python.vim" -Target (Join-Path -Path $args
 New-SymbolicLink -Name "complete_list_sh.vim" -Target (Join-Path -Path $args[1] -ChildPath "complete_list_sh.vim")
 New-SymbolicLink -Name "complete_list_zim.vim" -Target (Join-Path -Path $args[1] -ChildPath "complete_list_zim.vim")
 New-SymbolicLink -Name "keybinding_help.vim" -Target (Join-Path -Path $args[1] -ChildPath "keybinding_help.vim")
+New-SymbolicLink -Name "coc-settings.json" -Target (Join-Path -Path $args[1] -ChildPath "coc-settings.json")
 
 Get-ChildItem -Attributes ReparsePoint
 Pop-Location # 回到原来的目录
