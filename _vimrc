@@ -1306,17 +1306,21 @@ nnoremap <leader>db <Plug>VimspectorBreakpoints
 " vimspector 调试插件配置 {
 
 " ctrlsf 插件配置 {
+" :TODO: 目前试过各种办法都无法实现全词匹配
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
-nnoremap <leader>cfr :Rooter<cr> :CtrlSF <C-r><C-w>
-nnoremap <leader>cfc :CtrlSF <C-r><C-w>
-nnoremap <leader>cfd :CtrlSF <C-r><C-w> ./
-nnoremap <leader>cff :CtrlSF <C-r><C-w> %
+nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w>
+" 大小写敏感
+nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w>
+nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I 
+nnoremap <leader>cfc :CtrlSF -I <C-r><C-w>
+nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./
+nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %
 
 
-vnoremap <leader>cfr y:Rooter<cr> :CtrlSF <C-r>"
-vnoremap <leader>cfc y:CtrlSF <C-r>"
-vnoremap <leader>cfd y:CtrlSF <C-r>" ./
-vnoremap <leader>cff y:CtrlSF <C-r>" %
+vnoremap <leader>cfr y:Rooter<cr> :CtrlSF -I <C-r>"
+vnoremap <leader>cfc y:CtrlSF -I <C-r>"
+vnoremap <leader>cfd y:CtrlSF -I <C-r>" ./
+vnoremap <leader>cff y:CtrlSF -I <C-r>" %
 
 
 let g:ctrlsf_case_sensitive = 'yes'
@@ -1325,7 +1329,8 @@ let g:ctrlsf_ignore_dir = ['docs/bak.md', '.gitignore']
 let g:ctrlsf_backend = 'rg'
 let g:ctrlsf_search_mode = 'async'
 let g:ctrlsf_winsize = '30%'
-let g:ctrlsf_regex_pattern = 1
+" 默认按照字面意思搜索
+let g:ctrlsf_regex_pattern = 0
 
 " ctrlsf 插件配置 }
 
@@ -1390,7 +1395,7 @@ let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
 
 
 " 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown/zimwiki文件加上目录序号
-autocmd BufWritePost *.md silent call GenSectionNum('markdown')
+" autocmd BufWritePost *.md silent call GenSectionNum('markdown')
 autocmd BufWritePost *.txt silent call GenSectionNum('zim')
 
 " 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突

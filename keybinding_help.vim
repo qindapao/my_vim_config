@@ -34,6 +34,8 @@ let g:key_binding_list = [
 \ "Git[c]      :Gvdiffsplit       [vim-fugitive]左右对比当前文本和最新提交的改变(后面可以跟参数也可以不跟,跟参数表示和特定git对象比较,比如commit id或者分支名或者其它)",
 \ "Git[n]      <leader>gitda      [vim-fugitive]和最新提交对比所有变更(git diff all)",
 \ "Git[c]      :h fugitive        [vim-fugitive]帮助手册查看",
+\ 'git[t]      git fetch upstream             获取上游分支所有变更',
+\ 'git[t]      git merge upstream/mian        合并上游分支的变更到本地分支',
 \ "标记[n]  [signature]\n\
   \:h signature 帮助手册查看\n\
   \mx           Toggle mark 'x' and display it in the leftmost column\n\
@@ -61,5 +63,25 @@ let g:key_binding_list = [
   \m?           Open location list and display markers from current buffer\n\
   \m<BS>        Remove all markers\n",
 \ "日志定位[c] :messages clear           清除vim所有的messages日志",
+\ '查找  ctrlsf 按键映射           直接 ctrl + shift + c，然后搜索ctrlsf即可',
+\ "文件比较 \n\
+\在Vim中，你可以使用以下方法来对比两个文件：\n\
+\使用Vim的比较模式打开两个文件：\n\
+\vim -d file1 file2\n\
+\或者\n\
+\vimdiff file1 file2\n\
+\如果已经打开了文件file1，再打开另一个文件file2进行比较：\n\
+\:vert diffsplit file2\n\
+\如果没有用vert命令，diffsplit则会分上下两个窗口。\n\
+\如果已经用split方式打开了两个文件file1，file2，又想比较两文件的不同。分别在两个窗口里面输入命令：\n\
+\:diffthis\n\
+\如果更改了某个窗口的内容，vim又没有自动更新diff检查，可以使用如下命令更新：\n\
+\:diffupdate\n\
+\定位到不同点：\n\
+\[c 跳到前一个不同点\n\
+\]c 跳到后一个不同点\n\
+\合并文档：\n\
+\dp 将差异点的当前文档内容应用到另一文档（diff put）\n\
+\do 将差异点的另一文档的内容拷贝到当前文档（diff get）",
 \]
 
