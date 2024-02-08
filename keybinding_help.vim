@@ -83,5 +83,6 @@ let g:key_binding_list = [
 \合并文档：\n\
 \dp 将差异点的当前文档内容应用到另一文档（diff put）\n\
 \do 将差异点的另一文档的内容拷贝到当前文档（diff get）",
+\'gtags ctrl + shift + c 后弹出框搜索 gscope即可',
 \]
 

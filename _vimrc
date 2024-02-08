@@ -319,6 +319,10 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 
+" 打开括号的自动配对
+runtime macros/matchit.vim
+
+
 nnoremap <leader>dbt :call DeleteTerminalBuffers()<cr>
 
 nnoremap <leader>pwd :pwd<cr>
