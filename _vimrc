@@ -164,6 +164,10 @@ function! MyReplaceWord(now_mode)
     execute '%s/' . old_word . '/' . new_word . '/gc'
 endfunction
 
+" 括号自动配对
+runtime macros/matchit.vim
+" :TODO: GUI VIM中设置垂直和水平的滚动条的宽度(目前没有找到方法,可能要通过windows系统设置)
+
 " vim enters visual mode and selects an area the same size as the x register
 " ctrl j k h l move this selection area
 function! VisualBlockMove(derection)
@@ -319,9 +323,8 @@ endfunction
 " below are my personal settings
 " 基本设置区域 {
 
-" 打开括号的自动配对
-runtime macros/matchit.vim
-
+" 交换文件放置到固定的目录中去
+set directory^=$HOME/.vim/swap//
 
 nnoremap <leader>dbt :call DeleteTerminalBuffers()<cr>
 
@@ -853,9 +856,10 @@ let g:gitgutter_max_signs = -1                                                  
 
 " vim-guifont {
 let guifontpp_size_increment=1
-let guifontpp_smaller_font_map="<F7>"
-let guifontpp_larger_font_map="<C-S-F10>"
-let guifontpp_original_font_map="<C-F10>"
+let guifontpp_smaller_font_map="<C-ScrollWheelDown>"
+let guifontpp_larger_font_map="<C-ScrollWheelUp>"
+let guifontpp_original_font_map="<F7>"
+
 
 nnoremap <leader><C-t> :setlocal guifont=Yahei\ Fira\ Icon\ Hybrid:h
 " vim-guifont }
@@ -1883,5 +1887,4 @@ nnoremap <silent> <leader>tmt :call StopTimer()<cr>
 autocmd BufLeave * call StopTimer()
 
 " 利用弹出窗口自己设计的标记系统 }
-
 
