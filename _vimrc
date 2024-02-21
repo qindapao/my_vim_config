@@ -1887,4 +1887,13 @@ nnoremap <silent> <leader>tmt :call StopTimer()<cr>
 autocmd BufLeave * call StopTimer()
 
 " 利用弹出窗口自己设计的标记系统 }
+" :TODO: 下面这个通过emacs打开后继承的环境变量有点问题,导致ggtags相关的路径错乱,可能是因为两个程序都定义了gtags相关的东西
+function! OpenInEmacs()
+    let l:line_number = line(".")
+    let l:file_path = expand("%:p")
+    let l:command = "start emacsclientw +" . l:line_number . " " . l:file_path
+    call system(l:command)
+endfunction
+
+nnoremap <leader>oe :call OpenInEmacs()<CR>
 
