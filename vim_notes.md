@@ -3,69 +3,68 @@
 
 <!-- vim-markdown-toc GFM -->
 
-- [vim\_notes](#vim_notes)
-  - [1 快捷键整理](#1-快捷键整理)
+* [1 快捷键整理](#1-快捷键整理)
     - [1.1 窗口和buffer管理](#11-窗口和buffer管理)
     - [1.2 vim自带终端操作](#12-vim自带终端操作)
     - [1.3 链接](#13-链接)
-  - [2 搜索](#2-搜索)
-  - [3 tags查找搜索](#3-tags查找搜索)
+* [2 搜索](#2-搜索)
+* [3 tags查找搜索](#3-tags查找搜索)
     - [3.1 gtags](#31-gtags)
     - [3.2 CCTree](#32-cctree)
-  - [4 leaderf](#4-leaderf)
-  - [5 替换](#5-替换)
+* [4 leaderf](#4-leaderf)
+* [5 替换](#5-替换)
     - [5.1 ve配置](#51-ve配置)
     - [5.2 R命令和gR命令](#52-r命令和gr命令)
     - [5.3 全局替换](#53-全局替换)
-      - [5.3.1 加入参数列表](#531-加入参数列表)
-      - [5.3.2 对参数列表中的文件进行替换操作](#532-对参数列表中的文件进行替换操作)
+        + [5.3.1 加入参数列表](#531-加入参数列表)
+        + [5.3.2 对参数列表中的文件进行替换操作](#532-对参数列表中的文件进行替换操作)
     - [5.4 使用插件进行替换](#54-使用插件进行替换)
-      - [5.4.1 ctrlsf](#541-ctrlsf)
-  - [6 编辑](#6-编辑)
+        + [5.4.1 ctrlsf](#541-ctrlsf)
+* [6 编辑](#6-编辑)
     - [6.1 可视模式](#61-可视模式)
-      - [6.1.1 虚拟编辑模式](#611-虚拟编辑模式)
-      - [6.1.2 可视模式下的复制](#612-可视模式下的复制)
-  - [7 文件操作](#7-文件操作)
+        + [6.1.1 虚拟编辑模式](#611-虚拟编辑模式)
+        + [6.1.2 可视模式下的复制](#612-可视模式下的复制)
+* [7 文件操作](#7-文件操作)
     - [7.1 打开历史文件](#71-打开历史文件)
     - [7.2 Explore](#72-explore)
     - [7.3 强制vim以某个编码打开一个文件](#73-强制vim以某个编码打开一个文件)
-  - [8 未整理](#8-未整理)
-  - [9 常用插件操作](#9-常用插件操作)
+* [8 未整理](#8-未整理)
+* [9 常用插件操作](#9-常用插件操作)
     - [9.1 surround](#91-surround)
     - [9.2 completor 补全插件](#92-completor-补全插件)
     - [9.3 coc 补全框架](#93-coc-补全框架)
-      - [9.3.1 coc框架下的c语言补全](#931-coc框架下的c语言补全)
-      - [9.3.2 coc补全和代码片段管理工具的集成](#932-coc补全和代码片段管理工具的集成)
-      - [9.3.3 支持java语言](#933-支持java语言)
+        + [9.3.1 coc框架下的c语言补全](#931-coc框架下的c语言补全)
+        + [9.3.2 coc补全和代码片段管理工具的集成](#932-coc补全和代码片段管理工具的集成)
+        + [9.3.3 支持java语言](#933-支持java语言)
     - [9.4 ale代码检查](#94-ale代码检查)
-      - [9.4.1 java语言](#941-java语言)
-  - [10 git](#10-git)
+        + [9.4.1 java语言](#941-java语言)
+* [10 git](#10-git)
     - [10.1 配置终端中使用的git工具](#101-配置终端中使用的git工具)
     - [10.2 使用浏览器打开当前文件的远程文件](#102-使用浏览器打开当前文件的远程文件)
-  - [11 vim的自定义函数](#11-vim的自定义函数)
-  - [12 vscode](#12-vscode)
+* [11 vim的自定义函数](#11-vim的自定义函数)
+* [12 vscode](#12-vscode)
     - [12.1 easymotion插件的一些说明](#121-easymotion插件的一些说明)
-  - [13 关于使用vim来画字符画](#13-关于使用vim来画字符画)
+* [13 关于使用vim来画字符画](#13-关于使用vim来画字符画)
     - [13.1 虚拟编辑模式](#131-虚拟编辑模式)
     - [13.2 实用的命令行小工具](#132-实用的命令行小工具)
     - [13.3 R模式和gR模式](#133-r模式和gr模式)
-  - [14 git](#14-git)
+* [14 git](#14-git)
     - [14.1 登录wsl后的别名设置](#141-登录wsl后的别名设置)
     - [14.2 fugitive](#142-fugitive)
-      - [14.2.1 Gvdiffsplit](#1421-gvdiffsplit)
-      - [14.2.2 修改点的跳转](#1422-修改点的跳转)
-      - [14.2.3 如何实现预览所有的变更](#1423-如何实现预览所有的变更)
-      - [14.2.4 查看历史提交](#1424-查看历史提交)
+        + [14.2.1 Gvdiffsplit](#1421-gvdiffsplit)
+        + [14.2.2 修改点的跳转](#1422-修改点的跳转)
+        + [14.2.3 如何实现预览所有的变更](#1423-如何实现预览所有的变更)
+        + [14.2.4 查看历史提交](#1424-查看历史提交)
     - [14.3 强制设置项目的换行符为linux](#143-强制设置项目的换行符为linux)
-  - [15 调试](#15-调试)
+* [15 调试](#15-调试)
     - [15.1 vimspector方案](#151-vimspector方案)
     - [15.2 安装vimspector插件](#152-安装vimspector插件)
     - [15.3 安装需要的调试适配器](#153-安装需要的调试适配器)
     - [15.4 关于C语言调试](#154-关于c语言调试)
-  - [16 代码智能建议](#16-代码智能建议)
-  - [17 收缩效果文本隐藏](#17-收缩效果文本隐藏)
-  - [18 obsidian](#18-obsidian)
-  - [19 unicode](#19-unicode)
+* [16 代码智能建议](#16-代码智能建议)
+* [17 收缩效果文本隐藏](#17-收缩效果文本隐藏)
+* [18 obsidian](#18-obsidian)
+* [19 unicode](#19-unicode)
 
 <!-- vim-markdown-toc -->
 
@@ -598,7 +597,7 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
   "python.defaultInterpreterPath": "D:\\programes\\python3\\python.exe",
   "editor.renderWhitespace": "all",
   "editor.cursorBlinking": "solid",
-  "editor.fontFamily": "sarasa mono sc",
+  "editor.fontFamily": "PragmataPro",
   "security.workspace.trust.untrustedFiles": "open",
   "editor.minimap.enabled": false,
   "editor.tabCompletion": "on",
@@ -643,15 +642,9 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
   },
   "hediet.vscode-drawio.resizeImages": null,
   //vscodevim插件的配置
-  "editor.lineNumbers":"relative",
-  "vim.easymotion": true,
-  "vim.incsearch": true,
   "vim.handleKeys": {
     "<C-p>": "\"_dP"
   },
-  "vim.useSystemClipboard": true,
-  "vim.useCtrlKeys": true,
-  "vim.hlsearch": true,
   "vim.normalModeKeyBindings": [
     {
       "before": ["<C-h>"],
@@ -674,12 +667,102 @@ autocmd BufWritePost *.md silent call GenMarkdownSectionNum()
       "commands": [
         ":close"
       ]
-    }
-  ]
+    },
+  ],
+  "window.zoomLevel": 1,
+  // "editor.fontFamily": "PragmataPro",
+  "editor.fontLigatures": true,
+  "editor.codeLensFontFamily": "PragmataPro",
+  "debug.console.fontFamily": "defaul",
+  "editor.inlayHints.fontFamily": "PragmataPro",
+
+//这个并不是vim的设置，而是vscode自己的设置
+"editor.lineNumbers":"relative",
+//下面这些是vim的配置
+"vim.leader": "\\",
+"vim.easymotion": true,
+// 一个字符的背景色,设置为紫色
+"vim.easymotionMarkerForegroundColorOneChar": "#800080",
+"vim.easymotionMarkerForegroundColorTwoChar": "#800080",
+// "vim.easymotionMarkerBackgroundColor": "#ffffff",
+// bolder是比bold更粗的一种字体
+"vim.easymotionMarkerFontWeight": "bolder",
+// 下面的配置怎么都弄不对
+// "vim.normalModeKeyBindings": [
+//     {
+//         "before": ["leader", "b", "q"],
+//         "after": ["leader", "leader", "b", "d", "w"]
+//     }
+// ],
+// 即时搜索
+"vim.incsearch": true,
+"vim.useSystemClipboard": true,
+"vim.useCtrlKeys": true,
+"vim.hlsearch": true,
+// To improve performance
+"extensions.experimental.affinity": {
+    "vscodevim.vim": 1
+},
+"vim.vimrc.enable": true,
+"vim.vimrc.path": "E:\\code\\my_vim_config\\vscodevimrc",
+"task.slowProviderWarning": true,
+
+  "tasks": {
+    "version": "2.0.0",
+    "tasks": [
+      {
+        "label": "Open with Emacs",
+        "type": "shell",
+        "command": "runemacs",
+        "args": ["+$((${lineNumber}))", "${file}"],
+        "presentation": {
+          "reveal": "never"
+        }
+      },
+      {
+        "label": "Open with GVim",
+        "type": "shell",
+        "command": "gvim",
+        "args": ["+$((${lineNumber}))", "${file}"],
+        "presentation": {
+          "reveal": "never"
+        }
+      }
+    ]
+  }
 }
 ```
 
-上面的配置中，最后面就是关于`vscodevim`插件的配置。注意，这里不能使用`<C-v>`来映射系统剪切板的功能可能是因为
+上面的配置中，最后面就是关于`vscodevim`插件的配置。注意上面的`tasks`后面的配置是设置在`vscode`中方便打开`gvim`和`emacs`的光标行。如果无法正常工作的话，可能是因为终端的配置没对。这里还可以为自定义的终端命令设置快捷键。
+
+```json
+{
+"key": "ctrl+alt+e",
+"command": "workbench.action.tasks.runTask",
+"args": "Open with Emacs"
+},
+{
+    "key": "ctrl+alt+g",
+    "command": "workbench.action.tasks.runTask",
+    "args": "Open with GVim"
+}
+```
+
+不过目前需求不大，当前`vscode`中配置的默认终端确实不对，空了再研究吧。
+
+在VSCode中，你可以修改键位绑定。首先，你需要打开键位绑定设置。你可以通过菜单栏的文件 -> 首选项 -> 键盘快捷方式来找到它，或者直接使用快捷键Ctrl + K Ctrl + S。
+
+在键位绑定设置中，你可以搜索已经绑定到Ctrl + Shift + X的命令，然后修改它。如果你想要设置这个快捷键为剪切当前行，你可以找到editor.action.clipboardCutAction这个命令，然后修改它的键位绑定为Ctrl + Shift + X。
+
+其实可以不绑定，当前默认的可能已经满足要求，在
+
+文件->首选项->键盘快捷方式中可以搜索它们，还可以搜索
+
+undo
+redo
+editor.action.clipboardCopyAction
+editor.action.clipboardPasteAction
+
 
 ### 12.1 easymotion插件的一些说明
 

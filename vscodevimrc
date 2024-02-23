@@ -1,0 +1,42 @@
+" vscode相关设置
+
+" 设置自定义的leader键
+let mapleader="\\"
+" 设置行号
+set nu
+" 设置相对行号
+set rnu
+
+" 显示执行的命令
+set showcmd
+" 显示当前模式
+set showmode
+
+" 设置搜索高亮
+set hlsearch
+
+" 关闭其它窗口
+nnoremap bo :only<CR>
+" 切换窗口
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+
+" 下面的配置在vscodevim中并没有效果,只能设置json文件
+" " vim-easymotion 的配置 {
+" let g:EasyMotion_smartcase = 1
+" map <Leader>j <Plug>(easymotion-j)
+" map <Leader>k <Plug>(easymotion-k)
+" map <Leader>h <Plug>(easymotion-linebackward)
+" map <Leader>l <Plug>(easymotion-lineforward)
+" map <Leader><leader>. <Plug>(easymotion-repeat)
+" map <Leader>w <Plug>(easymotion-bd-w)
+" " 并没有跨窗口功能
+" " map <Leader>W <Plug>(easymotion-overwin-w)
+" map <Leader>f <Plug>(easymotion-bd-f)
+" " 并没有跨窗口功能
+" " map <Leader>F <Plug>(easymotion-overwin-f)
+" " vim-easymotion 的配置 }
+
