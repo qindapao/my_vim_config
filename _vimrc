@@ -674,7 +674,7 @@ Plug 'airblade/vim-rooter'                                                     "
 " 当前这个插件会导致编辑txt和zim文件变得很卡,所以只用于特定的编程语言
 " 太卡了先注释吧，编程的时候再放出来
 " Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
-Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
+" Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
 Plug 'puremourning/vimspector'                                                 " 调试插件
@@ -1280,12 +1280,12 @@ nnoremap <leader>foo :Rooter<CR>
 " vnoremap xxb: call box#Draw()<CR>
 " " vim-box-draw 插件配置 }
 
-" vim-snippets 插件配置 {
-let g:UltiSnipsExpandTrigger="<tab>"
-let g:UltiSnipsJumpForwardTrigger="<c-b>"
-let g:UltiSnipsJumpBackwardTrigger="<c-z>"
-let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
-" vim-snippets 插件配置 }
+" " vim-snippets 插件配置 {
+" let g:UltiSnipsExpandTrigger="<tab>"
+" let g:UltiSnipsJumpForwardTrigger="<c-b>"
+" let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+" let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
+" " vim-snippets 插件配置 }
 
 " airline {
 let g:airline_theme = 'catppuccin_frappe'
@@ -1347,19 +1347,20 @@ nnoremap <leader>db <Plug>VimspectorBreakpoints
 " 有个小tips: 我们在搜索结果页中我们可以使用zM折叠所有的搜索结果(类似于vscode的效果)
 " :TODO: 目前试过各种办法都无法实现全词匹配
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
-nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w> " 大小写不敏感递归搜索整个项目(当前单词)
-nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I            " 大小写不敏感递归搜索整个项目(手动输入搜索字符)
+nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w><cr> " 大小写不敏感递归搜索整个项目(当前单词)
+" 大小写不敏感递归搜索整个项目(手动输入搜索字符)
+nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I 
 " 大小写敏感
-nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w> " 大小写敏感递归搜索整个项目(当前单词)
-nnoremap <leader>cfc :CtrlSF -I <C-r><C-w>             " 当前文件夹递归搜索
-nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./          " 只搜索当前文件夹
-nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %           " 只搜索当前文件
+nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w><cr> " 大小写敏感递归搜索整个项目(当前单词)
+nnoremap <leader>cfc :CtrlSF -I <C-r><C-w><cr>             " 当前文件夹递归搜索
+nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./<cr>          " 只搜索当前文件夹
+nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %<cr>           " 只搜索当前文件
 
 
-vnoremap <leader>cfr y:Rooter<cr> :CtrlSF -I <C-r>"
-vnoremap <leader>cfc y:CtrlSF -I <C-r>"
-vnoremap <leader>cfd y:CtrlSF -I <C-r>" ./
-vnoremap <leader>cff y:CtrlSF -I <C-r>" %
+vnoremap <leader>cfr y:Rooter<cr> :CtrlSF -I <C-r>"<cr>
+vnoremap <leader>cfc y:CtrlSF -I <C-r>"<cr>
+vnoremap <leader>cfd y:CtrlSF -I <C-r>" ./<cr>
+vnoremap <leader>cff y:CtrlSF -I <C-r>" %<cr>
 
 
 let g:ctrlsf_case_sensitive = 'yes'
