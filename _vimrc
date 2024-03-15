@@ -672,7 +672,8 @@ Plug 'airblade/vim-rooter'                                                     "
 " Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 " Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
 " 当前这个插件会导致编辑txt和zim文件变得很卡,所以只用于特定的编程语言
-Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
+" 太卡了先注释吧，编程的时候再放出来
+" Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
 Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
@@ -747,6 +748,22 @@ let g:ale_lint_on_save = 1
 " 不保存历史记录
 let g:ale_history_enabled = 0
 
+
+
+
+
+
+
+
+
+
+
+" " vim_signify的配置 git显示插件
+" set updatetime=100                                     "设置异步的刷新时间
+" map <Leader>d :SignifyHunkDiff<CR>                     " 显示git差异
+
+
+
 " java检查相关设置
 " 指定javac使用的编码防止乱码,但是发现配置了并没有作用
 let g:ale_java_javac_options = '-encoding utf8 -verbose'
@@ -798,26 +815,31 @@ let g:gutentags_define_advanced_commands = 1
 " vim-gutentags }
 
 " gutentags_plus 插件配置 {
-let g:gutentags_plus_nomap = 1
-nnoremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>
-nnoremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>
-nnoremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>
-nnoremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>
-nnoremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>
-nnoremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr><cr>
-nnoremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr><cr>
-nnoremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>
-nnoremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>
 
-vnoremap <leader>gs y:GscopeFind s <c-r>"
-vnoremap <leader>gg y:GscopeFind g <c-r>"
-vnoremap <leader>gc y:GscopeFind c <c-r>"
-vnoremap <leader>gt y:GscopeFind t <c-r>"
-vnoremap <leader>ge y:GscopeFind e <c-r>"
-vnoremap <leader>gd y:GscopeFind d <c-r>"
-vnoremap <leader>ga y:GscopeFind a <c-r>"
-vnoremap <leader>gf y:GscopeFind f <c-r>"
-vnoremap <leader>gi y:GscopeFind i <c-r>"
+" 打开新的窗口，并且光标在跳转栏
+let g:gutentags_plus_nomap = 1
+nnoremap <silent> <leader>gs :belowright split \| GscopeFind s <C-R><C-W><cr>:wincmd p<cr>   " 查找符号
+nnoremap <silent> <leader>gg :belowright split \| GscopeFind g <C-R><C-W><cr>:wincmd p<cr>   " 查找符号定义
+nnoremap <silent> <leader>gc :belowright split \| GscopeFind c <C-R><C-W><cr>:wincmd p<cr>   " 调用这个函数的函数
+nnoremap <silent> <leader>gt :belowright split \| GscopeFind t <C-R><C-W><cr>:wincmd p<cr>   " 查找字符串
+nnoremap <silent> <leader>ge :belowright split \| GscopeFind e <C-R><C-W><cr>:wincmd p<cr>   " 查找正则表达式
+nnoremap <silent> <leader>gf :belowright split \| GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找文件名
+nnoremap <silent> <leader>gi :belowright split \| GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找包含当前头文件的文件
+nnoremap <silent> <leader>gd :belowright split \| GscopeFind d <C-R><C-W><cr>:wincmd p<cr>   " 此函数调用的函数
+nnoremap <silent> <leader>ga :belowright split \| GscopeFind a <C-R><C-W><cr>:wincmd p<cr>   " 查找为此符号赋值的位置
+nnoremap <silent> <leader>gz :belowright split \| GscopeFind z <C-R><C-W><cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+
+
+vnoremap <leader>gs y:belowright split \| GscopeFind s <c-r>"<cr>:wincmd p<cr>   " 查找符号
+vnoremap <leader>gg y:belowright split \| GscopeFind g <c-r>"<cr>:wincmd p<cr>   " 查找符号定义
+vnoremap <leader>gc y:belowright split \| GscopeFind c <c-r>"<cr>:wincmd p<cr>   " 调用这个函数的函数
+vnoremap <leader>gt y:belowright split \| GscopeFind t <c-r>"<cr>:wincmd p<cr>   " 查找字符串
+vnoremap <leader>ge y:belowright split \| GscopeFind e <c-r>"<cr>:wincmd p<cr>   " 查找正则表达式
+vnoremap <leader>gf y:belowright split \| GscopeFind f <c-r>"<cr>:wincmd p<cr>   " 查找文件名
+vnoremap <leader>gi y:belowright split \| GscopeFind i <c-r>"<cr>:wincmd p<cr>   " 查找包含当前头文件的文件
+vnoremap <leader>gd y:belowright split \| GscopeFind d <c-r>"<cr>:wincmd p<cr>   " 此函数调用的函数
+vnoremap <leader>ga y:belowright split \| GscopeFind a <c-r>"<cr>:wincmd p<cr>   " 查找为此符号赋值的位置
+vnoremap <leader>gz y:belowright split \| GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
 
 " gutentags_plus 插件配置 }
 
@@ -830,6 +852,9 @@ nnoremap <leader>ntf :NERDTreeFind<cr>R<c-w>W
 let NERDTreeMinimalMenu = 1
 let NERDTreeShowHidden = 1
 let NERDTreeAutoDeleteBuffer = 1
+
+" 让NERDTree在右边打开
+let NERDTreeWinPos="right"
 
 " NERDTree }
 
@@ -1059,9 +1084,14 @@ let g:Lf_PreviewInPopup = 0
 " unique的意思是vim是否检查映射已经存在,如果存在会报错,当前暂时不需要这个功能
 " nmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
 nmap <leader>fgd <Plug>LeaderfGtagsDefinition
+nmap <C-LeftMouse> <Plug>LeaderfGtagsDefinition
+nmap <leader>fgr <Plug>LeaderfGtagsReference
+nmap <S-LeftMouse> <Plug>LeaderfGtagsReference
 nmap <leader>fgr <Plug>LeaderfGtagsReference
 nmap <leader>fgs <Plug>LeaderfGtagsSymbol
+nmap <A-LeftMouse> <Plug>LeaderfGtagsSymbol
 nmap <leader>fgg <Plug>LeaderfGtagsGrep
+nmap <C-A-LeftMouse> <Plug>LeaderfGtagsGrep
 
 vmap <leader>fgd <Plug>LeaderfGtagsDefinition
 vmap <leader>fgr <Plug>LeaderfGtagsReference
@@ -1314,15 +1344,16 @@ nnoremap <leader>db <Plug>VimspectorBreakpoints
 " vimspector 调试插件配置 {
 
 " ctrlsf 插件配置 {
+" 有个小tips: 我们在搜索结果页中我们可以使用zM折叠所有的搜索结果(类似于vscode的效果)
 " :TODO: 目前试过各种办法都无法实现全词匹配
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
-nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w>
+nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w> " 大小写不敏感递归搜索整个项目(当前单词)
+nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I            " 大小写不敏感递归搜索整个项目(手动输入搜索字符)
 " 大小写敏感
-nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w>
-nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I 
-nnoremap <leader>cfc :CtrlSF -I <C-r><C-w>
-nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./
-nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %
+nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w> " 大小写敏感递归搜索整个项目(当前单词)
+nnoremap <leader>cfc :CtrlSF -I <C-r><C-w>             " 当前文件夹递归搜索
+nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./          " 只搜索当前文件夹
+nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %           " 只搜索当前文件
 
 
 vnoremap <leader>cfr y:Rooter<cr> :CtrlSF -I <C-r>"
