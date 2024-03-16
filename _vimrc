@@ -650,7 +650,8 @@ Plug 'dbakker/vim-paragraph-motion'                                            "
 " 依次要执行上面两条指令
 Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                              " 使用我稍微修改过的分支
 
-Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
+" 并不需要
+" Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
 " 用处不大,暂时屏蔽
 " Plug 'mbbill/undotree'
 Plug 'kshenoy/vim-signature'
@@ -677,25 +678,26 @@ Plug 'airblade/vim-rooter'                                                     "
 " Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
-Plug 'puremourning/vimspector'                                                 " 调试插件
+" 并不需要
+" Plug 'puremourning/vimspector'                                                 " 调试插件
 " Plug 'github/copilot.vim'                                                    " 智能补全,只是尝试下功能
 Plug 'simeji/winresizer'                                                       " 调整窗口
 
 
 " 主题相关
-Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
-Plug 'cormacrelf/vim-colors-github'                                            " github 主题
-Plug 'jsit/toast.vim'                                                          " toast 主题
-Plug 'rakr/vim-one'                                                            " vim-one主题
+" Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
+" Plug 'cormacrelf/vim-colors-github'                                            " github 主题
+" Plug 'jsit/toast.vim'                                                          " toast 主题
+" Plug 'rakr/vim-one'                                                            " vim-one主题
 Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  " catppuccin 主题
-Plug 'muellan/am-colors'                                                       " 主题插件
-Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
-Plug 'scwood/vim-hybrid'                                                       " 主题插件
-Plug 'yous/vim-open-color'                                                     " vim的主题
-Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
-Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
-Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
-Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
+" Plug 'muellan/am-colors'                                                       " 主题插件
+" Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
+" Plug 'scwood/vim-hybrid'                                                       " 主题插件
+" Plug 'yous/vim-open-color'                                                     " vim的主题
+" Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
+" Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
+" Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
+" Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
 Plug 'Mitgorakh/snow'
 
 
