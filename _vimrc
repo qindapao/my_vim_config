@@ -655,7 +655,8 @@ Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                              "
 " 用处不大,暂时屏蔽
 " Plug 'mbbill/undotree'
 Plug 'kshenoy/vim-signature'
-Plug 'bling/vim-bufferline'
+" 状态栏不需要显示buffer名字
+" Plug 'bling/vim-bufferline'
 Plug 'sk1418/QFGrep'                                                           " Quickfix窗口过滤
 Plug 'markonm/traces.vim'                                                      " 搜索效果显示
 Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
