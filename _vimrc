@@ -821,29 +821,49 @@ let g:gutentags_define_advanced_commands = 1
 
 " 打开新的窗口，并且光标在跳转栏
 let g:gutentags_plus_nomap = 1
-nnoremap <silent> <leader>gs :belowright split \| GscopeFind s <C-R><C-W><cr>:wincmd p<cr>   " 查找符号
-nnoremap <silent> <leader>gg :belowright split \| GscopeFind g <C-R><C-W><cr>:wincmd p<cr>   " 查找符号定义
-nnoremap <silent> <leader>gc :belowright split \| GscopeFind c <C-R><C-W><cr>:wincmd p<cr>   " 调用这个函数的函数
-nnoremap <silent> <leader>gt :belowright split \| GscopeFind t <C-R><C-W><cr>:wincmd p<cr>   " 查找字符串
-nnoremap <silent> <leader>ge :belowright split \| GscopeFind e <C-R><C-W><cr>:wincmd p<cr>   " 查找正则表达式
-nnoremap <silent> <leader>gf :belowright split \| GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找文件名
-nnoremap <silent> <leader>gi :belowright split \| GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找包含当前头文件的文件
-nnoremap <silent> <leader>gd :belowright split \| GscopeFind d <C-R><C-W><cr>:wincmd p<cr>   " 此函数调用的函数
-nnoremap <silent> <leader>ga :belowright split \| GscopeFind a <C-R><C-W><cr>:wincmd p<cr>   " 查找为此符号赋值的位置
-nnoremap <silent> <leader>gz :belowright split \| GscopeFind z <C-R><C-W><cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+nnoremap <silent> <leader>gws :belowright split \| GscopeFind s <C-R><C-W><cr>:wincmd p<cr>   " 查找符号
+nnoremap <silent> <leader>gwg :belowright split \| GscopeFind g <C-R><C-W><cr>:wincmd p<cr>   " 查找符号定义
+nnoremap <silent> <leader>gwc :belowright split \| GscopeFind c <C-R><C-W><cr>:wincmd p<cr>   " 调用这个函数的函数
+nnoremap <silent> <leader>gwt :belowright split \| GscopeFind t <C-R><C-W><cr>:wincmd p<cr>   " 查找字符串
+nnoremap <silent> <leader>gwe :belowright split \| GscopeFind e <C-R><C-W><cr>:wincmd p<cr>   " 查找正则表达式
+nnoremap <silent> <leader>gwf :belowright split \| GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找文件名
+nnoremap <silent> <leader>gwi :belowright split \| GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找包含当前头文件的文件
+nnoremap <silent> <leader>gwd :belowright split \| GscopeFind d <C-R><C-W><cr>:wincmd p<cr>   " 此函数调用的函数
+nnoremap <silent> <leader>gwa :belowright split \| GscopeFind a <C-R><C-W><cr>:wincmd p<cr>   " 查找为此符号赋值的位置
+nnoremap <silent> <leader>gwz :belowright split \| GscopeFind z <C-R><C-W><cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
 
+nnoremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>:wincmd p<cr>   " 查找符号
+nnoremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>:wincmd p<cr>   " 查找符号定义
+nnoremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>:wincmd p<cr>   " 调用这个函数的函数
+nnoremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>:wincmd p<cr>   " 查找字符串
+nnoremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>:wincmd p<cr>   " 查找正则表达式
+nnoremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找文件名
+nnoremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找包含当前头文件的文件
+nnoremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>:wincmd p<cr>   " 此函数调用的函数
+nnoremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>:wincmd p<cr>   " 查找为此符号赋值的位置
+nnoremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
 
-vnoremap <leader>gs y:belowright split \| GscopeFind s <c-r>"<cr>:wincmd p<cr>   " 查找符号
-vnoremap <leader>gg y:belowright split \| GscopeFind g <c-r>"<cr>:wincmd p<cr>   " 查找符号定义
-vnoremap <leader>gc y:belowright split \| GscopeFind c <c-r>"<cr>:wincmd p<cr>   " 调用这个函数的函数
-vnoremap <leader>gt y:belowright split \| GscopeFind t <c-r>"<cr>:wincmd p<cr>   " 查找字符串
-vnoremap <leader>ge y:belowright split \| GscopeFind e <c-r>"<cr>:wincmd p<cr>   " 查找正则表达式
-vnoremap <leader>gf y:belowright split \| GscopeFind f <c-r>"<cr>:wincmd p<cr>   " 查找文件名
-vnoremap <leader>gi y:belowright split \| GscopeFind i <c-r>"<cr>:wincmd p<cr>   " 查找包含当前头文件的文件
-vnoremap <leader>gd y:belowright split \| GscopeFind d <c-r>"<cr>:wincmd p<cr>   " 此函数调用的函数
-vnoremap <leader>ga y:belowright split \| GscopeFind a <c-r>"<cr>:wincmd p<cr>   " 查找为此符号赋值的位置
-vnoremap <leader>gz y:belowright split \| GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+vnoremap <leader>gws y:belowright split \| GscopeFind s <c-r>"<cr>:wincmd p<cr>   " 查找符号
+vnoremap <leader>gwg y:belowright split \| GscopeFind g <c-r>"<cr>:wincmd p<cr>   " 查找符号定义
+vnoremap <leader>gwc y:belowright split \| GscopeFind c <c-r>"<cr>:wincmd p<cr>   " 调用这个函数的函数
+vnoremap <leader>gwt y:belowright split \| GscopeFind t <c-r>"<cr>:wincmd p<cr>   " 查找字符串
+vnoremap <leader>gwe y:belowright split \| GscopeFind e <c-r>"<cr>:wincmd p<cr>   " 查找正则表达式
+vnoremap <leader>gwf y:belowright split \| GscopeFind f <c-r>"<cr>:wincmd p<cr>   " 查找文件名
+vnoremap <leader>gwi y:belowright split \| GscopeFind i <c-r>"<cr>:wincmd p<cr>   " 查找包含当前头文件的文件
+vnoremap <leader>gwd y:belowright split \| GscopeFind d <c-r>"<cr>:wincmd p<cr>   " 此函数调用的函数
+vnoremap <leader>gwa y:belowright split \| GscopeFind a <c-r>"<cr>:wincmd p<cr>   " 查找为此符号赋值的位置
+vnoremap <leader>gwz y:belowright split \| GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
 
+vnoremap <leader>gs y:GscopeFind s <c-r>"<cr>:wincmd p<cr>   " 查找符号
+vnoremap <leader>gg y:GscopeFind g <c-r>"<cr>:wincmd p<cr>   " 查找符号定义
+vnoremap <leader>gc y:GscopeFind c <c-r>"<cr>:wincmd p<cr>   " 调用这个函数的函数
+vnoremap <leader>gt y:GscopeFind t <c-r>"<cr>:wincmd p<cr>   " 查找字符串
+vnoremap <leader>ge y:GscopeFind e <c-r>"<cr>:wincmd p<cr>   " 查找正则表达式
+vnoremap <leader>gf y:GscopeFind f <c-r>"<cr>:wincmd p<cr>   " 查找文件名
+vnoremap <leader>gi y:GscopeFind i <c-r>"<cr>:wincmd p<cr>   " 查找包含当前头文件的文件
+vnoremap <leader>gd y:GscopeFind d <c-r>"<cr>:wincmd p<cr>   " 此函数调用的函数
+vnoremap <leader>ga y:GscopeFind a <c-r>"<cr>:wincmd p<cr>   " 查找为此符号赋值的位置
+vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
 " gutentags_plus 插件配置 }
 
 " NERDTree {
