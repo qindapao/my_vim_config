@@ -718,6 +718,7 @@ let g:table_mode_corner='|'
 " :ALEToggle
 " 禁用ALE
 " ALEDisable
+" }
 
 " 注意coc.nvim插件也有语法检查功能(某些情况下也需要关闭,比如调试)
 " 关闭
@@ -747,7 +748,8 @@ let g:airline#extensions#ale#enabled = 1
 let g:ale_floating_window_border = ['│', '─', '╭', '╮', '╯', '╰', '│', '─']
 " 禁用ale的虚拟文本行
 let g:ale_virtualtext_cursor = 0
-let g:ale_lint_on_save = 1
+" 保存的时候不要自动检查
+let g:ale_lint_on_save = 0
 " 不保存历史记录
 let g:ale_history_enabled = 0
 
