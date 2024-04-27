@@ -620,7 +620,8 @@ Plug 'dyng/ctrlsf.vim'                                                         "
 Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
 " Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
 Plug 'monkoose/vim9-stargate'
-Plug 'unblevable/quick-scope'
+" 高亮当前行的跳转关键字,用处不大
+" Plug 'unblevable/quick-scope'
 " Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
 Plug 'frazrepo/vim-rainbow'                                                    " 彩虹括号
 Plug 'tpope/vim-commentary'                                                    " 简洁注释
@@ -717,7 +718,9 @@ let g:table_mode_corner='|'
 " 开启或者关闭ALE
 " :ALEToggle
 " 禁用ALE
-" ALEDisable
+" :ALEDisable
+" 保存的时候不要自动检查
+let g:ale_lint_on_save = 0
 " }
 
 " 注意coc.nvim插件也有语法检查功能(某些情况下也需要关闭,比如调试)
@@ -1381,6 +1384,9 @@ nnoremap <leader>cfc :CtrlSF -I <C-r><C-w><cr>             " 当前文件夹递�
 nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./<cr>          " 只搜索当前文件夹
 nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %<cr>           " 只搜索当前文件
 
+" 当前文件夹手动搜索
+nnoremap <leader>cfm :CtrlSF -I 
+
 
 vnoremap <leader>cfr y:Rooter<cr> :CtrlSF -I <C-r>"<cr>
 vnoremap <leader>cfc y:CtrlSF -I <C-r>"<cr>
@@ -1410,17 +1416,17 @@ tnoremap <C-v> <C-S-_>"+
 
 " vim-terminal-help 插件配置 }
 
-" quick-scope 插件 {
-highlight QuickScopePrimary ctermfg=red guifg=red
-highlight QuickScopeSecondary ctermfg=blue guifg=blue
-" 这里设置的特殊字符好像无效
-let g:qs_accepted_chars = map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)') 
-            \+ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)') 
-            \+ map(range(char2nr('0'), char2nr('9')), 'nr2char(v:val)') 
-            \+ ['"', ',', '.', "'", '!', '@', '+', '-']
-" 终端中不要高亮
-" let g:qs_buftype_blacklist = ['terminal', 'nofile']
-" quick-scope 插件 }
+" " quick-scope 插件 {
+" highlight QuickScopePrimary ctermfg=red guifg=red
+" highlight QuickScopeSecondary ctermfg=blue guifg=blue
+" " 这里设置的特殊字符好像无效
+" let g:qs_accepted_chars = map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)') 
+"             \+ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)') 
+"             \+ map(range(char2nr('0'), char2nr('9')), 'nr2char(v:val)') 
+"             \+ ['"', ',', '.', "'", '!', '@', '+', '-']
+" " 终端中不要高亮
+" " let g:qs_buftype_blacklist = ['terminal', 'nofile']
+" " quick-scope 插件 }
 
 " vim9-stargate 插件配置 {
 let g:stargate_limit = 600
@@ -1458,10 +1464,12 @@ let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
 " 插件配置 }
 
 
-
 " 这个语句需要最后执行，说出暂时放在配置文件的最后，给markdown/zimwiki文件加上目录序号
+" :TODO: 因为保存的时候的效率问题，暂时先屏蔽掉
 " autocmd BufWritePost *.md silent call GenSectionNum('markdown')
-autocmd BufWritePost *.txt silent call GenSectionNum('zim')
+" autocmd BufWritePost *.txt silent call GenSectionNum('zim')
+noremap <leader>gsnm :silent call GenSectionNum('markdown')<cr>
+noremap <leader>gsnz :silent call GenSectionNum('zim')<cr>
 
 " 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突
 noremap <leader><leader>r :call MyReplaceWord('n')<CR>
@@ -1953,4 +1961,66 @@ function! OpenInEmacs()
 endfunction
 
 nnoremap <leader>oe :call OpenInEmacs()<CR>
+
+nnoremap <silent> v :let g:saved_cursor_pos = getpos('.')<CR>v
+nnoremap <silent> V :let g:saved_cursor_pos = getpos('.')<CR>V
+function! SurroundWith(symbol, visual, fill_char) range
+    let l:offset = 0
+    " 获取选定区域中的最小缩进
+    let l:min_indent = matchstr(getline(a:firstline), '^\s*')
+    for i in range(a:firstline, a:lastline)
+        let l:current_line = getline(i)
+        let l:current_indent = matchstr(l:current_line, '^\s*')
+        " 如果一行不是空行并且不只包含空格TAB(空字符)
+        if l:current_line =~ '\S'
+            if len(l:current_indent) < len(l:min_indent)
+                let l:min_indent = l:current_indent
+            endif
+        endif
+    endfor
+
+    if a:visual == 'v'
+        " 在选定区域的前后添加空格
+        let l:start_pos = getpos("'<")
+        let l:end_pos = getpos("'>")
+        let l:first_line = getline(l:start_pos[1])
+        let l:last_line = getline(l:end_pos[1])
+        
+        if g:saved_cursor_pos[1] == l:start_pos[1]
+            let l:offset = len(a:symbol[0]) + len(a:fill_char)
+        endif
+
+        if l:start_pos[1] == l:end_pos[1]
+            if l:start_pos[2] == 1
+                call setline(l:start_pos[1], a:symbol[0] . a:fill_char . l:first_line[l:start_pos[2]-1:l:end_pos[2]-2] . a:fill_char . a:symbol[1] . l:first_line[l:end_pos[2]-1:])
+            else
+                call setline(l:start_pos[1], l:first_line[:l:start_pos[2]-2] . a:symbol[0] . a:fill_char . l:first_line[l:start_pos[2]-1:l:end_pos[2]-2] . a:fill_char . a:symbol[1] . l:first_line[l:end_pos[2]-1:])
+            endif
+        else
+            if l:start_pos[2] == 1
+                call setline(l:start_pos[1], a:symbol[0] . a:fill_char . l:first_line[l:start_pos[2]-1:])
+            else
+                call setline(l:start_pos[1], l:first_line[:l:start_pos[2]-2] . a:symbol[0] . a:fill_char . l:first_line[l:start_pos[2]-1:])
+            endif
+
+            if l:end_pos[2] == 1
+                call setline(l:end_pos[1], a:fill_char . a:symbol[1] . l:last_line[l:end_pos[2]-1:])
+            else
+                call setline(l:end_pos[1], l:last_line[:l:end_pos[2]-2] . a:fill_char . a:symbol[1] . l:last_line[l:end_pos[2]-1:])
+            endif
+        endif
+    else
+        " 在选定区域的上方和下方分别添加一行
+        execute (a:firstline - 1) . 's/$/\r' . l:min_indent . a:symbol[0] . '/'
+        execute (a:lastline + 2) . 's/^/' . l:min_indent . a:symbol[1] . '\r/'
+    endif
+
+    call cursor(g:saved_cursor_pos[1], g:saved_cursor_pos[2] + l:offset)
+endfunction
+
+vnoremap <silent> S( :call SurroundWith('()', visualmode(), ' ')<CR>
+vnoremap <silent> S{ :call SurroundWith('{}', visualmode(), ' ')<CR>
+vnoremap <silent> S) :call SurroundWith('()', visualmode(), '')<CR>
+vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>
+
 
