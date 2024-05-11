@@ -1,3 +1,7 @@
 {
-  "suggest.noselect": true
+  "suggest.noselect": true,
+  "python.jediEnabled": false,
+  "python.languageServer": "pylsp",
+  "pylsp.plugins.pyls_mypy.enabled": true,
+  "pylsp.plugins.pyls_mypy.live_mode": false
 }
