@@ -479,7 +479,13 @@ set guioptions-=m                                                               
 autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tmp,test.c
 
 " 编辑vim配置文件
-nnoremap <Leader>ve :e $MYVIMRC<CR>
+nnoremap <Leader>ver :e $MYVIMRC<CR>
+" 打开虚拟文本编辑模式
+nnoremap <Leader>veon :set ve=all<CR>
+" 关闭虚拟文本编辑模式
+nnoremap <Leader>veof :set ve=<CR>
+
+
 " 重新加载vim配置文件
 nnoremap <Leader>vr :source $MYVIMRC<CR>
 
@@ -565,6 +571,19 @@ set smoothscroll
 
 " 关闭预览窗口(主要是自定义补全不冲突)
 set completeopt-=preview
+
+" 设置打开和关闭语法高亮快捷键
+nnoremap <silent> <leader>sof :syntax off<cr>
+nnoremap <silent> <leader>son :syntax on<cr>
+
+" vim 进入全词匹配搜索模式(自动搜索光标下单词)
+nnoremap <leader>swa yiw/\<<C-R>"\>
+" vim 进入全词匹配搜索模式(手动搜索)
+nnoremap <leader>swm /\<\><Left><Left>
+
+" 设置vim等待某些事件的刷新事件(默认是4000ms)[ :TODO: 这个设置可能比较危险,目前还不确定有什么副作用]
+set updatetime=100
+
 
 " 基本设置区域 }
 
@@ -701,6 +720,7 @@ Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  "
 " Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 " Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
 Plug 'Mitgorakh/snow'
+Plug 'qindapao/photon.vim'                                                           " 一个极简的漂亮主题
 
 
 call plug#end()
@@ -721,6 +741,10 @@ let g:table_mode_corner='|'
 " :ALEDisable
 " 保存的时候不要自动检查
 let g:ale_lint_on_save = 0
+" 手动关闭ale(大部分的卡顿都是这里造成的,包括打开md文件)
+nnoremap <leader>aleof :ALEDisable<cr>
+" 手动打开ale
+nnoremap <leader>aleon :ALEEnable<cr>
 " }
 
 " 注意coc.nvim插件也有语法检查功能(某些情况下也需要关闭,比如调试)
@@ -873,9 +897,9 @@ vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据
 
 " NERDTree {
 nnoremap <leader><leader><F8> :NERDTreeToggle<CR>
-" 刷新NERDTree的状态(这里的窗口切换无效不知道原因)
-nnoremap <leader>r :NERDTreeFocus<cr>R<c-w><c-p>
-nnoremap <leader>ntf :NERDTreeFind<cr>R<c-w>W
+" 刷新NERDTree的状态
+nnoremap <leader>r :NERDTreeFocus<cr>:NERDTreeRefreshRoot<cr><c-w>p
+nnoremap <leader>ntf :NERDTreeFind<cr>:NERDTreeRefreshRoot<cr><c-w>p
 " NERDTree的修改文件的界面使用更小的界面显示
 let NERDTreeMinimalMenu = 1
 let NERDTreeShowHidden = 1
@@ -957,11 +981,17 @@ let g:rainbow_active = 1                                                        
 " call github_colors#togglebg_map('<f6>')
 " " vim-colors-github 主题 }
 
-" Mitgorakh/snow 主题 {
-colorscheme snow
-set background=light
-" Mitgorakh/snow 主题 {
+" " Mitgorakh/snow 主题 {
+" colorscheme snow
+" set background=light
+" " Mitgorakh/snow 主题 {
 
+" photon.vim 主题 {
+" " Dark theme
+" colorscheme photon
+" Light theme
+colorscheme antiphoton
+" photon.vim 主题 }
 
 " set t_Co=256
 " " 还有amdard
@@ -1056,6 +1086,8 @@ let g:Lf_ShortcutF = '<c-p>'                                                    
 " 根目录配置
 let g:Lf_WorkingDirectoryMode = 'AF'                                             " 配置leaderf的工作目录模式
 let g:Lf_RootMarkers = ['.git', '.svn', '.hg', '.project', '.root']              " 根目录标识
+let g:Lf_MruFileExclude = ['*.tmp', '*.swp']
+let g:Lf_MruMaxFiles = 2000
 
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜索. -F 搜索字符串而不是正则表达式. -w 搜索只匹配有边界的词.)
@@ -1179,6 +1211,7 @@ let g:vim_markdown_folding_disabled = 1
 autocmd filetype zim,txt let g:mdip_imgdir = expand('%:t:r')
 autocmd filetype zim,txt let g:PasteImageFunction = 'g:ZimwikiPasteImage'
 autocmd filetype markdown,tex,zim,txt nmap <buffer><silent> <leader><leader>p :call mdip#MarkdownClipboardImage()<CR>
+autocmd FileType markdown silent! ALEDisableBuffer
 " img-paste }
 
 " 因为有星门vim9-stargate,所以easymotion暂时屏蔽
@@ -1207,6 +1240,7 @@ let g:coc_data_home = '~/.vim/coc'
 " coc补全插件的一些配置 }
 
 " vim-gitgutter 插件配置 {
+" 状态的刷新时间由updatetime决定
 nnoremap gnh :GitGutterNextHunk<CR>
 nnoremap gph :GitGutterPrevHunk<CR>
 command! Gqf GitGutterQuickFix | copen
@@ -1433,7 +1467,47 @@ let g:stargate_limit = 600
 " vim9-stargate 插件配置 }
 
 " vim-fugitive 插件按键绑定 {
-nnoremap <silent> <leader>gitda :Git difftool -y<cr>
+" 显示所有差异
+nnoremap <silent> <leader>gda :Git difftool -y<cr>
+" commit 全对比
+nnoremap <silent> <leader>gdc :execute 'Git! difftool ' . getreg('a') . ' ' . getreg('b') . ' --name-status'<CR>
+" 分支全对比
+nnoremap <silent> <leader>gdb :execute 'Git! difftool ' . getreg('a') . ' --name-status'<CR>
+" 执行单文件对比(commit id 和 分支)
+nnoremap <silent> <leader>gdv :execute 'Gvdiffsplit ' . getreg('a')<CR>
+" 对比当前文件
+nnoremap <silent> <leader>gdf :execute 'Gvdiffsplit'<CR>
+
+" 基于当前分支创建一个新分支
+nnoremap <silent> <leader>gbn :Git checkout -b 
+" 查看所有的本地分支
+nnoremap <silent> <leader>gbl :execute 'Git branch'<CR>
+" 切换分支
+nnoremap <silent> <leader>gbc :execute 'normal "xyiw' \| execute 'Git checkout ' . getreg('x') \| close<CR>
+vnoremap <silent> <leader>gbc y:execute 'Git checkout ' . shellescape(@0) \| close<CR>
+" 删除一个本地分支
+nnoremap <silent> <leader>gbxl :execute 'normal "xyiw' \| execute 'Git branch -d ' . getreg('x') \| close<CR>
+vnoremap <silent> <leader>gbxl y:execute 'Git branch -d ' . shellescape(@0) \| close<CR>
+nnoremap <silent> <leader>gbfxl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| close<CR>
+vnoremap <silent> <leader>gbfxl y:execute 'Git branch -D ' . shellescape(@0) \| close<CR>
+
+" 删除一个远程分支
+nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>
+nnoremap <silent> <leader>gbfxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>
+
+
+" 查看所有的远程分支
+nnoremap <silent> <leader>gbr :execute 'Git remote prune origin' \| execute 'Git branch -r'<CR>
+" 拉取一个远程分支并在本地跟踪它(复制远程分支名然后检出到本地)
+" git fetch origin <远程分支名>:<本地分支名>
+nnoremap <silent> <leader>gbfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch origin ' . branchname . ':' . branchname<CR>
+
+" 拉取最新变更
+nnoremap <silent> <leader>gpl :execute 'Git pull'<CR>
+" 推送当前更改(当前本地分支)
+nnoremap <silent> <leader>gps :let branchname=system('git rev-parse --abbrev-ref HEAD') \| execute 'Git push --set-upstream origin ' . trim(branchname)<CR>
+
+
 " vim-fugitive 插件按键绑定 }
 
 " " vim-markbar 插件配置 {
@@ -1460,6 +1534,15 @@ nnoremap <silent> <leader>gitda :Git difftool -y<cr>
 let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
 " markdown-preview 插件配置 }
 
+" vim-highlighter 配置 {
+
+" 这里最好不要直接用<CR>会覆盖掉一些重要的默认按键映射
+nnoremap <C-CR>  <Cmd>Hi><CR>
+nnoremap <C-S-CR>  <Cmd>Hi<<CR>
+nnoremap <C-S-N> <Cmd>Hi}<CR>
+nnoremap <S-CR> <Cmd>Hi{<CR>
+
+" vim-highlighter 配置 }
 
 " 插件配置 }
 
@@ -2018,9 +2101,12 @@ function! SurroundWith(symbol, visual, fill_char) range
     call cursor(g:saved_cursor_pos[1], g:saved_cursor_pos[2] + l:offset)
 endfunction
 
+" 创建新的命令，S)，来调用这个函数
 vnoremap <silent> S( :call SurroundWith('()', visualmode(), ' ')<CR>
+" 创建新的命令，S}，来调用这个函数
 vnoremap <silent> S{ :call SurroundWith('{}', visualmode(), ' ')<CR>
+" 创建新的命令，$)，来调用这个函数
 vnoremap <silent> S) :call SurroundWith('()', visualmode(), '')<CR>
+" 创建新的命令，$}，来调用这个函数
 vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>
-
 
