@@ -620,7 +620,7 @@ if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md'
     Plug 'maralla/completor.vim'                                               " 主要是用它的中文补全功能
 else
     " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
-    Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    " Plug 'neoclide/coc.nvim', {'branch': 'release'}
 endif
 Plug 'ludovicchabant/vim-gutentags'                                            " gtags ctags自动生成插件
 Plug 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
@@ -1349,11 +1349,11 @@ nnoremap <leader>foo :Rooter<CR>
 " let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
 " " vim-snippets 插件配置 }
 
-" airline {
-let g:airline_theme = 'catppuccin_frappe'
-let g:airline_theme_dark = 'catppuccin_frappe'
-let g:airline_powerline_fonts = 1
-" airline }
+" " airline {
+" let g:airline_theme = 'catppuccin_frappe'
+" let g:airline_theme_dark = 'catppuccin_frappe'
+" let g:airline_powerline_fonts = 1
+" " airline }
 
 " vim-javacomplete2 {
 " 自动导包?这行配置并不一定有作用,其它的配置也不一定有作用
