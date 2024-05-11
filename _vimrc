@@ -596,73 +596,73 @@ call plug#begin('~/.vim/plugged')
 
 " 这个补全插件的位置最好放置到最前面,目前不直到原因
 Plug 'qindapao/gtagsomnicomplete', {'branch': 'for_use'}                       " gtags完成插件
-Plug 'schmich/vim-guifont'                                                     " 灵活设置字体大小
-Plug 'preservim/nerdtree'                                                      " 文件管理器
-Plug 'Xuyuanp/nerdtree-git-plugin'                                             " nerdtree中显示git变化
-Plug 'tpope/vim-surround'                                                      " 单词包围
-Plug 'tpope/vim-repeat'                                                        " vim重复插件,可以重复surround的内容
+Plug 'qindapao/vim-guifont'                                                    " 灵活设置字体大小
+Plug 'qindapao/nerdtree'                                                       " 文件管理器
+Plug 'qindapao/nerdtree-git-plugin'                                            " nerdtree中显示git变化
+Plug 'qindapao/vim-surround'                                                   " 单词包围
+Plug 'qindapao/vim-repeat'                                                     " vim重复插件,可以重复surround的内容
 " 暂时用不着
-" Plug 'WolfgangMehner/bash-support'                                             " bash开发支持
-Plug 'jiangmiao/auto-pairs'                                                    " 插入模式下自动补全括号
-Plug 'dense-analysis/ale'                                                      " 异步语法检查和自动格式化框架
-Plug 'vim-airline/vim-airline'                                                 " 漂亮的状态栏
-Plug 'godlygeek/tabular'                                                       " 自动对齐插件
-Plug 'Yggdroot/indentLine'                                                     " 对齐参考线插件
-Plug 'tpope/vim-fugitive'                                                      " vim的git集成插件
-Plug 'tpope/vim-rhubarb'                                                       " 用于打开gi的远程
+" Plug 'WolfgangMehner/bash-support'                                           " bash开发支持
+Plug 'qindapao/auto-pairs'                                                     " 插入模式下自动补全括号
+Plug 'qindapao/ale'                                                            " 异步语法检查和自动格式化框架
+Plug 'qindapao/vim-airline'                                                    " 漂亮的状态栏
+Plug 'qindapao/tabular'                                                        " 自动对齐插件
+Plug 'qindapao/indentLine'                                                     " 对齐参考线插件
+Plug 'qindapao/vim-fugitive'                                                   " vim的git集成插件
+Plug 'qindapao/vim-rhubarb'                                                    " 用于打开gi的远程
 " 这个插件功能和vim-flog重复,先屏蔽
 " Plug 'junegunn/gv.vim'                                                         " git树显示插件
-Plug 'rbong/vim-flog'                                                          " 显示漂亮的git praph插件
-Plug 'airblade/vim-gitgutter'                                                  " git改变显示插件
-Plug 'yianwillis/vimcdoc'                                                      " vim的中文文档
+Plug 'qindapao/vim-flog'                                                       " 显示漂亮的git praph插件
+Plug 'qindapao/vim-gitgutter'                                                  " git改变显示插件
+Plug 'qindapao/vimcdoc'                                                        " vim的中文文档
 if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md'
     " 这里要注意下,这个插件会导致preview预览涂鸦窗口无法关闭,影响自定义补全
-    Plug 'maralla/completor.vim'                                               " 主要是用它的中文补全功能
+    Plug 'qindapao/completor.vim'                                              " 主要是用它的中文补全功能
 else
     " 这里必须使用realese分支,不能用master分支,master分支需要自己编译
-    " Plug 'neoclide/coc.nvim', {'branch': 'release'}
+    Plug 'qindapao/coc.nvim', {'branch': 'release'}
 endif
-Plug 'ludovicchabant/vim-gutentags'                                            " gtags ctags自动生成插件
-Plug 'skywind3000/gutentags_plus'                                              " 方便自动化管理tags插件
-Plug 'preservim/tagbar'                                                        " 当前文件的标签浏览器
-Plug 'MattesGroeger/vim-bookmarks'                                             " vim的书签插件
+Plug 'qindapao/vim-gutentags'                                                  " gtags ctags自动生成插件
+Plug 'qindapao/gutentags_plus'                                                 " 方便自动化管理tags插件
+Plug 'qindapao/tagbar'                                                         " 当前文件的标签浏览器
+Plug 'qindapao/vim-bookmarks'                                                  " vim的书签插件
 " 另外一个标记管理器(这个是标记并不是书签,书签是持久化的,这个不是,并且只能字母,所以需要和书签配合起来使用)
 " 不是很好用,直接屏蔽
 " Plug 'Yilin-Yang/vim-markbar'
-Plug 'azabiong/vim-highlighter'                                                " 多高亮标签插件
+Plug 'qindapao/vim-highlighter'                                                " 多高亮标签插件
 
-Plug 'dhruvasagar/vim-table-mode'                                              " 表格模式编辑插件
-Plug 'Yggdroot/LeaderF'                                                        " 模糊搜索插件
-Plug 'dyng/ctrlsf.vim'                                                         " 全局搜索替换插件
+Plug 'qindapao/vim-table-mode'                                                 " 表格模式编辑插件
+Plug 'qindapao/LeaderF'                                                        " 模糊搜索插件
+Plug 'qindapao/ctrlsf.vim'                                                     " 全局搜索替换插件
 " 有ctrlsf插件够用,这个功能重复
 " Plug 'brooth/far.vim'                                                          " 另外一个全局替换插件
-Plug 'skywind3000/vim-terminal-help'                                           " 终端帮助插件
+Plug 'qindapao/vim-terminal-help'                                              " 终端帮助插件
 " Plug 'easymotion/vim-easymotion'                                               " 快速移动插件
-Plug 'monkoose/vim9-stargate'
+Plug 'qindapao/vim9-stargate'
 " 高亮当前行的跳转关键字,用处不大
 " Plug 'unblevable/quick-scope'
 " Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
-Plug 'frazrepo/vim-rainbow'                                                    " 彩虹括号
-Plug 'tpope/vim-commentary'                                                    " 简洁注释
+Plug 'qindapao/vim-rainbow'                                                    " 彩虹括号
+Plug 'qindapao/vim-commentary'                                                 " 简洁注释
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
-Plug 'iamcco/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
+Plug 'qindapao/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
 " 这个插件暂时不要,默认的无法高亮就很好,这个反而弄得乱七八糟,这个插件还有个问题是,git对比的时候也弄得乱七八糟,所以先直接禁用掉
-Plug 'preservim/vim-markdown'                                                  " markdown 增强插件
+Plug 'qindapao/vim-markdown'                                                   " markdown 增强插件
 Plug 'qindapao/img-paste.vim', {'branch': 'for_zim'}                           " markdown 直接粘贴图片
-Plug 'mzlogin/vim-markdown-toc'                                                " 自动设置标题
+Plug 'qindapao/vim-markdown-toc'                                               " 自动设置标题
 
 " 这个也没啥用,先禁用掉
 " Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
 " 最强大的文档插件,暂时屏蔽
 " Plug 'kkoomen/vim-doge', { 'do': { -> doge#install() } }
-Plug 'mhinz/vim-startify'                                                      " vim的开始页
-Plug 'farmergreg/vim-lastplace'                                                " 打开文件的上次位置
-Plug 'rickhowe/diffchar.vim'                                                   " 更明显的对比
+Plug 'qindapao/vim-startify'                                                   " vim的开始页
+Plug 'qindapao/vim-lastplace'                                                  " 打开文件的上次位置
+Plug 'qindapao/diffchar.vim'                                                   " 更明显的对比
 " Plug 'terryma/vim-multiple-cursors'                                            " vim的多光标插件
-Plug 'mg979/vim-visual-multi'                                                  " 这个插件比上面插件更轻便更快
-Plug 'lilydjwg/colorizer'                                                      " vim中显示16进制颜色
-Plug 'michaeljsmith/vim-indent-object'                                         " 基于缩进的文本对象，用于python等语言
-Plug 'dbakker/vim-paragraph-motion'                                            " 增强{  }段落选择的功能,可以用全空格行作为段落
+Plug 'qindapao/vim-visual-multi'                                               " 这个插件比上面插件更轻便更快
+Plug 'qindapao/colorizer'                                                      " vim中显示16进制颜色
+Plug 'qindapao/vim-indent-object'                                              " 基于缩进的文本对象，用于python等语言
+Plug 'qindapao/vim-paragraph-motion'                                           " 增强{  }段落选择的功能,可以用全空格行作为段落
 " 这个插件的语法高亮需要说明下,可能是受默认的txt文件的语法高亮的影响
 " 所以它的语法高亮的优先级并不高,需要先关闭所有的语法高亮，然后单独打开
 " syntax off
@@ -674,16 +674,16 @@ Plug 'qindapao/vim-zim', {'branch': 'syntax_dev'}                              "
 " Plug 'vim-perl/vim-perl', { 'for': 'perl', 'do': 'make clean carp dancer highlight-all-pragmas moose test-more try-tiny' }
 " 用处不大,暂时屏蔽
 " Plug 'mbbill/undotree'
-Plug 'kshenoy/vim-signature'
+Plug 'qindapao/vim-signature'
 " 状态栏不需要显示buffer名字
 " Plug 'bling/vim-bufferline'
-Plug 'sk1418/QFGrep'                                                           " Quickfix窗口过滤
-Plug 'markonm/traces.vim'                                                      " 搜索效果显示
-Plug 'bronson/vim-visual-star-search'                                          " 增强星号搜索
+Plug 'qindapao/QFGrep'                                                         " Quickfix窗口过滤
+Plug 'qindapao/traces.vim'                                                     " 搜索效果显示
+Plug 'qindapao/vim-visual-star-search'                                         " 增强星号搜索
 " 暂时用不上先屏蔽
 " Plug 'hari-rangarajan/CCTree'                                                  " C语言的调用树
 " 使用下面这个rooter是对的,另外的一个rooter会造成set autochdir命令失效
-Plug 'airblade/vim-rooter'                                                     " root目录设置插件
+Plug 'qindapao/vim-rooter'                                                     " root目录设置插件
 " 画图插件,用处不大
 " Plug 'vim-scripts/DrawIt'                                                      " 文本图绘制
 " 画图插件,用处不大
@@ -698,11 +698,11 @@ Plug 'airblade/vim-rooter'                                                     "
 " Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
 " Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
-Plug 'terryma/vim-expand-region'                                               " vim的扩展选区插件
+Plug 'qindapao/vim-expand-region'                                              " vim的扩展选区插件
 " 并不需要
 " Plug 'puremourning/vimspector'                                                 " 调试插件
 " Plug 'github/copilot.vim'                                                    " 智能补全,只是尝试下功能
-Plug 'simeji/winresizer'                                                       " 调整窗口
+Plug 'qindapao/winresizer'                                                     " 调整窗口
 
 
 " 主题相关
@@ -710,7 +710,7 @@ Plug 'simeji/winresizer'                                                       "
 " Plug 'cormacrelf/vim-colors-github'                                            " github 主题
 " Plug 'jsit/toast.vim'                                                          " toast 主题
 " Plug 'rakr/vim-one'                                                            " vim-one主题
-Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  " catppuccin 主题
+Plug 'qindapao/vim', { 'as': 'catppuccin' }                                    " catppuccin 主题
 " Plug 'muellan/am-colors'                                                       " 主题插件
 " Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
 " Plug 'scwood/vim-hybrid'                                                       " 主题插件
@@ -719,7 +719,6 @@ Plug 'catppuccin/vim', { 'as': 'catppuccin' }                                  "
 " Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
 " Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 " Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
-Plug 'Mitgorakh/snow'
 Plug 'qindapao/photon.vim'                                                           " 一个极简的漂亮主题
 
 
@@ -1507,6 +1506,8 @@ nnoremap <silent> <leader>gpl :execute 'Git pull'<CR>
 " 推送当前更改(当前本地分支)
 nnoremap <silent> <leader>gps :let branchname=system('git rev-parse --abbrev-ref HEAD') \| execute 'Git push --set-upstream origin ' . trim(branchname)<CR>
 
+" 查看当前文件的所有提交历史
+nnoremap <silent> <leader>gog :0Gclog<cr> 
 
 " vim-fugitive 插件按键绑定 }
 
