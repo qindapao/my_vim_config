@@ -29,6 +29,8 @@ vim configuration file for my personal use
 
 https://github.com/vim/vim-win32-installer/releases
 
+当前我使用的版本是：`9.1`，包含补丁`1-16`。
+
 # 特殊插件安装备忘
 
 ## 1 vim-plug
