@@ -351,7 +351,7 @@ endif
 if has('gui_running')
     " 目前这里无法回到上次的中文输入法,不知道原因
     set imactivatekey=C
-    inoremap <ESC> <ESC>: set iminsert=2<CR>
+    inoremap <silent> <ESC> <ESC>: set iminsert=2<CR>
 endif
 
 
@@ -394,9 +394,9 @@ autocmd filetype markdown set wrap
 " 设置标签页的显示格式
 set guitablabel=%N%M%t
 " 切换标签页快捷方式
-noremap tn :tabnew<CR>
-noremap tc :tabclose<CR>
-noremap to :tabonly<CR>
+noremap <silent> tn :tabnew<CR>
+noremap <silent> tc :tabclose<CR>
+noremap <silent> to :tabonly<CR>
 nnoremap <Tab> gt<cr>
 nnoremap <S-Tab> gT<cr>
 :nn <M-1> 1gt
@@ -525,10 +525,10 @@ nnoremap <leader>lp :lprev<CR>
 
 " 窗口操作
 " 之所以绑定两个字母为了快速响应
-nnoremap <leader>cw :close<CR>
-nnoremap <leader>ss :split<CR>
-nnoremap <leader>vv :vsplit<CR>
-nnoremap <leader>ow :only<CR>
+nnoremap <silent> <leader>cw :close<CR>
+nnoremap <silent> <leader>ss :split<CR>
+nnoremap <silent> <leader>vv :vsplit<CR>
+nnoremap <silent> <leader>ow :only<CR>
 
 
 
@@ -583,6 +583,9 @@ nnoremap <leader>swm /\<\><Left><Left>
 
 " 设置vim等待某些事件的刷新事件(默认是4000ms)[ :TODO: 这个设置可能比较危险,目前还不确定有什么副作用]
 set updatetime=100
+
+" 自动创建注释
+set formatoptions+=ro
 
 
 " 基本设置区域 }
@@ -931,6 +934,32 @@ let g:gitgutter_max_signs = -1                                                  
 " vim-gitgutter }
 
 " vim-guifont {
+" " 定义调整字体大小的函数
+" :TODO: 这个挺有意思，可以指定每种字体大小的像素尺寸，然后函数中计算
+" function! PreserveWindowSize()
+"     " 获取光标的宽度和高度的估计值
+"     let l:cursor_width = 8 " 这里是一个假设的值
+"     let l:cursor_height = 16 " 这里是一个假设的值
+
+"     " 使用这些估计值来计算窗口的像素尺寸
+"     let l:window_width_px = winwidth(0) * l:cursor_width
+"     let l:window_height_px = winheight(0) * l:cursor_height
+
+"     " 在这里调整字体大小
+"     " ...
+
+"     " 调整字体大小后，重新计算行数和列数
+"     let &lines = l:window_height_px / l:cursor_height
+"     let &columns = l:window_width_px / l:cursor_width
+" endfunction
+
+" " 创建一个命令，用于减小字体大小，并调用PreserveWindowSize函数
+" nnoremap <silent> <C-ScrollWheelDown> :call PreserveWindowSize()<CR>
+
+" " 创建一个命令，用于增大字体大小，并调用PreserveWindowSize函数
+" nnoremap <silent> <C-ScrollWheelUp> :call PreserveWindowSize()<CR>
+
+
 let guifontpp_size_increment=1
 let guifontpp_smaller_font_map="<C-ScrollWheelDown>"
 let guifontpp_larger_font_map="<C-ScrollWheelUp>"
@@ -1280,7 +1309,12 @@ nmap <Leader>gl <Plug>BookmarkMoveToLine
 " indentLine 插件配置 {
 " 这里一定要配置，不然indentLine插件会把concealcursor=inc，造成光标行也不展开收缩无法编辑
 let g:indentLine_concealcursor = ""
-let g:indentLine_conceallevel = "2"
+" 这里会影响默认的json文件的缩进等级，所以暂时写成0。
+let g:indentLine_conceallevel = "0"
+
+" :verbose set conceallevel? 这样的命令可以查看最后设置某个配置的位置,可用于问题定位
+autocmd filetype json silent set conceallevel=0
+autocmd filetype zim,markdown silent set conceallevel=2
 " indentLine 插件配置 }
 
 " undotree 的配置 {
@@ -1354,27 +1388,52 @@ nnoremap <leader>foo :Rooter<CR>
 " let g:airline_powerline_fonts = 1
 " " airline }
 
-" vim-javacomplete2 {
-" 自动导包?这行配置并不一定有作用,其它的配置也不一定有作用
-" let g:JavaComplete_AutoImport = 1
-" <C-]> 跳转到类或者方法定义处
-" <C-t>返回跳转前位置
-" <Plug>(JavaComplete-Impports-Rename)重命名当前光标下的变量或者方法，自动更新所有引用
-" <Plug>(JavaComplete-Imports-Organize)自动格式化
-" vim-javacomplete2 }
 
 " completor 插件配置 {
-" 这行并不能阻止预览窗口顶部弹出，只是某些场景不自动弹出
+" pygments_parser.
+" 关闭自动预览窗口(不知道是否会有什么负作用,但是可以解决强制打开预览窗口的问题)
+" 就算是关闭这个选项也没用(涂鸦预览窗口还是会弹出)
 let g:completor_auto_preview = 0
-" 设置completor的补全时的触发为任意字母
+" set pythonthreedll=D:\python\python38.dll
+let g:completor_auto_close_doc = 0
+" let g:completor_clang_binary = 'D:\programs\LLVM\bin\clang.exe'
+" 和javacomplete2配合起来使用,让javacomplete2的补全结果出现在我们的默认补全列表中
+" .号或者::后面自动补全,或者输入任意的字符自动补全
+" 这个不设置也能触发,但是可能优先级不够高
 let g:completor_java_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
 " let g:completor_zim_omni_trigger = '([\w-]+|@[\w-]*|[\w-]+:\s*[\w-]*)$'
 let g:completor_zim_omni_trigger = '(\S+)$'
+let g:completor_html_omni_trigger = '(\.|::)?\w*'
+let g:completor_css_omni_trigger = '(\.|::)?\w*'
+let g:completor_markdown_omni_trigger = '(\.|::)?\w*'
+let g:completor_javascript_omni_trigger = '(\.|::)?\w*'
 let g:completor_python_omni_trigger = '(\S+)$'
+let g:completor_xml_omni_trigger = '(\.|::)?\w*'
+" let g:completor_bash_omni_trigger = '(\.|::)?\w*'
+" 还是单词优先好,需要补全函数手动触发即可
+let g:completor_sh_omni_trigger = '(\S+)$'
+" 一般情况下completor插件会自动检测java_completor插件的东西的位置,如果检测成功,那么功能自动就是正常的,否则需要手动指定他们
+" let g:completor_python_binary = '/path/to/python/with/jedi/installed'
 " 可以关闭preview,这样不和自定义的补全的弹出窗口重复
 " :TODO: 这里可以根据文件类型不同打开不同的参数
 " let g:completor_complete_options = 'menuone,noselect,preview'
 let g:completor_complete_options = 'menuone,noselect'
+
+
+" completor.vim 补全插件配置 }
+
+
+" vim_completor.git {
+
+" 如果使用的是虚拟环境这里要配置虚拟环境的地址,补全这里还有一个问题,如果文件名不规范,有@等特殊字符,无法补全
+" let g:completor_python_binary = 'D:/code/tu_refactor_learn/TU_Refactory/.venv/Scripts/python.exe'
+let g:completor_python_binary = 'D:/python/python.exe'
+
+noremap <silent> <leader><leader><leader>d :call completor#do('definition')<CR>
+noremap <silent> <leader><leader><leader>c :call completor#do('doc')<CR>
+noremap <silent> <leader><leader><leader>f :call completor#do('format')<CR>
+noremap <silent> <leader><leader><leader>s :call completor#do('hover')<CR>
+" vim_completor.git }
 
 " completor 插件配置 {
 
@@ -1566,11 +1625,6 @@ nnoremap <leader>br :call AddBufferBr()<CR>
 
 " 浏览器中打开当前编辑的html文件
 nnoremap <leader><F9> :call DisplayHTML()<CR>
-
-" 配置json文件不要收缩(目前好像不起作用)
-autocmd filetype json silent set conceallevel=0
-autocmd filetype zim,markdown silent set conceallevel=2
-
 
 " 针对特种文件格式的自定义补全 {
 " 暂时未验证是否和coc或者completor冲突
