@@ -935,33 +935,35 @@ let g:gitgutter_max_signs = -1                                                  
 
 " vim-guifont {
 " " 定义调整字体大小的函数
+" 微软雅黑 PragmataPro Mono 字体配置(不同字体不同显示环境都不一样)
 let g:my_font_sizes = {
 \ '1'  : {'width' : 1, 'height'  : 3},
-\ '2'  : {'width' : 2, 'height'  : 4},
+\ '2'  : {'width' : 1, 'height'  : 4},
 \ '3'  : {'width' : 2, 'height'  : 7},
 \ '4'  : {'width' : 3, 'height'  : 8},
-\ '5'  : {'width' : 4, 'height'  : 10},
-\ '6'  : {'width' : 5, 'height'  : 12},
-\ '7'  : {'width' : 5, 'height'  : 13},
-\ '8'  : {'width' : 6, 'height'  : 15},
-\ '9'  : {'width' : 7, 'height'  : 17},
-\ '10' : {'width' : 8, 'height'  : 19},
-\ '11' : {'width' : 9, 'height'  : 20},
-\ '12' : {'width' : 9, 'height'  : 22},
-\ '13' : {'width' : 10, 'height' : 24},
-\ '14' : {'width' : 11, 'height' : 25},
-\ '15' : {'width' : 12, 'height' : 28},
-\ '16' : {'width' : 13, 'height' : 29},
-\ '17' : {'width' : 13, 'height' : 30},
-\ '18' : {'width' : 14, 'height' : 33},
-\ '20' : {'width' : 16, 'height' : 36},
-\ '21' : {'width' : 16, 'height' : 38},
-\ '22' : {'width' : 17, 'height' : 40},
-\ '23' : {'width' : 18, 'height' : 42},
-\ '24' : {'width' : 19, 'height' : 43},
-\ '25' : {'width' : 20, 'height' : 45},
-\ '26' : {'width' : 20, 'height' : 47},
-\ '27' : {'width' : 21, 'height' : 49},
+\ '5'  : {'width' : 3, 'height'  : 10},
+\ '6'  : {'width' : 4, 'height'  : 12},
+\ '7'  : {'width' : 5, 'height'  : 14},
+\ '8'  : {'width' : 5, 'height'  : 15},
+\ '9'  : {'width' : 6, 'height'  : 17},
+\ '10' : {'width' : 7, 'height'  : 19},
+\ '11' : {'width' : 7, 'height'  : 20},
+\ '12' : {'width' : 8, 'height'  : 23},
+\ '13' : {'width' : 9, 'height' : 24},
+\ '14' : {'width' : 9, 'height' : 26},
+\ '15' : {'width' : 10, 'height' : 28},
+\ '16' : {'width' : 11, 'height' : 30},
+\ '17' : {'width' : 11, 'height' : 31},
+\ '18' : {'width' : 12, 'height' : 32},
+\ '19' : {'width' : 13, 'height' : 35},
+\ '20' : {'width' : 13, 'height' : 36},
+\ '21' : {'width' : 14, 'height' : 39},
+\ '22' : {'width' : 15, 'height' : 40},
+\ '23' : {'width' : 15, 'height' : 42},
+\ '24' : {'width' : 16, 'height' : 44},
+\ '25' : {'width' : 17, 'height' : 45},
+\ '26' : {'width' : 17, 'height' : 47},
+\ '27' : {'width' : 18, 'height' : 49},
 \ }
 
 
@@ -973,9 +975,7 @@ function! PreserveWindowSize(delta)
 
     let l:guifont = &guifont
     let l:parts = split(l:guifont, ':')
-    let l:font_name = l:parts[0]
     let l:guifont_size_str = l:parts[1]
-
 
     let l:guifont_size_list = split(l:guifont_size_str, 'h')
     " split函数会默认忽略空元素 let l:guifont_size_list = split(l:guifont_size_str, 'h', 1) 这样才会保留
@@ -1009,8 +1009,9 @@ function! PreserveWindowSize(delta)
     " let &columns = l:window_width_px / g:my_font_sizes[l:new_font_size]['width']
 
     " 用浮点除法4舍5入可能更精确
-    let &lines = float2nr(l:window_height_px / g:my_font_sizes[l:new_font_size]['height'])
-    let &columns = float2nr(l:window_width_px / g:my_font_sizes[l:new_font_size]['width'])
+    " (:TODO: 偏差较大先屏蔽吧)
+    " let &lines = float2nr(l:window_height_px / g:my_font_sizes[l:new_font_size]['height'])
+    " let &columns = float2nr(l:window_width_px / g:my_font_sizes[l:new_font_size]['width'])
 endfunction
 
 nnoremap <silent> <C-ScrollWheelDown> :call PreserveWindowSize(-1)<CR>
