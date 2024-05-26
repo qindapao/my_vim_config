@@ -57,6 +57,10 @@ function! GitDiff(spec)
 endfunction
 command! -nargs=? Diff call GitDiff(<q-args>)
 
+function! TrimString(s)
+    return substitute(a:s, '^\s*\(.\{-}\)\s*$', '\1', '')
+endfunction
+
 " 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
 " usage :call GenMarkdownSectionNum    给markdown/zimwiki 文件生成目录编号
 " 如果要在某些脚本代码中写注释,那么使用#----这种格式来过滤
@@ -934,40 +938,44 @@ let g:gitgutter_max_signs = -1                                                  
 " vim-gitgutter }
 
 " vim-guifont {
-" " 定义调整字体大小的函数
-" 微软雅黑 PragmataPro Mono 字体配置(不同字体不同显示环境都不一样)
-let g:my_font_sizes = {
-\ '1'  : {'width' : 1, 'height'  : 3},
-\ '2'  : {'width' : 1, 'height'  : 4},
-\ '3'  : {'width' : 2, 'height'  : 7},
-\ '4'  : {'width' : 3, 'height'  : 8},
-\ '5'  : {'width' : 3, 'height'  : 10},
-\ '6'  : {'width' : 4, 'height'  : 12},
-\ '7'  : {'width' : 5, 'height'  : 14},
-\ '8'  : {'width' : 5, 'height'  : 15},
-\ '9'  : {'width' : 6, 'height'  : 17},
-\ '10' : {'width' : 7, 'height'  : 19},
-\ '11' : {'width' : 7, 'height'  : 20},
-\ '12' : {'width' : 8, 'height'  : 23},
-\ '13' : {'width' : 9, 'height' : 24},
-\ '14' : {'width' : 9, 'height' : 26},
-\ '15' : {'width' : 10, 'height' : 28},
-\ '16' : {'width' : 11, 'height' : 30},
-\ '17' : {'width' : 11, 'height' : 31},
-\ '18' : {'width' : 12, 'height' : 32},
-\ '19' : {'width' : 13, 'height' : 35},
-\ '20' : {'width' : 13, 'height' : 36},
-\ '21' : {'width' : 14, 'height' : 39},
-\ '22' : {'width' : 15, 'height' : 40},
-\ '23' : {'width' : 15, 'height' : 42},
-\ '24' : {'width' : 16, 'height' : 44},
-\ '25' : {'width' : 17, 'height' : 45},
-\ '26' : {'width' : 17, 'height' : 47},
-\ '27' : {'width' : 18, 'height' : 49},
-\ }
+
+" 使用了外部二进制 nircmd.exe
+" :TODO: 如果要精细过滤可以下面这样
+" nircmd.exe win setsize find "MyDocument" class "Vim" 0 0 800 600
+function! ResizeGvimWindow(x, y, width, height)
+  " 构建 nircmd 命令字符串
+  let l:nircmd_cmd = 'nircmd.exe win setsize class "vim" ' . a:x . ' ' . a:y . ' ' . a:width . ' ' . a:height
+  " 调用 nircmd 命令
+  
+  call system(l:nircmd_cmd)
+endfunction
+
+
+
+
+" 使用powershell命令获取GVim窗口的像素大小(windows系统专用!目前只支持一个窗口的情况)
+" :TODO: 精细过滤可以文件名或者?
+function! GetGvimWindowSize()
+    let l:ps_script_path = 'E:\code\my_vim_config\get_win_size.ps1'
+    let l:cmd = 'powershell -ExecutionPolicy Bypass -File ' . shellescape(l:ps_script_path)
+    let l:size = system(l:cmd)
+    return l:size
+endfunction
 
 
 function! PreserveWindowSize(delta)
+    let l:size = GetGvimWindowSize()
+    let l:pattern = 'Width: \(\d\+\), Height: \(\d\+\)'
+    let matches = matchlist(l:size, pattern)
+
+    " 先保存原始的像素尺寸
+    let l:window_width_px = matches[1]
+    let l:window_height_px = matches[2]
+
+    " 获取窗口的起始位置
+    let l:pos = execute('silent! winpos')
+    let l:x = split(split(l:pos, 'X')[1], ',')[0]
+    let l:y = split(split(l:pos, 'Y')[1], ' ')[0]
 
     let l:decimalpat = '[1-9][0-9]*'
     let l:fontpat_unix = '^\(\(-[^-]\+\)\{6}-\)\(' . l:decimalpat . '\)'
@@ -982,18 +990,7 @@ function! PreserveWindowSize(delta)
     let l:guifont_size = l:guifont_size_list[0]
 
 
-    let l:cursor_width = g:my_font_sizes[l:guifont_size]['width']
-    let l:cursor_height = g:my_font_sizes[l:guifont_size]['height']
-    " 计算窗口的像素尺寸
-    let l:window_width_px = winwidth(0) * l:cursor_width
-    let l:window_height_px = winheight(0) * l:cursor_height
-
     let l:new_font_size = l:guifont_size + a:delta
-
-    " 检查新的字号是否存在于字典中
-    if !has_key(g:my_font_sizes, l:new_font_size)
-        return
-    endif
 
     if has("unix")
         let guifont = substitute(&guifont, l:fontpat_unix,
@@ -1003,19 +1000,24 @@ function! PreserveWindowSize(delta)
                                \ '\1' . l:new_font_size . '\3', "")
     endif
     let &guifont = guifont
-
-    " 调整字体大小后，重新计算行数和列数
-    " let &lines = l:window_height_px / g:my_font_sizes[l:new_font_size]['height']
-    " let &columns = l:window_width_px / g:my_font_sizes[l:new_font_size]['width']
-
-    " 用浮点除法4舍5入可能更精确
-    " (:TODO: 偏差较大先屏蔽吧)
-    " let &lines = float2nr(l:window_height_px / g:my_font_sizes[l:new_font_size]['height'])
-    " let &columns = float2nr(l:window_width_px / g:my_font_sizes[l:new_font_size]['width'])
+  
+    return [l:window_width_px, l:window_height_px]
 endfunction
 
-nnoremap <silent> <C-ScrollWheelDown> :call PreserveWindowSize(-1)<CR>
-nnoremap <silent> <C-ScrollWheelUp> :call PreserveWindowSize(1)<CR>
+function! RestoreWindowSize(width, height)
+    " 获取窗口的起始位置
+    let l:pos = execute('silent! winpos')
+    let l:x = split(split(l:pos, 'X')[1], ',')[0]
+    let l:y = split(split(l:pos, 'Y')[1], ' ')[0]
+
+    " 调整窗口大小
+    " :TODO: 不知道为什么这里要乘以1.25
+    call ResizeGvimWindow(l:x, l:y, a:width * 1.25, a:height * 1.25)
+endfunction
+
+
+nnoremap <silent> <C-ScrollWheelDown> :let size = PreserveWindowSize(-1) \| call RestoreWindowSize(size[0], size[1])<CR>
+nnoremap <silent> <C-ScrollWheelUp> :let size = PreserveWindowSize(1) \| call RestoreWindowSize(size[0], size[1])<CR>
 
 " let guifontpp_size_increment=1
 " let guifontpp_smaller_font_map="<C-ScrollWheelDown>"
@@ -1996,6 +1998,7 @@ source $VIM/keybinding_help.vim
 " :TODO: 滚轮键只有在固定的时候可以使用，可以再处理下PgUp和PgDn
 " 如果要搜索所有的，输入.点号即可
 
+" :TODO: 增加获取某个文件的行的后几行功能,用于查看_vimrc的注释信息和实际配置信息
 nnoremap <silent> <c-h> :call PopupMenuShowKeyBindings('and', '', '')<cr>
 nnoremap <silent> <c-s-h> :call PopupMenuShowKeyBindings('or', '', '')<cr>
 nnoremap <silent> <c-s-c> :call PopupMenuShowKeyBindings('and', 'auto', 'map')<cr>
