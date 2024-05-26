@@ -1,0 +1,12 @@
+{
+    "suggest.noselect": true,
+    "npm.registry": "http://cmc-cd-mirror.rnd.xx.com/npm",
+    "http.proxy": "http://proxyhk.xx.com:8080",
+    "https.proxy": "http://proxyhk.xx.com:8080",
+    "proxyAuthorization": "当前代理服务器的密码的base64编码",
+    "http.proxyStrictSSL": false,
+    "python.linting.enabled": false,
+    "python.linting.pylintEnabled": false,
+    "python.linting.pylintPath": "",
+    "python.pythonPath" : "D:\\python\\python.exe",
+}
