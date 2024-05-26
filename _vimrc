@@ -935,35 +935,91 @@ let g:gitgutter_max_signs = -1                                                  
 
 " vim-guifont {
 " " 定义调整字体大小的函数
-" :TODO: 这个挺有意思，可以指定每种字体大小的像素尺寸，然后函数中计算
-" function! PreserveWindowSize()
-"     " 获取光标的宽度和高度的估计值
-"     let l:cursor_width = 8 " 这里是一个假设的值
-"     let l:cursor_height = 16 " 这里是一个假设的值
+let g:my_font_sizes = {
+\ '1'  : {'width' : 1, 'height'  : 3},
+\ '2'  : {'width' : 2, 'height'  : 4},
+\ '3'  : {'width' : 2, 'height'  : 7},
+\ '4'  : {'width' : 3, 'height'  : 8},
+\ '5'  : {'width' : 4, 'height'  : 10},
+\ '6'  : {'width' : 5, 'height'  : 12},
+\ '7'  : {'width' : 5, 'height'  : 13},
+\ '8'  : {'width' : 6, 'height'  : 15},
+\ '9'  : {'width' : 7, 'height'  : 17},
+\ '10' : {'width' : 8, 'height'  : 19},
+\ '11' : {'width' : 9, 'height'  : 20},
+\ '12' : {'width' : 9, 'height'  : 22},
+\ '13' : {'width' : 10, 'height' : 24},
+\ '14' : {'width' : 11, 'height' : 25},
+\ '15' : {'width' : 12, 'height' : 28},
+\ '16' : {'width' : 13, 'height' : 29},
+\ '17' : {'width' : 13, 'height' : 30},
+\ '18' : {'width' : 14, 'height' : 33},
+\ '20' : {'width' : 16, 'height' : 36},
+\ '21' : {'width' : 16, 'height' : 38},
+\ '22' : {'width' : 17, 'height' : 40},
+\ '23' : {'width' : 18, 'height' : 42},
+\ '24' : {'width' : 19, 'height' : 43},
+\ '25' : {'width' : 20, 'height' : 45},
+\ '26' : {'width' : 20, 'height' : 47},
+\ '27' : {'width' : 21, 'height' : 49},
+\ }
 
-"     " 使用这些估计值来计算窗口的像素尺寸
-"     let l:window_width_px = winwidth(0) * l:cursor_width
-"     let l:window_height_px = winheight(0) * l:cursor_height
 
-"     " 在这里调整字体大小
-"     " ...
+function! PreserveWindowSize(delta)
 
-"     " 调整字体大小后，重新计算行数和列数
-"     let &lines = l:window_height_px / l:cursor_height
-"     let &columns = l:window_width_px / l:cursor_width
-" endfunction
+    let l:decimalpat = '[1-9][0-9]*'
+    let l:fontpat_unix = '^\(\(-[^-]\+\)\{6}-\)\(' . l:decimalpat . '\)'
+    let l:fontpat_win32 = '\(:h\)\(' . l:decimalpat . '\)\(:\|,\|$\)'
 
-" " 创建一个命令，用于减小字体大小，并调用PreserveWindowSize函数
-" nnoremap <silent> <C-ScrollWheelDown> :call PreserveWindowSize()<CR>
-
-" " 创建一个命令，用于增大字体大小，并调用PreserveWindowSize函数
-" nnoremap <silent> <C-ScrollWheelUp> :call PreserveWindowSize()<CR>
+    let l:guifont = &guifont
+    let l:parts = split(l:guifont, ':')
+    let l:font_name = l:parts[0]
+    let l:guifont_size_str = l:parts[1]
 
 
-let guifontpp_size_increment=1
-let guifontpp_smaller_font_map="<C-ScrollWheelDown>"
-let guifontpp_larger_font_map="<C-ScrollWheelUp>"
-let guifontpp_original_font_map="<F7>"
+    let l:guifont_size_list = split(l:guifont_size_str, 'h')
+    " split函数会默认忽略空元素 let l:guifont_size_list = split(l:guifont_size_str, 'h', 1) 这样才会保留
+    let l:guifont_size = l:guifont_size_list[0]
+
+
+    let l:cursor_width = g:my_font_sizes[l:guifont_size]['width']
+    let l:cursor_height = g:my_font_sizes[l:guifont_size]['height']
+    " 计算窗口的像素尺寸
+    let l:window_width_px = winwidth(0) * l:cursor_width
+    let l:window_height_px = winheight(0) * l:cursor_height
+
+    let l:new_font_size = l:guifont_size + a:delta
+
+    " 检查新的字号是否存在于字典中
+    if !has_key(g:my_font_sizes, l:new_font_size)
+        return
+    endif
+
+    if has("unix")
+        let guifont = substitute(&guifont, l:fontpat_unix,
+                               \ '\1' . l:new_font_size, "")
+    elseif has("win32")
+        let guifont = substitute(&guifont, l:fontpat_win32, 
+                               \ '\1' . l:new_font_size . '\3', "")
+    endif
+    let &guifont = guifont
+
+    " 调整字体大小后，重新计算行数和列数
+    " let &lines = l:window_height_px / g:my_font_sizes[l:new_font_size]['height']
+    " let &columns = l:window_width_px / g:my_font_sizes[l:new_font_size]['width']
+
+    " 用浮点除法4舍5入可能更精确
+    let &lines = float2nr(l:window_height_px / g:my_font_sizes[l:new_font_size]['height'])
+    let &columns = float2nr(l:window_width_px / g:my_font_sizes[l:new_font_size]['width'])
+endfunction
+
+nnoremap <silent> <C-ScrollWheelDown> :call PreserveWindowSize(-1)<CR>
+nnoremap <silent> <C-ScrollWheelUp> :call PreserveWindowSize(1)<CR>
+
+" let guifontpp_size_increment=1
+" let guifontpp_smaller_font_map="<C-ScrollWheelDown>"
+" let guifontpp_larger_font_map="<C-ScrollWheelUp>"
+" let guifontpp_original_font_map="<F7>"
 
 
 nnoremap <leader><C-t> :setlocal guifont=Yahei\ Fira\ Icon\ Hybrid:h
