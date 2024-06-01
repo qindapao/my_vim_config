@@ -526,7 +526,58 @@ mysub
 
 下载的东西可能比较多，比较占用硬盘空间。
 
+#### coc框架下的代码补全
 
+需要安装`coc-snippets`插件。
+
+```txt
+Coc-install coc-snippets
+```
+
+安装完成后，可能需要在`coc`的配置文件中配置一个路径：
+
+```json
+{
+    "suggest.noselect": true,
+    "npm.registry": "http://cmc-cd-mirror.rnd.huawei.com/npm",
+    "http.proxy": "http://proxy.xx.com:8080",
+    "https.proxy": "http://proxy.xx.com:8080",
+    "proxyAuthorization": "xx",
+    "http.proxyStrictSSL": false,
+    "python.linting.enabled": false,
+    "python.linting.pylintEnabled": false,
+    "python.linting.pylintPath": "",
+    "python.pythonPath" : "D:\\python\\python.exe",
+    "snippets.userSnippetsDirectory": "C:\\Users\\xx\\.vim\\plugged\\vim-snippets\\mysnips",
+    "snippets.textmateSnippetsRoots": ["C:\\Users\\xx\\.vim\\plugged\\vim-snippets\\textmate"],
+    "coc.preferences.snippetTrigger": "tab"
+}
+```
+
+
+**说明** : 
+- 上面的`proxyAuthorization`里面的内容是你的代理服务器的用户名和密码的`base64`编码。格式是：`用户名@密码`，然后生成`base64`编码。
+- snippets.userSnippetsDirectory 这个目录下的代码片段是`ultisnips`格式专用
+- snippets.textmateSnippetsRoots 这个目录下的代码片段是`vscode`使用的`textmate`的代码片段格式专用。
+
+vscode使用的`textmate`代码片段格式这里可以举个例子：
+
+C:\Users\xx\.vim\plugged\vim-snippets\textmate\sh.json
+
+```json
+{
+    "Echo to console": {
+        "prefix": "echo",
+        "body": [
+            "echo \"$1\"",
+            "$2"
+        ],
+        "description": "Echo output to console"
+    }
+}
+```
+
+UltiSnips 格式不太好用，无法提示注释。
 
 ### 9.4 ale代码检查
 
@@ -933,6 +984,77 @@ git config --global core.autocrlf input
 
 其它语言的可以去插件的主页查看。如果后续需要更新安装的这些适配器，使用下面的命令更新：
 
+最后应该是会生成一个类似于这样的文件：`C:\Users\q00208337\.vim\plugged\vimspector\gadgets\windows\.gadgets.json`，文件中的内容大概是下面这样：
+
+```json
+{
+  "adapters": {
+    "CodeLLDB": {
+      "command": [
+        "${gadgetDir}/CodeLLDB/adapter/codelldb",
+        "--port",
+        "${unusedLocalPort}"
+      ],
+      "configuration": {
+        "args": [],
+        "cargo": {},
+        "cwd": "${workspaceRoot}",
+        "env": {},
+        "name": "lldb",
+        "terminal": "integrated",
+        "type": "lldb"
+      },
+      "name": "CodeLLDB",
+      "port": "${unusedLocalPort}",
+      "type": "CodeLLDB"
+    },
+    "chrome": {
+      "command": [
+        "node",
+        "${gadgetDir}/debugger-for-chrome/out/src/chromeDebug.js"
+      ],
+      "name": "debugger-for-chrome",
+      "type": "chrome"
+    },
+    "debugpy": {
+      "command": [
+        "D:\\python\\python.exe",
+        "${gadgetDir}/debugpy/build/lib/debugpy/adapter"
+      ],
+      "configuration": {
+        "python": "D:\\python\\python.exe"
+      },
+      "custom_handler": "vimspector.custom.python.Debugpy",
+      "name": "debugpy"
+    },
+    "multi-session": {
+      "host": "${host}",
+      "port": "${port}"
+    },
+    "vscode-cpptools": {
+      "attach": {
+        "pidProperty": "processId",
+        "pidSelect": "ask"
+      },
+      "command": [
+        "${gadgetDir}/vscode-cpptools/debugAdapters/bin/OpenDebugAD7.exe"
+      ],
+      "configuration": {
+        "MIDebuggerPath": "gdb.exe",
+        "MIMode": "gdb",
+        "args": [],
+        "cwd": "${workspaceRoot}",
+        "environment": [],
+        "type": "cppdbg"
+      },
+      "name": "cppdbg"
+    }
+  }
+}
+```
+
+里面包含了各种调试小部件的配置。
+
 ```vim
 :VimspectorUpdate
 ```
@@ -1011,20 +1133,52 @@ type：cppdgb(GDB/LLDB)或cppvsdbg(Visutal Studio Windows debugger)
 
 关于`C`语言的配置，可以在[这里](https://ljqaq233.github.io/2023/04/21/VimSpector_Intro_and_Use/)找到一个范例。
 
+上面的范例可能并不好，用下面的：
+
 ```json
 {
   "configurations": {
-    "Launch": {
+    "C": {
       "adapter": "vscode-cpptools",
       "configuration": {
         "request": "launch",
-        "program": "E:\\code\\C\\helloworld.exe", // 要调试的可执行文件路径
+        "program": "${fileDirname}\\${fileBasenameNoExtension}.exe",
+        "cwd": "${workspaceRoot}",
+        "MIMode": "gdb",
+        "miDebuggerPath": "C:\\msys64\\mingw64\\bin\\gdb.exe",
+        "externalConsole": false,
+        "args": [],
+        "env": {},
+        "justMyCode": true
       }
     }
   }
 }
-
 ```
+
+`python`语言的范例可以参考下面：
+
+```json
+{
+  "configurations": {
+    "Python": {
+      "adapter": "debugpy",
+      "configuration": {
+        "request": "launch",
+        "python": "D:\\python\\python.exe",
+        "program": "${file}",
+        "cwd": "${workspaceRoot}",
+        "externalConsole": false,
+        "args": [],
+        "env": {},
+        "justMyCode": false
+      }
+    }
+  }
+}
+```
+
+
 (6). 调试快捷键备忘
 
 ```txt
@@ -1043,11 +1197,18 @@ F12	<Plug>VimspectorStepOut	Step out of current function scope
 
 这套快捷键有个问题是把我当前配置中的某些默认配置覆盖了。
 
+(7). 更新调试器
+
+在vim中执行这个命令更新已经安装的调试器
+:VimspectorUpdate
+
+
 
 ### 15.4 关于C语言调试
 
 现在有一个BUG是，每次调试都需要先把以前的断点删除再重新加载，然后才能断。断点的窗口有保存session和重新加载session的功能，可以利用这个防止每次都手动重新设置以前的断点。最好是把打开断点窗口设置为快捷键,方便打开和关闭。
 
+为了解决C语言调试过程中断点不生效问题，每次调试前加载前面的断点即可。或者把断点清空，然后加载配置也可以，相当于重置了。
 
 ## 16 代码智能建议
 

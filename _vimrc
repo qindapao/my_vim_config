@@ -439,6 +439,11 @@ nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>
 " nnoremap <silent> * :if &hlsearch \| let @/= '\<' . expand('<cword>') . '\>' \| set nohls \| else \| let @/= '\<' . expand('<cword>') . '\>' \| set hls \| endif <cr>
 
 set cursorline                                                                   " highlight current line
+
+nnoremap <silent> <leader>scsc :set cursorcolumn<cr>
+nnoremap <silent> <leader>sncsc :set nocursorcolumn<cr>
+
+
 " cursor not blinking
 set guicursor+=a:blinkon0
 
@@ -560,7 +565,15 @@ autocmd filetype zim setlocal omnifunc=OmniCompleteCustom
 " C语言的编译和调试
 " 打开termdebug
 packadd termdebug
-set makeprg=gcc\ -Wall\ -o\ %<\ %
+nnoremap <leader>m :make<cr>
+" 在vim中执行make不是执行make命令,而是执行makeprg的命令,不要混淆
+" 增加告警显示和gdb的调试支持
+set makeprg=gcc\ -g\ -Wall\ -o\ %<\ %
+
+" 快速编译当前源文件为可执行文件(支持gdb调试和告警信息显示)(直接用vim的make命令更好,这里没有必要)
+" nnoremap <leader>cfe :!gcc.exe -g -Wall %:p -o %:p:r.exe<CR>
+" nnoremap <leader>cfe :terminal gcc.exe -g -Wall %:p -o %:p:r.exe<CR>
+
 
 " 设置conceallevel的收缩级别
 nnoremap <leader>cc0 :set conceallevel=0<cr>
@@ -603,7 +616,7 @@ call plug#begin('~/.vim/plugged')
 
 " 这个补全插件的位置最好放置到最前面,目前不直到原因
 Plug 'qindapao/gtagsomnicomplete', {'branch': 'for_use'}                       " gtags完成插件
-Plug 'qindapao/vim-guifont'                                                    " 灵活设置字体大小
+" Plug 'qindapao/vim-guifont'                                                    " 灵活设置字体大小
 Plug 'qindapao/nerdtree'                                                       " 文件管理器
 Plug 'qindapao/nerdtree-git-plugin'                                            " nerdtree中显示git变化
 Plug 'qindapao/vim-surround'                                                   " 单词包围
@@ -701,15 +714,16 @@ Plug 'qindapao/vim-rooter'                                                     "
 " Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
 " Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
 " 当前这个插件会导致编辑txt和zim文件变得很卡,所以只用于特定的编程语言
-" 太卡了先注释吧，编程的时候再放出来
-" Plug 'SirVer/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
-" Plug 'honza/vim-snippets'                                                      " 拥有大量的现成代码片段
+" 太卡了先注释吧，编程的时候再放出来(这个很卡的的插件要放出来，不然TAB键无法生效?)
+" Plug 'qindapao/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
+Plug 'qindapao/vim-snippets'                                                   " 拥有大量的现成代码片段
 " Plug 'artur-shaik/vim-javacomplete2'                                           " javac语义补全
 Plug 'qindapao/vim-expand-region'                                              " vim的扩展选区插件
 " 并不需要
-" Plug 'puremourning/vimspector'                                                 " 调试插件
+Plug 'qindapao/vimspector'                                                     " 调试插件
 " Plug 'github/copilot.vim'                                                    " 智能补全,只是尝试下功能
 Plug 'qindapao/winresizer'                                                     " 调整窗口
+
 
 
 " 主题相关
@@ -817,7 +831,7 @@ let g:ale_java_javac_classpath = '.'
 " 使用~/.vim/这种路径也是不行的,不知道原因
 " let g:ale_java_javac_executable = '~/.vim/coc/extensions/coc-java-data/jdk-17.0.8/javajre-windows-64/jre/bin/javac.exe'
 " 如果当前的配置就可以，如果当前默认的javac就是对的，那么这里暂时就不用修改,如果无法找到正确的就需要修改
-let g:ale_java_javac_executable = 'C:\Users\pc\.vim\coc\extensions\coc-java-data\jdk-17.0.8\javajre-windows-64\jre\bin\javac.exe'
+" let g:ale_java_javac_executable = 'C:\Users\pc\.vim\coc\extensions\coc-java-data\jdk-17.0.8\javajre-windows-64\jre\bin\javac.exe'
 
 " dense-analysis/ale }
 
@@ -856,49 +870,49 @@ let g:gutentags_define_advanced_commands = 1
 
 " 打开新的窗口，并且光标在跳转栏
 let g:gutentags_plus_nomap = 1
-nnoremap <silent> <leader>gws :belowright split \| GscopeFind s <C-R><C-W><cr>:wincmd p<cr>   " 查找符号
-nnoremap <silent> <leader>gwg :belowright split \| GscopeFind g <C-R><C-W><cr>:wincmd p<cr>   " 查找符号定义
-nnoremap <silent> <leader>gwc :belowright split \| GscopeFind c <C-R><C-W><cr>:wincmd p<cr>   " 调用这个函数的函数
-nnoremap <silent> <leader>gwt :belowright split \| GscopeFind t <C-R><C-W><cr>:wincmd p<cr>   " 查找字符串
-nnoremap <silent> <leader>gwe :belowright split \| GscopeFind e <C-R><C-W><cr>:wincmd p<cr>   " 查找正则表达式
-nnoremap <silent> <leader>gwf :belowright split \| GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找文件名
-nnoremap <silent> <leader>gwi :belowright split \| GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找包含当前头文件的文件
-nnoremap <silent> <leader>gwd :belowright split \| GscopeFind d <C-R><C-W><cr>:wincmd p<cr>   " 此函数调用的函数
-nnoremap <silent> <leader>gwa :belowright split \| GscopeFind a <C-R><C-W><cr>:wincmd p<cr>   " 查找为此符号赋值的位置
-nnoremap <silent> <leader>gwz :belowright split \| GscopeFind z <C-R><C-W><cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+nnoremap <silent> <leader>gws :belowright split \| GscopeFind s <C-R><C-W><cr>:wincmd p<cr>| " 查找符号
+nnoremap <silent> <leader>gwg :belowright split \| GscopeFind g <C-R><C-W><cr>:wincmd p<cr>| " 查找符号定义
+nnoremap <silent> <leader>gwc :belowright split \| GscopeFind c <C-R><C-W><cr>:wincmd p<cr>| " 调用这个函数的函数
+nnoremap <silent> <leader>gwt :belowright split \| GscopeFind t <C-R><C-W><cr>:wincmd p<cr>| " 查找字符串
+nnoremap <silent> <leader>gwe :belowright split \| GscopeFind e <C-R><C-W><cr>:wincmd p<cr>| " 查找正则表达式
+nnoremap <silent> <leader>gwf :belowright split \| GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 查找文件名
+nnoremap <silent> <leader>gwi :belowright split \| GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 查找包含当前头文件的文件
+nnoremap <silent> <leader>gwd :belowright split \| GscopeFind d <C-R><C-W><cr>:wincmd p<cr>| " 此函数调用的函数
+nnoremap <silent> <leader>gwa :belowright split \| GscopeFind a <C-R><C-W><cr>:wincmd p<cr>| " 查找为此符号赋值的位置
+nnoremap <silent> <leader>gwz :belowright split \| GscopeFind z <C-R><C-W><cr>:wincmd p<cr>| " 在ctags的数据库中查找当前单词
 
-nnoremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>:wincmd p<cr>   " 查找符号
-nnoremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>:wincmd p<cr>   " 查找符号定义
-nnoremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>:wincmd p<cr>   " 调用这个函数的函数
-nnoremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>:wincmd p<cr>   " 查找字符串
-nnoremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>:wincmd p<cr>   " 查找正则表达式
-nnoremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找文件名
-nnoremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>  " 查找包含当前头文件的文件
-nnoremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>:wincmd p<cr>   " 此函数调用的函数
-nnoremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>:wincmd p<cr>   " 查找为此符号赋值的位置
-nnoremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+nnoremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>:wincmd p<cr>| " 查找符号
+nnoremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>:wincmd p<cr>| " 查找符号定义
+nnoremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>:wincmd p<cr>| " 调用这个函数的函数
+nnoremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>:wincmd p<cr>| " 查找字符串
+nnoremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>:wincmd p<cr>| " 查找正则表达式
+nnoremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>|" 查找文件名
+nnoremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 查找包含当前头文件的文件
+nnoremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>:wincmd p<cr>| " 此函数调用的函数
+nnoremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>:wincmd p<cr>| " 查找为此符号赋值的位置
+nnoremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>:wincmd p<cr>| " 在ctags的数据库中查找当前单词
 
-vnoremap <leader>gws y:belowright split \| GscopeFind s <c-r>"<cr>:wincmd p<cr>   " 查找符号
-vnoremap <leader>gwg y:belowright split \| GscopeFind g <c-r>"<cr>:wincmd p<cr>   " 查找符号定义
-vnoremap <leader>gwc y:belowright split \| GscopeFind c <c-r>"<cr>:wincmd p<cr>   " 调用这个函数的函数
-vnoremap <leader>gwt y:belowright split \| GscopeFind t <c-r>"<cr>:wincmd p<cr>   " 查找字符串
-vnoremap <leader>gwe y:belowright split \| GscopeFind e <c-r>"<cr>:wincmd p<cr>   " 查找正则表达式
-vnoremap <leader>gwf y:belowright split \| GscopeFind f <c-r>"<cr>:wincmd p<cr>   " 查找文件名
-vnoremap <leader>gwi y:belowright split \| GscopeFind i <c-r>"<cr>:wincmd p<cr>   " 查找包含当前头文件的文件
-vnoremap <leader>gwd y:belowright split \| GscopeFind d <c-r>"<cr>:wincmd p<cr>   " 此函数调用的函数
-vnoremap <leader>gwa y:belowright split \| GscopeFind a <c-r>"<cr>:wincmd p<cr>   " 查找为此符号赋值的位置
-vnoremap <leader>gwz y:belowright split \| GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+vnoremap <leader>gws y:belowright split \| GscopeFind s <c-r>"<cr>:wincmd p<cr>| " 查找符号
+vnoremap <leader>gwg y:belowright split \| GscopeFind g <c-r>"<cr>:wincmd p<cr>| " 查找符号定义
+vnoremap <leader>gwc y:belowright split \| GscopeFind c <c-r>"<cr>:wincmd p<cr>| " 调用这个函数的函数
+vnoremap <leader>gwt y:belowright split \| GscopeFind t <c-r>"<cr>:wincmd p<cr>| " 查找字符串
+vnoremap <leader>gwe y:belowright split \| GscopeFind e <c-r>"<cr>:wincmd p<cr>| " 查找正则表达式
+vnoremap <leader>gwf y:belowright split \| GscopeFind f <c-r>"<cr>:wincmd p<cr>| " 查找文件名
+vnoremap <leader>gwi y:belowright split \| GscopeFind i <c-r>"<cr>:wincmd p<cr>| " 查找包含当前头文件的文件
+vnoremap <leader>gwd y:belowright split \| GscopeFind d <c-r>"<cr>:wincmd p<cr>| " 此函数调用的函数
+vnoremap <leader>gwa y:belowright split \| GscopeFind a <c-r>"<cr>:wincmd p<cr>| " 查找为此符号赋值的位置
+vnoremap <leader>gwz y:belowright split \| GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 在ctags的数据库中查找当前单词
 
-vnoremap <leader>gs y:GscopeFind s <c-r>"<cr>:wincmd p<cr>   " 查找符号
-vnoremap <leader>gg y:GscopeFind g <c-r>"<cr>:wincmd p<cr>   " 查找符号定义
-vnoremap <leader>gc y:GscopeFind c <c-r>"<cr>:wincmd p<cr>   " 调用这个函数的函数
-vnoremap <leader>gt y:GscopeFind t <c-r>"<cr>:wincmd p<cr>   " 查找字符串
-vnoremap <leader>ge y:GscopeFind e <c-r>"<cr>:wincmd p<cr>   " 查找正则表达式
-vnoremap <leader>gf y:GscopeFind f <c-r>"<cr>:wincmd p<cr>   " 查找文件名
-vnoremap <leader>gi y:GscopeFind i <c-r>"<cr>:wincmd p<cr>   " 查找包含当前头文件的文件
-vnoremap <leader>gd y:GscopeFind d <c-r>"<cr>:wincmd p<cr>   " 此函数调用的函数
-vnoremap <leader>ga y:GscopeFind a <c-r>"<cr>:wincmd p<cr>   " 查找为此符号赋值的位置
-vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>   " 在ctags的数据库中查找当前单词
+vnoremap <leader>gs y:GscopeFind s <c-r>"<cr>:wincmd p<cr>| " 查找符号
+vnoremap <leader>gg y:GscopeFind g <c-r>"<cr>:wincmd p<cr>| " 查找符号定义
+vnoremap <leader>gc y:GscopeFind c <c-r>"<cr>:wincmd p<cr>| " 调用这个函数的函数
+vnoremap <leader>gt y:GscopeFind t <c-r>"<cr>:wincmd p<cr>| " 查找字符串
+vnoremap <leader>ge y:GscopeFind e <c-r>"<cr>:wincmd p<cr>| " 查找正则表达式
+vnoremap <leader>gf y:GscopeFind f <c-r>"<cr>:wincmd p<cr>| " 查找文件名
+vnoremap <leader>gi y:GscopeFind i <c-r>"<cr>:wincmd p<cr>| " 查找包含当前头文件的文件
+vnoremap <leader>gd y:GscopeFind d <c-r>"<cr>:wincmd p<cr>| " 此函数调用的函数
+vnoremap <leader>ga y:GscopeFind a <c-r>"<cr>:wincmd p<cr>| " 查找为此符号赋值的位置
+vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 在ctags的数据库中查找当前单词
 " gutentags_plus 插件配置 }
 
 " NERDTree {
@@ -942,19 +956,17 @@ let g:gitgutter_max_signs = -1                                                  
 " 使用了外部二进制 nircmd.exe
 " :TODO: 如果要精细过滤可以下面这样
 " nircmd.exe win setsize find "MyDocument" class "Vim" 0 0 800 600
+" 目前这个函数并没有意义(有set guioptions+=k选项就够了)
 function! ResizeGvimWindow(x, y, width, height)
   " 构建 nircmd 命令字符串
   let l:nircmd_cmd = 'nircmd.exe win setsize class "vim" ' . a:x . ' ' . a:y . ' ' . a:width . ' ' . a:height
   " 调用 nircmd 命令
-  
   call system(l:nircmd_cmd)
 endfunction
 
-
-
-
 " 使用powershell命令获取GVim窗口的像素大小(windows系统专用!目前只支持一个窗口的情况)
 " :TODO: 精细过滤可以文件名或者?
+" 目前这个函数并没有意义(有set guioptions+=k选项就够了)
 function! GetGvimWindowSize()
     let l:ps_script_path = 'E:\code\my_vim_config\get_win_size.ps1'
     let l:cmd = 'powershell -ExecutionPolicy Bypass -File ' . shellescape(l:ps_script_path)
@@ -964,20 +976,19 @@ endfunction
 
 
 function! PreserveWindowSize(delta)
-    let l:size = GetGvimWindowSize()
-    let l:pattern = 'Width: \(\d\+\), Height: \(\d\+\)'
-    let matches = matchlist(l:size, pattern)
+    " let l:size = GetGvimWindowSize()
+    " let l:pattern = 'Width: \(\d\+\), Height: \(\d\+\)'
+    " let matches = matchlist(l:size, pattern)
+    " " 先保存原始的像素尺寸
+    " let l:window_width_px = matches[1]
+    " let l:window_height_px = matches[2]
 
-    " 先保存原始的像素尺寸
-    let l:window_width_px = matches[1]
-    let l:window_height_px = matches[2]
+    " " 获取窗口的起始位置
+    " let l:pos = execute('silent! winpos')
+    " let l:x = split(split(l:pos, 'X')[1], ',')[0]
+    " let l:y = split(split(l:pos, 'Y')[1], ' ')[0]
 
-    " 获取窗口的起始位置
-    let l:pos = execute('silent! winpos')
-    let l:x = split(split(l:pos, 'X')[1], ',')[0]
-    let l:y = split(split(l:pos, 'Y')[1], ' ')[0]
-
-    let l:decimalpat = '[1-9][0-9]*'
+    let l:decimalpat = '[0-9]\+\(\.[0-9]*\)\?'
     let l:fontpat_unix = '^\(\(-[^-]\+\)\{6}-\)\(' . l:decimalpat . '\)'
     let l:fontpat_win32 = '\(:h\)\(' . l:decimalpat . '\)\(:\|,\|$\)'
 
@@ -987,37 +998,32 @@ function! PreserveWindowSize(delta)
 
     let l:guifont_size_list = split(l:guifont_size_str, 'h')
     " split函数会默认忽略空元素 let l:guifont_size_list = split(l:guifont_size_str, 'h', 1) 这样才会保留
-    let l:guifont_size = l:guifont_size_list[0]
-
-
+    let l:guifont_size = str2float(l:guifont_size_list[0])
+    
     let l:new_font_size = l:guifont_size + a:delta
+    if l:new_font_size < 1
+        let l:new_font_size = 1
+    endif
 
     if has("unix")
         let guifont = substitute(&guifont, l:fontpat_unix,
                                \ '\1' . l:new_font_size, "")
     elseif has("win32")
         let guifont = substitute(&guifont, l:fontpat_win32, 
-                               \ '\1' . l:new_font_size . '\3', "")
+                               \ '\1' . l:new_font_size, "")
     endif
     let &guifont = guifont
   
-    return [l:window_width_px, l:window_height_px]
+    " 这里可能需要乘以一个缩放比例,根据环境不同可能需要调整
+    " call ResizeGvimWindow(l:x, l:y, l:window_width_px, l:window_height_px)
 endfunction
 
-function! RestoreWindowSize(width, height)
-    " 获取窗口的起始位置
-    let l:pos = execute('silent! winpos')
-    let l:x = split(split(l:pos, 'X')[1], ',')[0]
-    let l:y = split(split(l:pos, 'Y')[1], ' ')[0]
+" 调整字体大小的时候不要重新计算窗口大小
+set guioptions+=k
 
-    " 调整窗口大小
-    " :TODO: 不知道为什么这里要乘以1.25
-    call ResizeGvimWindow(l:x, l:y, a:width * 1.25, a:height * 1.25)
-endfunction
-
-
-nnoremap <silent> <C-ScrollWheelDown> :let size = PreserveWindowSize(-1) \| call RestoreWindowSize(size[0], size[1])<CR>
-nnoremap <silent> <C-ScrollWheelUp> :let size = PreserveWindowSize(1) \| call RestoreWindowSize(size[0], size[1])<CR>
+" 使用小数步进值
+nnoremap <silent> <C-ScrollWheelDown> :call PreserveWindowSize(-0.5)<CR>
+nnoremap <silent> <C-ScrollWheelUp> :call PreserveWindowSize(0.5)<CR>
 
 " let guifontpp_size_increment=1
 " let guifontpp_smaller_font_map="<C-ScrollWheelDown>"
@@ -1178,24 +1184,15 @@ let g:Lf_MruMaxFiles = 2000
 
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜索. -F 搜索字符串而不是正则表达式. -w 搜索只匹配有边界的词.)
-" 命令行显示:Leaderf rg -e,然后等待输入正则表达式
-nmap <leader>fr <Plug>LeaderfRgPrompt
-" 查询光标或者可视模式下所在的词,非全词匹配
-nmap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary
-" 查询光标或者可视模式下所在的词,全词匹配
-nmap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary
-" 查询光标或者可视模式下所在的正则表达式，非全词匹配
-nmap <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary
-" 查询光标或者可视模式下所在的正则表达式，全词匹配
-nmap <leader>frew <Plug>LeaderfRgCwordRegexBoundary
-" 上面解释了
-vmap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary
-" 上面解释了
-vmap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary
-" 上面解释了
-vmap <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary
-" 上面解释了
-vmap <leader>frew <Plug>LeaderfRgVisualRegexBoundary
+nmap <leader>fr <Plug>LeaderfRgPrompt| " 命令行显示:Leaderf rg -e,然后等待输入正则表达式
+nmap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary| " 查询光标或者可视模式下所在的词,非全词匹配
+nmap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary| " 查询光标或者可视模式下所在的词,全词匹配
+nmap <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary| " 查询光标或者可视模式下所在的正则表达式，非全词匹配
+nmap <leader>frew <Plug>LeaderfRgCwordRegexBoundary| " 查询光标或者可视模式下所在的正则表达式，全词匹配
+vmap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary| " 查询光标或者可视模式下所在的词,非全词匹配
+vmap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary| " 查询光标或者可视模式下所在的词,全词匹配
+vmap <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary| " 查询光标或者可视模式下所在的正则表达式，非全词匹配
+vmap <leader>frew <Plug>LeaderfRgVisualRegexBoundary| " 查询光标或者可视模式下所在的正则表达式，全词匹配
 
 " 跳到字符串搜索的下一个结果
 noremap ]n :Leaderf rg --next<CR>
@@ -1324,6 +1321,8 @@ inoremap <silent><expr> <S-TAB> pumvisible() ? coc#pum#next(1) : "\<TAB>"
 
 " 定义coc插件和数据的目录
 let g:coc_data_home = '~/.vim/coc'
+" 这个参数可能并没有作用
+" let g:python3_host_prog = "D:\\python\\python.exe"
 " coc补全插件的一些配置 }
 
 " vim-gitgutter 插件配置 {
@@ -1435,10 +1434,30 @@ nnoremap <leader>foo :Rooter<CR>
 " " vim-box-draw 插件配置 }
 
 " " vim-snippets 插件配置 {
-" let g:UltiSnipsExpandTrigger="<tab>"
-" let g:UltiSnipsJumpForwardTrigger="<c-b>"
-" let g:UltiSnipsJumpBackwardTrigger="<c-z>"
-" let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysub"]
+" Coc中安装这个就能触发代码片段,并且它读取的是UltiSnipsSnippetDirectories目录中的代码片段,另外UltiSnips目录也会默认读取
+" :CocInstall coc-snippets
+let g:UltiSnipsExpandTrigger="<tab>"
+let g:UltiSnipsJumpForwardTrigger="<c-b>"
+let g:UltiSnipsJumpBackwardTrigger="<c-z>"
+let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnips"]
+" Utisnippest目录
+" snippets.userSnippetsDirectory": "C:\\Users\\q00208337\\.vim\\plugged\\vim-snippets\\mysnips",
+" vscode的textmate格式目录 sh.json 后缀
+" snippets.textmateSnippetsRoots": ["C:\\Users\\q00208337\\.vim\\plugged\\vim-snippets\\textmate"]
+
+inoremap <silent><expr> <TAB>
+      \ coc#pum#visible() ? coc#_select_confirm() :
+      \ coc#expandableOrJumpable() ? "\<C-r>=coc#rpc#request('doKeymap', ['snippets-expand-jump',''])\<CR>" :
+      \ CheckBackspace() ? "\<TAB>" :
+      \ coc#refresh()
+
+function! CheckBackspace() abort
+  let col = col('.') - 1
+  return !col || getline('.')[col - 1]  =~# '\s'
+endfunction
+
+let g:coc_snippet_next = '<tab>'
+
 " " vim-snippets 插件配置 }
 
 " " airline {
@@ -1446,7 +1465,6 @@ nnoremap <leader>foo :Rooter<CR>
 " let g:airline_theme_dark = 'catppuccin_frappe'
 " let g:airline_powerline_fonts = 1
 " " airline }
-
 
 " completor 插件配置 {
 " pygments_parser.
@@ -1520,24 +1538,21 @@ let g:vimspector_enable_mappings = 'HUMAN'
 " let g:vimspector_base_dir='C:\Users\pc\.vim\plugged\vimspector'
 nnoremap <leader>db <Plug>VimspectorBreakpoints
 
-" vimspector 调试插件配置 {
+" vimspector 调试插件配置 }
 
 " ctrlsf 插件配置 {
 " 有个小tips: 我们在搜索结果页中我们可以使用zM折叠所有的搜索结果(类似于vscode的效果)
 " :TODO: 目前试过各种办法都无法实现全词匹配
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
-nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w><cr> " 大小写不敏感递归搜索整个项目(当前单词)
-" 大小写不敏感递归搜索整个项目(手动输入搜索字符)
-nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I 
-" 大小写敏感
-nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w><cr> " 大小写敏感递归搜索整个项目(当前单词)
-nnoremap <leader>cfc :CtrlSF -I <C-r><C-w><cr>             " 当前文件夹递归搜索
-nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./<cr>          " 只搜索当前文件夹
-nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %<cr>           " 只搜索当前文件
+nnoremap <leader>cfr :Rooter<cr> :CtrlSF -I <C-r><C-w><cr>| " 大小写不敏感递归搜索整个项目(当前单词)
 
-" 当前文件夹手动搜索
-nnoremap <leader>cfm :CtrlSF -I 
+nnoremap <leader>cfn :Rooter<cr> :CtrlSF -I| " 大小写不敏感递归搜索整个项目(手动输入搜索字符)
+nnoremap <leader>cfs :Rooter<cr> :CtrlSF -S <C-r><C-w><cr>| " 大小写敏感递归搜索整个项目(当前单词)
+nnoremap <leader>cfc :CtrlSF -I <C-r><C-w><cr>|             " 当前文件夹递归搜索
+nnoremap <leader>cfd :CtrlSF -I <C-r><C-w> ./<cr>|          " 只搜索当前文件夹
+nnoremap <leader>cff :CtrlSF -I <C-r><C-w> %<cr>|           " 只搜索当前文件
 
+nnoremap <leader>cfm :CtrlSF -I| " 当前文件夹手动搜索
 
 vnoremap <leader>cfr y:Rooter<cr> :CtrlSF -I <C-r>"<cr>
 vnoremap <leader>cfc y:CtrlSF -I <C-r>"<cr>
@@ -1626,6 +1641,29 @@ nnoremap <silent> <leader>gps :let branchname=system('git rev-parse --abbrev-ref
 
 " 查看当前文件的所有提交历史
 nnoremap <silent> <leader>gog :0Gclog<cr> 
+
+" 标签管理
+nnoremap <leader>gta :execute 'Git tag -a <tag-name> ' . getreg('a') .  ' -m "标注信息"'| " 基于某个提交创建一个标签
+nnoremap <silent> <leader>gtsl :execute 'normal "xyiw' \| execute 'Git show ' . getreg('x')<CR>| " 显示某个标签明细
+nnoremap <silent> <leader>gtl :execute 'Git tag -l'<CR>| " 列出所有的本地标签
+
+nnoremap <silent> <leader>gtxl :execute 'normal "xyiw' \| execute 'Git tag -d ' . getreg('x') \| close<CR>| " 删除一个本地标签
+vnoremap <silent> <leader>gtxl y:execute 'Git tag -d ' . shellescape(@0) \| close<CR>| " 删除一个本地标签
+
+nnoremap <silent> <leader>gtp :execute 'normal "xyiw' \| execute 'Git push --set-upstream origin ' . getreg('x')<CR>| " 推送某个标签到远程服务器(x寄存器中存储了内容)
+
+nnoremap <silent> <leader>gtr :execute 'Git fetch --prune --tags' \| terminal Git ls-remote --tags<CR>| " 列出所有的远程标签
+function! GetLineContentLast ()
+    " 获取当前行的内容
+    let line = getline('.')
+    " 使用空格分割行内容
+    let fields = split(line)
+    " 返回最后一个域的内容
+    return fields[-1]
+endfunction
+nnoremap <silent> <leader>gtxr :execute 'Git push origin :' . GetLineContentLast() \| close<CR>| " 删除某一个远程标签
+
+
 
 " vim-fugitive 插件按键绑定 }
 
@@ -1847,25 +1885,32 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
         let user_command = input('请输入一个命令:', '', 'command')
     endif
 
+    " :TODO: 当前特殊情况太多了,函数需要重构
     if a:exec_mode != ''
-        let user_command_str = ''
-        try
-            if user_command[0] == '!'
-                let user_command_str = system(user_command[1:])
-            elseif user_command[0] == ':'
-                let user_command_str = eval(user_command[1:] . '()')
-            else
-                redir => user_command_str
-                silent execute user_command
-                redir END
-            endif
-        catch
-            let user_command_str = "null"
-            echoerr "执行的命令无效: " . v:exception
-        endtry
-        
-        let user_command_utf8 = iconv(user_command_str, &encoding, 'utf-8')
-        let data_list = split(user_command_utf8, '\n')
+        if user_command == 'get_vimrc_content'
+            let data_list = readfile($MYVIMRC)
+        elseif user_command == ':SortMarks'
+            let data_list = eval(user_command[1:] . '()')
+        else
+            let user_command_str = ''
+            try
+                if user_command[0] == '!'
+                    let user_command_str = system(user_command[1:])
+                elseif user_command[0] == ':'
+                    let user_command_str = eval(user_command[1:] . '()')
+                else
+                    redir => user_command_str
+                    silent execute user_command
+                    redir END
+                endif
+            catch
+                let user_command_str = "null"
+                echoerr "执行的命令无效: " . v:exception
+            endtry
+            
+            let user_command_utf8 = iconv(user_command_str, &encoding, 'utf-8')
+            let data_list = split(user_command_utf8, '\n')
+        endif
     else
         let data_list = g:key_binding_list
     endif
@@ -2003,6 +2048,7 @@ nnoremap <silent> <c-h> :call PopupMenuShowKeyBindings('and', '', '')<cr>
 nnoremap <silent> <c-s-h> :call PopupMenuShowKeyBindings('or', '', '')<cr>
 nnoremap <silent> <c-s-c> :call PopupMenuShowKeyBindings('and', 'auto', 'map')<cr>
 nnoremap <silent> <leader><leader>ca :call PopupMenuShowKeyBindings('or', 'auto', 'map')<cr>
+nnoremap <silent> <leader><leader>cv :call PopupMenuShowKeyBindings('and', 'auto', 'get_vimrc_content')<cr>
 " 输入命令 marks 可以显示当前所有的标记
 nnoremap <silent> <leader><leader>cm :call PopupMenuShowKeyBindings('and', 'manu', '')<cr>
 
@@ -2142,9 +2188,9 @@ endfunction
 
 
 " show marks
-nnoremap <silent> <leader><leader>sm :call PopupMenuShowKeyBindings('and', 'auto', ':SortMarks')<cr>
-nnoremap <silent> <leader>smt :call StartTimer()<cr>
-nnoremap <silent> <leader>tmt :call StopTimer()<cr>
+nnoremap <silent> <leader><leader>sm :call PopupMenuShowKeyBindings('and', 'auto', ':SortMarks')<cr>| " 静态显示当前文件所有marks标记
+nnoremap <silent> <leader>smt :call StartTimer()<cr>| " 动态显示当前文件所有marks标记
+nnoremap <silent> <leader>tmt :call StopTimer()<cr>| " 关闭显示当前文件所有marks标记
 " 为了避免麻烦,在切换标签页前关闭
 " :TODO: 可以考虑给字母标记加注释,注释的内容可以持久化,并方便更新,字母标记也可以持久化
 autocmd BufLeave * call StopTimer()
