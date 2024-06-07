@@ -463,6 +463,7 @@ autocmd filetype perl setlocal noexpandtab
 
 " 设置星号不要自动跳转,只高亮
 nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>| " 搜索: 搜索并高亮当前单词
+" :TODO: 这里使用了默认的寄存器，如果后续有干扰，需要保持默认寄存器干净，可能需要修改这里
 xnoremap <silent> * y:let @/='\V'.escape(@", '/\')<CR>:let old_pos = getpos(".")<CR>:set hls<CR>:call setpos('.', old_pos)<CR>| " 搜索: 可视模式搜索并高亮当前单词
 
 
@@ -1642,51 +1643,51 @@ vnoremap <leader>cfsf y:CtrlSF -S <C-r>" %<cr>| "                  搜索:ctrlsf
 vnoremap <leader>cfwf y:CtrlSF -S -W <C-r>" %<cr>| "               搜索:ctrlsf:当前文件 敏感,全词
 
 " 设置vimgrep的全局排除规则
-set wildignore=.git/**,tags
-nnoremap <leader>vgip :execute "normal! *" \| :Rooter<cr> :vimgrep /\c<C-r><C-w>/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 不敏感,非全词
-nnoremap <leader>vgsp :execute "normal! *" \| :Rooter<cr> :vimgrep /<C-r><C-w>/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 敏感,非全词
-nnoremap <leader>vgwp :execute "normal! *" \| :Rooter<cr> :vimgrep /\<<C-r><C-w>\>/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 敏感,全词
-nnoremap <leader>vgiwp :execute "normal! *" \| :Rooter<cr> :vimgrep /\c\<<C-r><C-w>\>/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 不敏感,全词
+set wildignore=.git/**,tags,GPATH,GRTAGS,GTAGS
+nnoremap <leader>vgip :Rooter<cr> :vimgrep /\c<C-r><C-w>/gj **/*<cr>| "      搜索:vimgrep:项目级 不敏感,非全词
+nnoremap <leader>vgsp :Rooter<cr> :vimgrep /<C-r><C-w>/gj **/*<cr>| "        搜索:vimgrep:项目级 敏感,非全词
+nnoremap <leader>vgwp :Rooter<cr> :vimgrep /\<<C-r><C-w>\>/gj **/*<cr>| "    搜索:vimgrep:项目级 敏感,全词
+nnoremap <leader>vgiwp :Rooter<cr> :vimgrep /\c\<<C-r><C-w>\>/gj **/*<cr>| " 搜索:vimgrep:项目级 不敏感,全词
 
-nnoremap <leader>vgic :execute "normal! *" \| :vimgrep /\c<C-r><C-w>/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 不敏感,非全词
-nnoremap <leader>vgsc :execute "normal! *" \| :vimgrep /<C-r><C-w>/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 敏感,非全词
-nnoremap <leader>vgwc :execute "normal! *" \| :vimgrep /\<<C-r><C-w>\>/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 敏感,全词
-nnoremap <leader>vgiwc :execute "normal! *" \| :vimgrep /\c\<<C-r><C-w>\>/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 不敏感,全词
+nnoremap <leader>vgic :vimgrep /\c<C-r><C-w>/gj **/*<cr>| "                  搜索:vimgrep:当前目录递归 不敏感,非全词
+nnoremap <leader>vgsc :vimgrep /<C-r><C-w>/gj **/*<cr>| "                    搜索:vimgrep:当前目录递归 敏感,非全词
+nnoremap <leader>vgwc :vimgrep /\<<C-r><C-w>\>/gj **/*<cr>| "                搜索:vimgrep:当前目录递归 敏感,全词
+nnoremap <leader>vgiwc :vimgrep /\c\<<C-r><C-w>\>/gj **/*<cr>| "             搜索:vimgrep:当前目录递归 不敏感,全词
 
-nnoremap <leader>vgid :execute "normal! *" \| :vimgrep /\c<C-r><C-w>/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 不敏感,非全词
-nnoremap <leader>vgsd :execute "normal! *" \| :vimgrep /<C-r><C-w>/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 敏感,非全词
-nnoremap <leader>vgwd :execute "normal! *" \| :vimgrep /\<<C-r><C-w>\>/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 敏感,全词
-nnoremap <leader>vgiwd :execute "normal! *" \| :vimgrep /\c\<<C-r><C-w>\>/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 不敏感,全词
+nnoremap <leader>vgid :vimgrep /\c<C-r><C-w>/gj *<cr>| "                     搜索:vimgrep:仅限当前目录 不敏感,非全词
+nnoremap <leader>vgsd :vimgrep /<C-r><C-w>/gj *<cr>| "                       搜索:vimgrep:仅限当前目录 敏感,非全词
+nnoremap <leader>vgwd :vimgrep /\<<C-r><C-w>\>/gj *<cr>| "                   搜索:vimgrep:仅限当前目录 敏感,全词
+nnoremap <leader>vgiwd :vimgrep /\c\<<C-r><C-w>\>/gj *<cr>| "                搜索:vimgrep:仅限当前目录 不敏感,全词
 
-nnoremap <leader>vgif :execute "normal! *" \| :vimgrep /\c<C-r><C-w>/ % \| copen<cr>| " 搜索:vimgrep:当前文件 不敏感,非全词
-nnoremap <leader>vgsf :execute "normal! *" \| :vimgrep /<C-r><C-w>/ % \| copen<cr>| " 搜索:vimgrep:当前文件 敏感,非全词
-nnoremap <leader>vgwf :execute "normal! *" \| :vimgrep /\<<C-r><C-w>\>/ % \| copen<cr>| " 搜索:vimgrep:当前文件 敏感,全词
-nnoremap <leader>vgiwf :execute "normal! *" \| :vimgrep /\c\<<C-r><C-w>\>/ % \| copen<cr>| " 搜索:vimgrep:当前文件 不敏感,全词
+nnoremap <leader>vgif :vimgrep /\c<C-r><C-w>/gj %<cr>| "                     搜索:vimgrep:当前文件 不敏感,非全词
+nnoremap <leader>vgsf :vimgrep /<C-r><C-w>/gj %<cr>| "                       搜索:vimgrep:当前文件 敏感,非全词
+nnoremap <leader>vgwf :vimgrep /\<<C-r><C-w>\>/gj %<cr>| "                   搜索:vimgrep:当前文件 敏感,全词
+nnoremap <leader>vgiwf :vimgrep /\c\<<C-r><C-w>\>/gj %<cr>| "                搜索:vimgrep:当前文件 不敏感,全词
 
-nnoremap <leader>vgmp :Rooter<cr> :vimgrep // **/*| "                   搜索:ctrlsf:项目级 手动搜索
-nnoremap <leader>vgmc :vimgrep // **/*| "                               搜索:ctrlsf:当前目录递归 手动搜索
-nnoremap <leader>vgmd :vimgrep // *|          "                   搜索:ctrlsf:仅限当前目录 手动搜索
-nnoremap <leader>vgmf :vimgrep // %|           "                   搜索:ctrlsf:当前文件 手动搜索
+nnoremap <leader>vgmp :Rooter<cr> :vimgrep //gj **/*| "                      搜索:ctrlsf:项目级 手动搜索
+nnoremap <leader>vgmc :vimgrep //gj **/*| "                                  搜索:ctrlsf:当前目录递归 手动搜索
+nnoremap <leader>vgmd :vimgrep //gj *|          "                            搜索:ctrlsf:仅限当前目录 手动搜索
+nnoremap <leader>vgmf :vimgrep //gj %|           "                           搜索:ctrlsf:当前文件 手动搜索
 
-vnoremap <leader>vgip *:Rooter<cr> :vimgrep /\c<C-r>"/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 不敏感,非全词
-vnoremap <leader>vgsp *:Rooter<cr> :vimgrep /<C-r>"/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 敏感,非全词
-vnoremap <leader>vgwp *:Rooter<cr> :vimgrep /\<<C-r>"\>/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 敏感,全词
-vnoremap <leader>vgiwp *:Rooter<cr> :vimgrep /\c\<<C-r>"\>/ **/* \| copen<cr>| " 搜索:vimgrep:项目级 不敏感,全词
+vnoremap <leader>vgip y:Rooter<cr> :vimgrep /\c<C-r>"/gj **/*<cr>| "         搜索:vimgrep:项目级 不敏感,非全词
+vnoremap <leader>vgsp y:Rooter<cr> :vimgrep /<C-r>"/gj **/*<cr>| "           搜索:vimgrep:项目级 敏感,非全词
+vnoremap <leader>vgwp y:Rooter<cr> :vimgrep /\<<C-r>"\>/gj **/*<cr>| "       搜索:vimgrep:项目级 敏感,全词
+vnoremap <leader>vgiwp y:Rooter<cr> :vimgrep /\c\<<C-r>"\>/gj **/*<cr>| "    搜索:vimgrep:项目级 不敏感,全词
 
-vnoremap <leader>vgic *:vimgrep /\c<C-r>"/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 不敏感,非全词
-vnoremap <leader>vgsc *:vimgrep /<C-r>"/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 敏感,非全词
-vnoremap <leader>vgwc *:vimgrep /\<<C-r>"\>/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 敏感,全词
-vnoremap <leader>vgiwc *:vimgrep /\c\<<C-r>"\>/ **/* \| copen<cr>| " 搜索:vimgrep:当前目录递归 不敏感,全词
+vnoremap <leader>vgic y:vimgrep /\c<C-r>"/gj **/*<cr>| "                     搜索:vimgrep:当前目录递归 不敏感,非全词
+vnoremap <leader>vgsc y:vimgrep /<C-r>"/gj **/*<cr>| "                       搜索:vimgrep:当前目录递归 敏感,非全词
+vnoremap <leader>vgwc y:vimgrep /\<<C-r>"\>/gj **/*<cr>| "                   搜索:vimgrep:当前目录递归 敏感,全词
+vnoremap <leader>vgiwc y:vimgrep /\c\<<C-r>"\>/gj **/*<cr>| "                搜索:vimgrep:当前目录递归 不敏感,全词
 
-vnoremap <leader>vgid *:vimgrep /\c<C-r>"/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 不敏感,非全词
-vnoremap <leader>vgsd *:vimgrep /<C-r>"/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 敏感,非全词
-vnoremap <leader>vgwd *:vimgrep /\<<C-r>"\>/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 敏感,全词
-vnoremap <leader>vgiwd *:vimgrep /\c\<<C-r>"\>/ * \| copen<cr>| " 搜索:vimgrep:仅限当前目录 不敏感,全词
+vnoremap <leader>vgid y:vimgrep /\c<C-r>"/gj *<cr>| "                        搜索:vimgrep:仅限当前目录 不敏感,非全词
+vnoremap <leader>vgsd y:vimgrep /<C-r>"/gj *<cr>| "                          搜索:vimgrep:仅限当前目录 敏感,非全词
+vnoremap <leader>vgwd y:vimgrep /\<<C-r>"\>/gj *<cr>| "                      搜索:vimgrep:仅限当前目录 敏感,全词
+vnoremap <leader>vgiwd y:vimgrep /\c\<<C-r>"\>/gj *<cr>| "                   搜索:vimgrep:仅限当前目录 不敏感,全词
 
-vnoremap <leader>vgif *:vimgrep /\c<C-r>"/ % \| copen<cr>| " 搜索:vimgrep:当前文件 不敏感,非全词
-vnoremap <leader>vgsf *:vimgrep /<C-r>"/ % \| copen<cr>| " 搜索:vimgrep:当前文件 敏感,非全词
-vnoremap <leader>vgwf *:vimgrep /\<<C-r>"\>/ % \| copen<cr>| " 搜索:vimgrep:当前文件 敏感,全词
-vnoremap <leader>vgiwf *:vimgrep /\c\<<C-r>"\>/ % \| copen<cr>| " 搜索:vimgrep:当前文件 不敏感,全词
+vnoremap <leader>vgif y:vimgrep /\c<C-r>"/gj %<cr>| "                        搜索:vimgrep:当前文件 不敏感,非全词
+vnoremap <leader>vgsf y:vimgrep /<C-r>"/gj %<cr>| "                          搜索:vimgrep:当前文件 敏感,非全词
+vnoremap <leader>vgwf y:vimgrep /\<<C-r>"\>/gj %<cr>| "                      搜索:vimgrep:当前文件 敏感,全词
+vnoremap <leader>vgiwf y:vimgrep /\c\<<C-r>"\>/gj %<cr>| "                   搜索:vimgrep:当前文件 不敏感,全词
 
 let g:ctrlsf_case_sensitive = 'yes'
 let g:ctrlsf_follow_symlinks = 0
