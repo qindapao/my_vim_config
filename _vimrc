@@ -194,7 +194,16 @@ function! MyReplaceWord(now_mode)
         let old_word = GetVisualLine()
     endif
     let new_word = input("Replace " . old_word . " with: ")
-    execute '%s/' . old_word . '/' . new_word . '/gc'
+    execute '%s/' . old_word . '/' . new_word . '/gc | update'
+endfunction
+
+" range 标识的函数才能在可视选择范围内执行
+function! VisualReplaceWord() range
+    let old_word = escape(getreg('"'), '/\&')
+    " 设置默认值并且有机会可以修改默认pattern
+    let old_word = input("old_patter: ", old_word)
+    let new_word = input("Replace " . old_word . " with: ")
+    execute "'<,'>s/" . old_word . "/" . new_word . "/gc | update"
 endfunction
 
 " 括号自动配对
@@ -609,6 +618,8 @@ set smoothscroll
 set completeopt-=preview
 
 " 设置打开和关闭语法高亮快捷键
+" :TODO: 不知道从哪个配置开始NERDTree的显示不正常,需要先关闭语法高亮然后再打开语法高亮才能正常(默认会显示多余的^G字符,有空再定位吧,可能是哪个设置导致的)
+" 定位方法是回退当前配置的git前面的提交,一直回退到不出问题的vimrc的版本
 nnoremap <silent> <leader>sof :syntax off<cr>| " 辅助: 取消语法高亮(提高效率)
 nnoremap <silent> <leader>son :syntax on<cr>| " 辅助: 取消语法高亮(增加可读性)
 
@@ -878,7 +889,7 @@ let $GTAGSLABEL = 'native-pygments'                                             
 " 这里的路径注意下一定要是绝对路径
 let $GTAGSCONF = 'C:/Users/pc/.vim/gtags/share/gtags/gtags.conf'                 " gtags的配置文件的路径
 
-let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']      " gutentags 搜索工程目录的标志，当前文件路径向上递归直到碰到这些文件/目录名
+let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']      " gutentags 搜 索工程目录的标志，当前文件路径向上递归直到碰到这些文件/目录名
 let g:gutentags_ctags_tagfile = '.tags'                                          " 所生成的数据文件的名称
 
 let g:gutentags_modules = ['ctags', 'gtags_cscope']                              " 同时开启 ctags 和 gtags 支持
@@ -1195,7 +1206,6 @@ colorscheme antiphoton
 " let g:lucius_contrast = 'normal'
 " let g:lucius_contrast_bg = 'high'
 " " lucius 主题配置 }
-
 " LeaderF 配置 {
 
 let g:Lf_GtagsAutoGenerate = 0
@@ -1689,6 +1699,69 @@ vnoremap <leader>vgsf y:vimgrep /<C-r>"/gj %<cr>| "                          搜
 vnoremap <leader>vgwf y:vimgrep /\<<C-r>"\>/gj %<cr>| "                      搜索:vimgrep:当前文件 敏感,全词
 vnoremap <leader>vgiwf y:vimgrep /\c\<<C-r>"\>/gj %<cr>| "                   搜索:vimgrep:当前文件 不敏感,全词
 
+let g:regexPatterns = [
+\ '^：匹配行的开始。',
+\ '$：匹配行的结束。',
+\ '[]：匹配括号内的任何字符。',
+\ '.：匹配任何单个字符（除了换行符）。',
+\ '*：匹配前面的元素零次或多次。',
+\ '+：匹配前面的元素一次或多次。',
+\ '?：匹配前面的元素零次或一次。',
+\ '\s：匹配任何空白字符，包括空格、制表符、换页符等。',
+\ '\S：匹配任何非空白字符。',
+\ '\d：匹配任何数字。',
+\ '\D：匹配任何非数字字符。',
+\ '\w：匹配任何字母、数字或下划线字符。',
+\ '\W：匹配任何非字母、非数字和非下划线字符。',
+\ '{n,m}：匹配前面的元素至少 n 次，但不超过 m 次。',
+\ '{n,}：匹配前面的元素 n 次或更多次。',
+\ '{,m}：匹配前面的元素不超过 m 次。',
+\ '{n}：匹配前面的元素恰好 n 次。',
+\ '|：表示或（or），匹配前面或后面的表达式。',
+\ '( )：用于分组，匹配括号中的表达式。'
+\ ]
+
+" :TODO: 目前列表里面无法加注释只能放到外面来单独注释
+" ^：匹配行的开始。                                    " 辅助:regexPatterns 
+" $：匹配行的结束。                                    " 辅助:regexPatterns
+" []：匹配括号内的任何字符。                           " 辅助:regexPatterns
+" .：匹配任何单个字符（除了换行符）。                  " 辅助:regexPatterns
+" *：匹配前面的元素零次或多次。                        " 辅助:regexPatterns
+" +：匹配前面的元素一次或多次。                        " 辅助:regexPatterns
+" ?：匹配前面的元素零次或一次。                        " 辅助:regexPatterns
+" \s：匹配任何空白字符，包括空格、制表符、换页符等。   " 辅助:regexPatterns
+" \S：匹配任何非空白字符。                             " 辅助:regexPatterns
+" \d：匹配任何数字。                                   " 辅助:regexPatterns
+" \D：匹配任何非数字字符。                             " 辅助:regexPatterns
+" \w：匹配任何字母、数字或下划线字符。                 " 辅助:regexPatterns
+" \W：匹配任何非字母、非数字和非下划线字符。           " 辅助:regexPatterns
+" {n,m}：匹配前面的元素至少 n 次，但不超过 m 次。      " 辅助:regexPatterns
+" {n,}：匹配前面的元素 n 次或更多次。                  " 辅助:regexPatterns
+" {,m}：匹配前面的元素不超过 m 次。                    " 辅助:regexPatterns
+" {n}：匹配前面的元素恰好 n 次。                       " 辅助:regexPatterns
+" |：表示或（or），匹配前面或后面的表达式。            " 辅助:regexPatterns
+" ( )：用于分组，匹配括号中的表达式。                  " 辅助:regexPatterns
+
+
+function! FindAndReplaceInFiles()
+    let winid = ShowPopup(g:regexPatterns)
+    " 这里的redraw至关重要
+    redraw
+    let file_pattern = input('Enter the file pattern(Rooter 进入项目根; **/* 目录递归; * 当前目录; % 当前文件): ')
+    execute 'args ' . file_pattern
+    let search_pattern = input('Enter the search pattern(\c 忽略大小写; \<\> 全词匹配): ')
+    let replace_pattern = input('Enter the replace pattern: ')
+    execute 'argdo %s/' . search_pattern . '/' . replace_pattern . '/gc | update'
+    call popup_close(winid)
+endfunction
+
+
+nnoremap <leader>vs :call FindAndReplaceInFiles()<cr>| " 替换: vim内置替换功能封装
+
+" 多文件替换相关的操作
+" :args *.txt
+" :argdo %s/foo/bar/gc | update
+
 let g:ctrlsf_case_sensitive = 'yes'
 let g:ctrlsf_follow_symlinks = 0
 let g:ctrlsf_ignore_dir = ['docs/bak.md', '.gitignore']
@@ -1840,6 +1913,7 @@ noremap <leader>gsnz :silent call GenSectionNum('zim')<cr>| " zim: zim生成数�
 " 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突
 noremap <leader><leader>r :call MyReplaceWord('n')<CR>| " 替换: 普通模式替换当前单词
 vnoremap <leader>r :call MyReplaceWord('v')<CR>| " 替换: 可视模式替换当前单词
+vnoremap <leader><leader>r :call VisualReplaceWord()<CR>| " 替换: 可视模式替换选择区域复制的单词为新单词
 
 nnoremap <leader>br :call AddBufferBr()<CR>
 
@@ -2163,6 +2237,21 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
     endwhile
 endfunction
 
+" 一个简单的弹出窗口只是为了用户帮助信息(只显示信息不获取焦点,屏幕右上角)
+function! ShowPopup(contentList)
+    let options = {
+    \ 'line': 1,
+    \ 'col': winwidth(0) - 30,
+    \ 'minwidth': 30,
+    \ 'minheight': len(a:contentList),
+    \ 'padding': [0,1,0,1],
+    \ 'border': [],
+    \ 'close': 'click',
+    \ 'focusable': 0,
+    \ }
+    let winid = popup_create(a:contentList, options)
+    return winid
+endfunction
 
 source $VIM/keybinding_help.vim
 " :TODO: 如果列表中只有一个元素，可能再增加一个弹窗显示详情
