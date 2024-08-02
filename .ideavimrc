@@ -1,0 +1,69 @@
+" 设置行号
+set nu
+" 设置相对行号
+set rnu
+
+" 显示执行的命令
+set showcmd
+" 显示当前模式
+set showmode
+
+" 设置搜索高亮
+set hlsearch
+
+" 关闭其它窗口
+nnoremap bo :only<CR>
+
+" 创建新窗口
+nnoremap tn :tabnew<CR>
+
+
+" 切换窗口
+nnoremap <C-h> <C-w>h
+nnoremap <C-j> <C-w>j
+nnoremap <C-k> <C-w>k
+nnoremap <C-l> <C-w>l
+
+" 打开超级移动
+set easymotion
+" 打开s和S的超级移动功能
+set sneak
+" 输入法控制
+set keep-english-in-normal-and-restore-in-insert
+
+" 打开surround插件
+set surround
+
+" 多光标插件
+set multiple-cursors
+
+" 段落匹配全是空格的行
+set vim-paragraph-motion
+
+" 缩进文本对象
+set vim-indent-object
+
+
+" vim-easymotion 的配置 {
+let g:EasyMotion_smartcase = 1
+map <Leader>j <Plug>(easymotion-j)
+map <Leader>k <Plug>(easymotion-k)
+map <Leader>h <Plug>(easymotion-linebackward)
+map <Leader>l <Plug>(easymotion-lineforward)
+map <Leader><leader>. <Plug>(easymotion-repeat)
+map <Leader>w <Plug>(easymotion-bd-w)
+" 并没有跨窗口功能
+" map <Leader>W <Plug>(easymotion-overwin-w)
+map <Leader>f <Plug>(easymotion-bd-f)
+" 并没有跨窗口功能
+" map <Leader>F <Plug>(easymotion-overwin-f)
+" vim-easymotion 的配置 }
+
+" 恢复系统剪切板的功能
+nnoremap <C-c> "+y
+nnoremap <C-v> "+p
+vnoremap <C-c> "+y
+vnoremap <C-v> "+p
+inoremap <C-v> <C-r>+
+cnoremap <C-v> <C-r>+
+

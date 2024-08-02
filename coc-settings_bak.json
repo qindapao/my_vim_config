@@ -9,4 +9,7 @@
     "python.linting.pylintEnabled": false,
     "python.linting.pylintPath": "",
     "python.pythonPath" : "D:\\python\\python.exe",
+    "snippets.userSnippetsDirectory": "C:\\Users\\xx\\.vim\\plugged\\vim-snippets\\mysnips",
+    "snippets.textmateSnippetsRoots": ["C:\\Users\\xx\\.vim\\plugged\\vim-snippets\\textmate"],
+    "coc.preferences.snippetTrigger": "tab"
 }

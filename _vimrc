@@ -777,8 +777,8 @@ Plug 'qindapao/vim', { 'as': 'catppuccin' }                                    "
 " Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
 " Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 " Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
-Plug 'qindapao/photon.vim'                                                           " 一个极简的漂亮主题
-Plug 'wimstefan/Lightning'
+Plug 'qindapao/photon.vim'                                                       " 一个极简的漂亮主题
+Plug 'qindapao/Lightning', {'branch': 'qq_modify'}
 
 call plug#end()
 " 插件 }
