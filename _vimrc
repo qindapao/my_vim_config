@@ -438,6 +438,7 @@ set guitablabel=%N%M%t
 " 切换标签页快捷方式
 noremap <silent> tn :tabnew<CR>| " 多标签: 创建新标签页
 noremap <silent> tc :tabclose<CR>| " 多标签: 关闭当前标签页
+noremap <silent> tC :q!<CR> " 多标签: 强制关闭当前标签页
 noremap <silent> to :tabonly<CR>| " 多标签: 只保留当前标签页
 nnoremap <Tab> gt<cr>| " 多标签: 向前切换标签页
 nnoremap <S-Tab> gT<cr>| " 多标签: 向后切换标签页
@@ -489,7 +490,8 @@ set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
 " set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
-set guifont=微软雅黑\ PragmataPro\ Mono:h12
+" set guifont=微软雅黑\ PragmataPro\ Mono:h8
+set guifont=Fira\ Code:h8
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
@@ -499,6 +501,10 @@ set guifont=微软雅黑\ PragmataPro\ Mono:h12
 set noundofile
 set nobackup
 set guioptions+=b                                                                " 添加水平滚动条
+" 打开右侧滚动条
+set guioptions+=r
+" 隐藏左侧滚动条
+set guioptions-=L
 
 nnoremap <leader>o o<Esc>| " 编辑: 下面插入一行保持普通模式(不能设置为oo,会导致严重延迟)
 nnoremap <leader>O O<Esc>| " 编辑: 上面插入一行保持普通模式(不能设置为OO,会导致严重延迟)
@@ -710,7 +716,8 @@ Plug 'qindapao/vim-lastplace'                                                  "
 Plug 'qindapao/diffchar.vim'                                                   " 更明显的对比
 " Plug 'terryma/vim-multiple-cursors'                                            " vim的多光标插件
 Plug 'qindapao/vim-visual-multi'                                               " 这个插件比上面插件更轻便更快
-Plug 'qindapao/colorizer'                                                      " vim中显示16进制颜色
+" qindapao/colorizer这个插件的性能特别低!暂时不要打开,会导致gvim在处理大文件时候拆分窗口和TAB标签页的处理都非常缓慢
+Plug 'qindapao/vim-coloresque'                                                 " 这个也是颜色显示插件但是没有性能问题
 Plug 'qindapao/vim-indent-object'                                              " 基于缩进的文本对象，用于python等语言
 Plug 'qindapao/vim-paragraph-motion'                                           " 增强{  }段落选择的功能,可以用全空格行作为段落
 " 这个插件的语法高亮需要说明下,可能是受默认的txt文件的语法高亮的影响
@@ -742,7 +749,7 @@ Plug 'qindapao/vim-rooter'                                                     "
 " Plug 't9md/vim-textmanip'                                                      " 可视模式的文本移动和替换
 " 画盒子的插件,用处不大
 " Plug 'GCRev/vim-box-draw'                                                      " 好看的unicode盒子，可以交叉
-" Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜索字符,它们可以用作别的映射
+" Plug 'rhysd/clever-f.vim'                                                      " 聪明的f,这样就不用逗号和分号来重复搜 索字符,它们可以用作别的映射
 " 当前这个插件会导致编辑txt和zim文件变得很卡,所以只用于特定的编程语言
 " 太卡了先注释吧，编程的时候再放出来(这个很卡的的插件要放出来，不然TAB键无法生效?)
 " Plug 'qindapao/ultisnips', { 'for': ['python', 'c', 'sh', 'perl'] }
@@ -771,7 +778,7 @@ Plug 'qindapao/vim', { 'as': 'catppuccin' }                                    "
 " Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
 " Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
 Plug 'qindapao/photon.vim'                                                           " 一个极简的漂亮主题
-
+Plug 'wimstefan/Lightning'
 
 call plug#end()
 " 插件 }
@@ -1139,8 +1146,16 @@ let g:rainbow_active = 1                                                        
 " " Dark theme
 " colorscheme photon
 " Light theme
-colorscheme antiphoton
+" colorscheme antiphoton
 " photon.vim 主题 }
+" " Lightning 主题 {
+colorscheme Lightning
+" " Lightning 主题 }
+" colorscheme Atom
+" colorscheme github
+" set background=light
+" colorscheme sunbather
+
 
 " set t_Co=256
 " " 还有amdard
@@ -1206,6 +1221,7 @@ colorscheme antiphoton
 " let g:lucius_contrast = 'normal'
 " let g:lucius_contrast_bg = 'high'
 " " lucius 主题配置 }
+
 " LeaderF 配置 {
 
 let g:Lf_GtagsAutoGenerate = 0
@@ -1531,7 +1547,7 @@ let g:coc_snippet_next = '<tab>'
 " " vim-snippets 插件配置 }
 
 " " airline {
-" let g:airline_theme = 'catppuccin_frappe'
+let g:airline_theme = 'catppuccin_frappe'
 " let g:airline_theme_dark = 'catppuccin_frappe'
 " let g:airline_powerline_fonts = 1
 " " airline }
@@ -1884,6 +1900,17 @@ nnoremap <silent> <leader>gtxr :execute 'Git push origin :' . GetLineContentLast
 
 
 " " vim-markbar 插件配置 }
+
+
+" tabular 对齐插件配置区域 {
+vnoremap <silent> <leader>tb<Space> :Tabularize / \+<cr>
+vnoremap <silent> <leader>tb= :Tabularize /=<cr>
+vnoremap <silent> <leader>tb: :Tabularize /:<cr>
+vnoremap <silent> <leader>tb-> :Tabularize /-><cr>
+vnoremap <silent> <leader>tb=> :Tabularize /=><cr>
+
+" tabular 对齐插件配置区域 }
+
 
 " markdown-preview 插件配置 {
 " let g:mkdp_markdown_css = $VIM . '\github-markdown-light.css'
