@@ -1991,8 +1991,8 @@ let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
 " 这里最好不要直接用<CR>会覆盖掉一些重要的默认按键映射
 nnoremap <C-CR>  <Cmd>Hi><CR>| " 高亮: 当前高亮的下一个
 nnoremap <C-S-CR>  <Cmd>Hi<<CR>| " 高亮: 当前高亮的上一个
-nnoremap <C-S-N> <Cmd>Hi}<CR>| " 高亮: 所有高亮的下一个
-nnoremap <C-S-P> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
+nnoremap <S-N> <Cmd>Hi}<CR>| " 高亮: 所有高亮的下一个
+nnoremap <S-P> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
 
 " vim-highlighter 配置 }
 
