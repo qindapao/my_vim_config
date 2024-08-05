@@ -90,6 +90,73 @@ function! TrimString(s)
     return substitute(a:s, '^\s*\(.\{-}\)\s*$', '\1', '')
 endfunction
 
+" viminfo 设置规则
+" set viminfo=%,<800,'10,/50,:100,h,f0,n~/.vim/cache/.viminfo
+"             | |    |   |   |    | |  + viminfo file path
+"             | |    |   |   |    | + file marks 0-9,A-Z 0=NOT stored
+"             | |    |   |   |    + disable 'hlsearch' loading viminfo
+"             | |    |   |   + command-line history saved
+"             | |    |   + search history saved
+"             | |    + files marks saved
+"             | + lines saved each register (new name for ", vi6.2)
+"             + save/restore buffer list
+"
+
+function! SetProjectViminfo()
+    " 先恢复默认
+    set viminfo='800,<50,s10,h,rA:,rB:
+    execute 'set viminfo+=n' . '~/.vim/default_viminfo'
+    execute 'silent! rviminfo ' . '~/.vim/default_viminfo'
+    let g:viminfo_file_path = '~/.vim/default_viminfo'
+
+    " 获取项目根目录
+    let l:project_root = finddir('.git', ';')
+    if empty(l:project_root)
+        let l:project_root = finddir('.hg', ';')
+    endif
+    if empty(l:project_root)
+        let l:project_root = finddir('.svn', ';')
+    endif
+    if empty(l:project_root)
+        let l:project_root = findfile('Makefile', ';')
+    endif
+    if empty(l:project_root)
+        let l:project_root = findfile('package.json', ';')
+    endif
+
+    " echom l:project_root
+
+    if !empty(l:project_root)
+        let l:project_root = fnamemodify(l:project_root, ':p:h')
+    endif
+
+    echom l:project_root
+
+    " 如果找到了项目根目录，设置 viminfo 文件路径
+    if !empty(l:project_root)
+        let l:dirpath = '~/.vim/viminfo/'
+        if !isdirectory(expand(l:dirpath))
+            call mkdir(expand(l:dirpath), 'p')
+        endif
+
+        let l:viminfo_file = substitute(l:project_root, '[\\/:]', '-', 'g')
+        let l:viminfo_path = l:dirpath . 'viminfo_' . l:viminfo_file
+        let g:viminfo_file_path = l:viminfo_path
+        set viminfo='800,<50,s10,h,rA:,rB:
+        execute 'set viminfo+=n' . l:viminfo_path
+
+        " 重新加载viminfo内容
+        execute 'silent! rviminfo ' . l:viminfo_path
+    endif
+
+    " viminfo更新后需要改变全局标记的文件
+    call LoadGlobalMarkComments()
+endfunction
+
+" 每次启动 Vim 时调用 SetProjectViminfo 函数
+autocmd VimEnter * call SetProjectViminfo()
+
+
 " 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
 " usage :call GenMarkdownSectionNum    给markdown/zimwiki 文件生成目录编号
 " 如果要在某些脚本代码中写注释,那么使用#----这种格式来过滤
@@ -599,7 +666,7 @@ autocmd filetype zim setlocal omnifunc=OmniCompleteCustom
 " C语言的编译和调试
 " 打开termdebug
 packadd termdebug
-nnoremap <leader>m :make<cr>| " 构建: 执行make命令
+nnoremap <leader><leader>m :make<cr>| " 构建: 执行make命令
 " 在vim中执行make不是执行make命令,而是执行makeprg的命令,不要混淆
 " 增加告警显示和gdb的调试支持
 set makeprg=gcc\ -g\ -Wall\ -o\ %<\ %
@@ -1917,13 +1984,15 @@ vnoremap <silent> <leader>tb=> :Tabularize /=><cr>
 let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
 " markdown-preview 插件配置 }
 
+" let g:lightline.colorscheme='catppuccin_mocha'
+
 " vim-highlighter 配置 {
 
 " 这里最好不要直接用<CR>会覆盖掉一些重要的默认按键映射
 nnoremap <C-CR>  <Cmd>Hi><CR>| " 高亮: 当前高亮的下一个
 nnoremap <C-S-CR>  <Cmd>Hi<<CR>| " 高亮: 当前高亮的上一个
 nnoremap <C-S-N> <Cmd>Hi}<CR>| " 高亮: 所有高亮的下一个
-nnoremap <S-CR> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
+nnoremap <C-S-P> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
 
 " vim-highlighter 配置 }
 
@@ -2377,6 +2446,21 @@ function! SortMarks()
     let l:lines = split(l:marks, '\n')
     call filter(l:lines, 'v:val =~ "^\\s\\+[a-zA-Z]"')
     call map(l:lines, 'split(v:val)')
+    " 如果这些标记包含注释也要显示出来
+    for l:line in l:lines
+        let l:mark = l:line[0]
+        let l:line[1] = printf('%-5s', l:line[1])
+        let l:line[2] = printf('%-5s', l:line[2])
+
+        if l:mark =~# '[A-Z]'
+            let l:comment = get(g:global_mark_comments, l:mark, '')
+        else
+            let l:comment = get(b:file_mark_comments, l:mark, '')
+        endif
+
+        let l:comment = printf('%-10s', l:comment)
+        call insert(l:line, l:comment, 1)
+    endfor
     call sort(l:lines, 'SortByLine')
 
     " return join(map(copy(l:lines), 'join(v:val, " ")'), "\n")
@@ -2387,19 +2471,71 @@ function! SortByLine(mark1, mark2)
     return a:mark1[1] - a:mark2[1]
 endfunction
 
-" vim中执行异步的命令并且在弹出窗口中动态显示出来(用于监控一些重要信息)
-let s:timer = -1
+" timer的实现 {
+" " vim中执行异步的命令并且在弹出窗口中动态显示出来(用于监控一些重要信息)
+" let s:timer = -1
 
-function! StartTimer()
-    if s:timer != -1
-        call timer_stop(s:timer)
+" function! StartTimer()
+"     if s:timer != -1
+"         call timer_stop(s:timer)
+"     endif
+
+"     " 创建一个空的弹出窗口
+"     let opts = { 'line': 'cursor',
+"         \ 'col': 'cursor',
+"         \ 'padding': [0,1,0,1],
+"         \ 'wrap': v:true,
+"         \ 'border': [],
+"         \ 'close': 'none',
+"         \ 'highlight': 'Pmenu',
+"         \ 'resize': 1,
+"         \ 'zindex': 100,
+"         \ 'maxheight': 20,
+"         \ 'maxwidth': 80,
+"         \ 'title': 'tips',
+"         \ 'dragall': 1}
+"     let s:dynamic_content_win = popup_create([''], opts)
+
+"     let s:timer = timer_start(1000, 'UploadDynamicPopupWin', {'repeat': -1})
+" endfunction
+
+" function! StopTimer()
+"     if s:timer != -1
+"         call timer_stop(s:timer)
+"         let s:timer = -1
+"         " if exists(s:dynamic_content_win) && !empty(popup_findinfo(s:dynamic_content_win))
+"         call popup_close(s:dynamic_content_win)
+"         " endif
+"     endif
+" endfunction
+
+" function! UploadDynamicPopupWin(timer_id)
+"     let dynamic_info_list = SortMarks()
+"     " if exists(s:dynamic_content_win) && !empty(popup_findinfo(s:dynamic_content_win))
+"     call popup_settext(s:dynamic_content_win, dynamic_info_list)
+"     " endif
+" endfunction
+
+" nnoremap <silent> <leader>smt :call StartTimer()<cr>| " 辅助: 动态显示当前文件所有marks标记
+" nnoremap <silent> <leader>tmt :call StopTimer()<cr>| " 辅助: 关闭显示当前文件所有marks标记
+" " 为了避免麻烦,在切换标签页前关闭
+" " :TODO: 可以考虑给字母标记加注释,注释的内容可以持久化,并方便更新,字母标记也可以持久化
+" autocmd BufLeave * call StopTimer()
+" timer的实现 }
+
+" Autocmd的实现 {
+function! StartAutoCmd()
+    if !exists("b:dynamic_content_win")
+        let b:dynamic_content_win = -1
     endif
+    " 如果前面已经有一个需要先关闭
+    call StopPopUpAutoCmd()
 
     " 创建一个空的弹出窗口
     let opts = { 'line': 'cursor',
         \ 'col': 'cursor',
         \ 'padding': [0,1,0,1],
-        \ 'wrap': v:true,
+        \ 'wrap': v:false,
         \ 'border': [],
         \ 'close': 'none',
         \ 'highlight': 'Pmenu',
@@ -2408,37 +2544,241 @@ function! StartTimer()
         \ 'maxheight': 20,
         \ 'maxwidth': 80,
         \ 'title': 'tips',
-        \ 'dragall': 1}
-    let s:dynamic_content_win = popup_create([''], opts)
+        \ 'dragall': 1,
+        \ 'scrollbar': 1}
+    let b:dynamic_content_win = popup_create([''], opts)
 
-    let s:timer = timer_start(1000, 'UploadDynamicPopupWin', {'repeat': -1})
+    " " 设置autocmd事件
+    " augroup DynamicPopup
+    "     autocmd!
+    "     autocmd CursorMoved * call UploadDynamicPopupWin()
+    " augroup END
+
+    " 手动打开
+    call UploadDynamicPopupWin()
+
 endfunction
 
-function! StopTimer()
-    if s:timer != -1
-        call timer_stop(s:timer)
-        let s:timer = -1
-        " if exists(s:dynamic_content_win) && !empty(popup_findinfo(s:dynamic_content_win))
-        call popup_close(s:dynamic_content_win)
-        " endif
+function! StopPopUpAutoCmd()
+    " " 清除autocmd事件
+    " augroup DynamicPopup
+    "     autocmd!
+    " augroup END
+
+    " 关闭弹出窗口
+    if !exists("b:dynamic_content_win")
+        let b:dynamic_content_win = -1
+    endif
+    if b:dynamic_content_win != -1
+        call popup_close(b:dynamic_content_win)
+        let b:dynamic_content_win = -1
     endif
 endfunction
 
-function! UploadDynamicPopupWin(timer_id)
-    let dynamic_info_list = SortMarks()
-    " if exists(s:dynamic_content_win) && !empty(popup_findinfo(s:dynamic_content_win))
-    call popup_settext(s:dynamic_content_win, dynamic_info_list)
-    " endif
+function! UploadDynamicPopupWin()
+    if !exists("b:dynamic_content_win")
+        let b:dynamic_content_win = -1
+    endif
+    if b:dynamic_content_win != -1
+        let dynamic_info_list = SortMarks()
+        call popup_settext(b:dynamic_content_win, dynamic_info_list)
+    endif
 endfunction
+
+" show marks
+nnoremap <silent> <leader>smt :call StartAutoCmd()<cr>| " 辅助: 显示当前文件所有marks标记
+nnoremap <silent> <leader>smx :call StopPopUpAutoCmd()<cr>| " 辅助: 关闭显示当前文件所有marks标记
+nnoremap <silent> <leader>smu :call UploadDynamicPopupWin()<cr>| " 辅助: 更新显示当前文件所有marks标记
+autocmd BufEnter * call UploadDynamicPopupWin()| " 辅助: 进入buffer的时候更新标记
+
+" 一键清除所有的小写和大写字母标记
+nnoremap <silent> <leader>smd :call DeleteMarks(join(map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)'), ' '))<cr>| " 辅助: 删除当前文件中所有的小写字母 marks 标记
+nnoremap <silent> <leader>smD :call DeleteMarks(join(map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)'), ' '))<cr>| " 辅助: 删除当前文件中所有的大写字母 marks 标记
+function! UpdateMarks(type)
+    let marks_dict = {
+        \ 'n': map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)'),
+        \ 'N': map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)')
+        \ }
+    if has_key(marks_dict, a:type)
+        let marks = marks_dict[a:type]
+    else
+        echo "Invalid type. Use 'n' for lowercase and 'N' for uppercase."
+        return
+    endif
+
+    " :TODO: 一个循环后最大标记永远为z,这里该如何处理?用全局变量又不太好,暂时先手动清理吧
+    " 获取当前最大的标记
+    let max_mark = ''
+    for mark in marks
+       if !empty(getpos("'" . mark)[1])
+            let max_mark = mark
+        endif
+    endfor
+
+    " 计算下一个标记
+    if max_mark == ''
+        let next_mark = marks[0]
+    else
+        let next_index = (index(marks, max_mark) + 1) % len(marks)
+        let next_mark = marks[next_index]
+    endif
+
+    " 设置下一个标记
+    execute 'mark ' . next_mark
+    " 更新标记列表
+    call UploadDynamicPopupWin()
+endfunction
+
+nnoremap <silent> <leader>smn :call UpdateMarks('n')<cr>| " 辅助: 添加下一个小写字母 marks 标记
+nnoremap <silent> <leader>smN :call UpdateMarks('N')<cr>| " 辅助: 添加下一个大写字母 marks 标记
+" 定义添加标记并调用自定义函数的函数
+function! AddOrRemoveMark(mark)
+    let lnum = line('.')
+    let col = col('.')
+    let pos = getpos("'" . a:mark)[1]
+    execute 'delmarks ' . a:mark
+    " 删除标记的同时也删除它的注释
+    call DeleteMarkComment(a:mark)
+    if pos != lnum
+        call setpos("'" . a:mark, [0, lnum, col, 0])
+    endif
+    call UploadDynamicPopupWin()
+endfunction
+
+for char in range(char2nr('a'), char2nr('z')) + range(char2nr('A'), char2nr('Z'))
+    execute 'nnoremap <silent> m' . nr2char(char) . ' :call AddOrRemoveMark("' . nr2char(char) . '")<CR>'
+endfor
+
+function! DeleteMarks(marks)
+    let l:marks = split(a:marks)
+    for mark in l:marks
+        execute 'delmarks' mark
+        " 删除标记的同时也删除它的注释
+        call DeleteMarkComment(mark)
+    endfor
+    call UploadDynamicPopupWin()
+endfunction
+
+" 手动删除某个(某些)标记
+nnoremap <silent> <leader>sdm :call DeleteMarks(input('Enter marks to delete (space-separated): '))<CR>| " 辅助: 手动删除一个标记列表
+
+
+
+let g:global_mark_comments = {}
+let g:global_mark_comments_file_path = ''
+
+" 加载全局标记注释
+function! LoadGlobalMarkComments()
+    " 如果当前viminfo并不是默认的,那么全局注释文件也需要更换
+    let g:global_mark_comments_file_path = expand('~/.vim/mark_comments/' . fnamemodify(g:viminfo_file_path, ':t') . 'global_mark_comments_')
+
+    echom g:global_mark_comments_file_path
+
+    if filereadable(g:global_mark_comments_file_path)
+        let g:global_mark_comments = eval(join(readfile(g:global_mark_comments_file_path), "\n"))
+    endif
+endfunction
+
+" 保存全局标记注释
+function! SaveGlobalMarkComments()
+    let l:dirpath = expand('~/.vim/mark_comments/')
+    let l:filepath = expand(l:dirpath . 'global_mark_comments')
+    " 检查并创建目录
+    if !isdirectory(l:dirpath)
+        call mkdir(l:dirpath, 'p')
+    endif
+
+    if empty(g:global_mark_comments)
+        if filereadable(g:global_mark_comments_file_path)
+            call delete(g:global_mark_comments_file_path)
+        endif
+    else
+        call writefile(split(string(g:global_mark_comments), "\n"), g:global_mark_comments_file_path)
+    endif
+endfunction
+
+" 加载文件标记注释
+function! LoadFileMarkComments()
+    let l:filepath = expand('%:p')
+    let l:comment_file = substitute(l:filepath, '[\\/:]', '-', 'g')
+    let l:file_name = expand('~/.vim/mark_comments/' . l:comment_file . '_mark_comments')
+    if filereadable(l:file_name)
+        let b:file_mark_comments = eval(join(readfile(l:file_name), "\n"))
+    else
+        let b:file_mark_comments = {}
+    endif
+endfunction
+
+" 保存文件标记注释
+function! SaveFileMarkComments()
+    let l:filepath = expand('%:p')
+    let l:comment_file = substitute(l:filepath, '[\\/:]', '-', 'g')
+    let l:dirpath = expand('~/.vim/mark_comments/')
+    if !isdirectory(l:dirpath)
+        call mkdir(l:dirpath, 'p')
+    endif
+
+    let l:file_name = expand(l:dirpath . l:comment_file . '_mark_comments')
+    if empty(b:file_mark_comments)
+        if filereadable(l:file_name)
+            call delete(l:file_name)
+        endif
+    else
+        call writefile(split(string(b:file_mark_comments), "\n"), l:file_name)
+    endif
+endfunction
+
+" 添加标记注释
+function! AddMarkComment(mark, comment)
+    if a:mark =~# '[A-Z]'
+        let g:global_mark_comments[a:mark] = a:comment
+    else
+        let b:file_mark_comments[a:mark] = a:comment
+    endif
+    call UploadDynamicPopupWin()
+endfunction
+
+" 删除标记注释
+function! DeleteMarkComment(mark)
+    if a:mark =~# '[A-Z]'
+        if has_key(g:global_mark_comments, a:mark)
+            call remove(g:global_mark_comments, a:mark)
+        endif
+    else
+        if has_key(b:file_mark_comments, a:mark)
+            call remove(b:file_mark_comments, a:mark)
+        endif
+    endif
+    call UploadDynamicPopupWin()
+endfunction
+
+" 在Vim退出时保存全局标记注释(:TODO:这里要判断下是不是最后一个实例,只有最后一个实例才能保存)
+autocmd VimLeavePre * call SaveGlobalMarkComments()
+" 在进入buffer时加载文件标记注释
+autocmd BufEnter * call LoadFileMarkComments()
+
+" 在离开buffer时保存文件标记注释
+autocmd BufLeave * call SaveFileMarkComments()
+" 在Vim退出之前保存所有文件标记注释
+autocmd VimLeavePre * call SaveFileMarkComments()
+
+" " 在标签页切换时保存和加载文件标记注释
+" autocmd TabLeave * call SaveFileMarkComments()
+" autocmd TabEnter * call LoadFileMarkComments()
+
+" 示例映射：添加标记注释
+nnoremap <silent> <leader>ama :call AddMarkComment(input('Mark: '), input('Comment: '))<CR>| " 辅助: 添加某一个标记注释
+" 示例映射：删除标记注释
+nnoremap <silent> <leader>amx :call DeleteMarkComment(input('Mark: '))<CR>| " 辅助: 删除某一个标记注释
+
+
+
+" autocmd BufLeave * call StopPopUpAutoCmd()
+" Autocmd的实现 }
 
 
 " show marks
 nnoremap <silent> <leader><leader>sm :call PopupMenuShowKeyBindings('and', 'auto', ':SortMarks')<cr>| " 辅助: 静态显示当前文件所有marks标记
-nnoremap <silent> <leader>smt :call StartTimer()<cr>| " 辅助: 动态显示当前文件所有marks标记
-nnoremap <silent> <leader>tmt :call StopTimer()<cr>| " 辅助: 关闭显示当前文件所有marks标记
-" 为了避免麻烦,在切换标签页前关闭
-" :TODO: 可以考虑给字母标记加注释,注释的内容可以持久化,并方便更新,字母标记也可以持久化
-autocmd BufLeave * call StopTimer()
 
 " 利用弹出窗口自己设计的标记系统 }
 " :TODO: 下面这个通过emacs打开后继承的环境变量有点问题,导致ggtags相关的路径错乱,可能是因为两个程序都定义了gtags相关的东西
@@ -2516,4 +2856,6 @@ vnoremap <silent> S) :call SurroundWith('()', visualmode(), '')<CR>| " 编辑: �
 " 创建新的命令，$}，来调用这个函数
 vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>| " 编辑: 大括号包围无空格 
 
+" 增加映射手动重置当前的viminfo
+nnoremap <leader>svm :call SaveGlobalMarkComments()<cr> \| :call SetProjectViminfo()<cr>| " 辅助: 重置当前环境的viminfo(切换新项目时)
 
