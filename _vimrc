@@ -334,8 +334,69 @@ function! VisualBlockMove(direction)
         \ 'moved': 'any',
         \ 'mask': mask
         \ })
-
 endfunction
+
+
+function! PasteXWithoutSpace()
+    " 获取寄存器中的数据
+    let regtype = getregtype("x")
+    let regcontent = getreg("x")
+    let blockwidth = str2nr(regtype[1:])
+    let blockheight = len(split(regcontent, "\n"))
+    let reg_text = split(regcontent, "\n")
+
+    " 得到基于物理行列的字符数组,如果是宽字符,那么放置两份,但是合并的时候只取一份
+    " 这是一个二维数组,第一维是行,第二维是每行的字符
+    " 另外一个二维数组，对应起来记录每个字符的物理长度
+    let reg_x_chars = []
+    let reg_x_phy_lens = []
+    let row_chars = []
+    let row_phy_lens = []
+    let start_row = line('.')
+    for i in range(len(reg_text))
+        let row = start_row + i
+        let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row)
+        let reg_line = reg_text[i]
+        let j = 0
+        for char in split(reg_line, '\zs')
+            let char_phy_len = strdisplaywidth(char)
+            if len(reg_x_chars) <= i
+                call add(reg_x_chars, [])
+                call add(reg_x_phy_lens, [])
+            endif
+            
+            if char_phy_len == 2
+                call extend(reg_x_chars[i], [char, ''])
+                call extend(reg_x_phy_lens[i], [2, 0])
+            else
+                call extend(reg_x_chars[i], [char])
+                call extend(reg_x_phy_lens[i], [1])
+            endif
+            let j += char_phy_len
+        endfor
+
+        let k = 0
+        " echo "index:" . index . ';' . 'chars_arr:' . string(chars_arr) . ';' . 'reg_text:' . string(reg_text) . ';'
+        for k_index in range(index, len(chars_arr))
+            " 如果覆盖层字符不是空格就覆盖
+            let char_phy_len = strdisplaywidth(chars_arr[k_index])
+            if reg_x_chars[i][k] != ' '
+                let chars_arr[k_index] = reg_x_chars[i][k]
+            endif
+
+            let k += char_phy_len
+            if k >= j
+                break
+            endif
+        endfor
+
+        " 重新设置该行
+        " echo "row:" . row . ';' . "chars_arr:" . join(chars_arr, '') . ';' . 'len:' . len(reg_text) . ';'
+        call setline(row, join(chars_arr, ''))
+    endfor
+endfunction
+
+
 
 
 function CloseVisualBlockPopWin()
@@ -607,8 +668,8 @@ set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
 " set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
-" set guifont=微软雅黑\ PragmataPro\ Mono:h8
-set guifont=Fira\ Code:h8
+set guifont=微软雅黑\ PragmataPro\ Mono:h8
+" set guifont=Fira\ Code:h8
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
@@ -1339,7 +1400,9 @@ endfunction
 " There is a space after the mapping below. In visual mode, 
 " a region is cut and saved in the x register, and all characters in the 
 " original region are replaced with spaces.
-vnoremap xc "xygvgr| " 辅助: 基于绘图的复制
+vnoremap xc "xygvgr| " 辅助: 基于绘图的替换
+vnoremap xx "xygvgr | " 辅助: 基于绘图的剪切
+vnoremap xy "xy| " 辅助: 基于绘图的复制
 
 nnoremap <leader>xv :call VisualBlockMove("null")<cr>| " 辅助: 基于绘图的选择
 vnoremap <C-j> <Esc>:call VisualBlockMove("j")<cr>| " 辅助: 基于绘图的移动
@@ -1379,8 +1442,15 @@ nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上
 
 
 " :TODO: 基于范围绘制一个圆(如果选择区域不满足要求按照最小规则生成一个,自动重新选择区域并且生成)
+" :TODO: 圆的实现和其它图形的实现都不用使用标准的算法，直接在图形库中写死即可
+" 键就是宽和高,然后可以分类，有圆有三角形还可以有五角星等等
+" 使用弹出窗口空格为空的预览效果即可。
 
 vnoremap <leader>p "xp| " 辅助: 基于绘图的粘贴
+
+" 清除当前行内容,确保函数只被调用一次
+vnoremap <silent> <leader><leader>p :<C-u>call PasteXWithoutSpace()<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
 " 位于autoload目录下(这个目录下可能还有不少好东西)
