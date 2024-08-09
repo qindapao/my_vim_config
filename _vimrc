@@ -279,28 +279,78 @@ runtime macros/matchit.vim
 
 " vim enters visual mode and selects an area the same size as the x register
 " ctrl j k h l move this selection area
-function! VisualBlockMove(derection)
-    if a:derection == 'j'
-        normal 1j
-    elseif a:derection == 'k'
-        normal 1k
-    elseif a:derection == 'h'
-        normal 1h
-    elseif a:derection == 'l'
-        normal 1l
+function! VisualBlockMove(direction)
+    call CloseVisualBlockPopWin()
+
+    " 移动光标
+    if a:direction == 'j'
+        normal! 1j
+    elseif a:direction == 'k'
+        normal! 1k
+    elseif a:direction == 'h'
+        normal! 1h
+    elseif a:direction == 'l'
+        normal! 1l
     endif
-    
+
+    " 进入可视模式
+    execute "normal! \<C-S-V>"
+
+    " 获取寄存器内容和类型
     let regtype = getregtype("x")
     let regcontent = getreg("x")
     let blockwidth = str2nr(regtype[1:])
     let blockheight = len(split(regcontent, "\n"))
-    execute "normal! \<C-S-V>"
-    if blockheight != 1
+
+    " 更新光标位置
+    if blockheight > 1
         execute "normal! " . (blockheight - 1) . "j"
+    else
+        let blockwidth = strdisplaywidth(regcontent)
     endif
+
     execute "normal! " . blockwidth . "l"
     execute 'normal! o'
+
+    let l:text = split(regcontent, "\n")
+    let mask = []
+    " 空格透明
+    for i in range(len(l:text))
+        let line = l:text[i]
+        let j = 0
+        for char in split(line, '\zs')
+            if char == ' '
+                call add(mask, [j + 1, j + 1, i + 1, i + 1])
+            endif
+            let j += strdisplaywidth(char)
+        endfor
+    endfor
+
+    let g:visual_block_popup_id = popup_create(l:text, {
+        \ 'line': 'cursor',
+        \ 'col': 'cursor',
+        \ 'zindex': 100,
+        \ 'highlight': 'MyVirtualText',
+        \ 'moved': 'any',
+        \ 'mask': mask
+        \ })
+
 endfunction
+
+
+function CloseVisualBlockPopWin()
+    if exists('g:visual_block_popup_id') && g:visual_block_popup_id != 0
+        call popup_close(g:visual_block_popup_id)
+    endif
+endfunction
+
+
+" 'moved': 'any' 替代
+" " 在退出可视模式时调用 prop_clear
+" augroup ClearMyVirtualText
+"     autocmd!
+"     autocmd ModeChanged [vV\x16]:n call CloseVisualBlockPopWin()
+" augroup END
 
 function! CloseHiddenBuffers()
 
@@ -640,6 +690,650 @@ nnoremap <silent> <leader>ss :split<CR>| " 纵向分屏
 nnoremap <silent> <leader>vv :vsplit<CR>| " 横向分屏
 nnoremap <silent> <leader>ow :only<CR>| " 只保留当前窗口
 
+function! SetLineStr(line_list, line, jumpline, jumpcol)
+    let line_str = join(a:line_list, '')
+    call setline(a:line, line_str)
+    " 这里设置的是直接列
+    call cursor(a:jumpline, a:jumpcol)
+endfunction
+
+
+let g:draw_smartline_all_ascii_chars = {
+    \ '-': 1, '|': 1, '+': 1, '.': 1, "'": 1, '^': 1, 'v': 1, '<': 1, '>': 1
+    \ }
+
+let g:draw_smartline_all_cross_chars = {
+    \ '-': 1, '|': 1, '+': 1, '.': 1, "'": 1, '^': 1, 'v': 1, '<': 1, '>': 1,
+    \ '─': 1, '│': 1, '┼': 1, '┤': 1, '├': 1, '┬': 1, '┴': 1, '╭': 1, '╮': 1, '╯': 1, '╰': 1,
+    \ '━': 1, '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┳': 1, '┻': 1, '┏': 1, '┓': 1, '┛': 1, '┗': 1, 
+    \ '═': 1, '║': 1, '╬': 1, '╣': 1, '╠': 1, '╦': 1, '╩': 1, '╔': 1, '╗': 1, '╝': 1, '╚': 1,
+    \ '╫': 1, '╪': 1, '╨': 1, '╧': 1, '╥': 1, '╤': 1, '╢': 1, '╡': 1, '╟': 1, '╞': 1, '╜': 1, 
+    \ '╛': 1, '╙': 1, '╘': 1, '╖': 1, '╕': 1, '╓': 1, '╒': 1,
+    \ '┍': 1, '┎': 1, '┑': 1, '┒': 1, '┕': 1, '┖': 1, '┙': 1, '┚': 1,
+    \ '┝': 1, '┞': 1, '┟': 1, '┠': 1, '┡': 1, '┢': 1,
+    \ '┥': 1, '┦': 1, '┧': 1, '┨': 1, '┩': 1, '┪': 1,
+    \ '┭': 1, '┮': 1, '┯': 1, '┰': 1, '┱': 1, '┲': 1,
+    \ '┵': 1, '┶': 1, '┷': 1, '┸': 1, '┹': 1, '┺': 1,
+    \ '┽': 1, '┾': 1, '┿': 1, '╀': 1, '╁': 1, '╂': 1, '╃': 1,
+    \ '╄': 1, '╅': 1, '╆': 1, '╇': 1, '╈': 1, '╉': 1, '╊': 1,
+    \ '┌': 1, '┐': 1, '└': 1, '┘': 1, '┅': 1, '┄': 1, '┆': 1, '┇': 1
+    \ }
+
+let g:unicode_cross_chars = [
+    \ {
+    \ '─': 1, '┼': 1, '├': 1, '┬': 1, '┴': 1, '╭': 1, '╰': 1, '╫': 1, '╨': 1, '╥': 1, '╟': 1, '╙': 1, '╓': 1, '┎': 1, '┖': 1, '┞': 1, '┟': 1, '┠': 1, '┭': 1, '┰': 1, '┱': 1, '┵': 1, '┸': 1, '┹': 1, '┽': 1, '╀': 1, '╁': 1, '╂': 1, '╃': 1, '╅': 1, '╉': 1, '┌': 1, '└': 1, '┄': 1
+    \ },
+    \ {
+    \ '═': 1, '╬': 1, '╠': 1, '╦': 1, '╩': 1, '╔': 1, '╚': 1, '╪': 1, '╧': 1, '╤': 1, '╞': 1, '╘': 1, '╒': 1
+    \ },
+    \ {
+    \ '━': 1, '╋': 1, '┣': 1, '┳': 1, '┻': 1, '┏': 1, '┗': 1, '┍': 1, '┕': 1, '┝': 1, '┡': 1, '┢': 1, '┮': 1, '┯': 1, '┲': 1, '┶': 1, '┷': 1, '┺': 1, '┾': 1, '┿': 1, '╄': 1, '╆': 1, '╇': 1, '╈': 1, '╊': 1, '┅': 1
+    \ },
+    \ {
+    \ '─': 1, '┼': 1, '┤': 1, '┬': 1, '┴': 1, '╮': 1, '╯': 1, '╫': 1, '╨': 1, '╥': 1, '╢': 1, '╜': 1, '╖': 1, '┒': 1, '┚': 1, '┦': 1, '┧': 1, '┨': 1, '┮': 1, '┰': 1, '┲': 1, '┶': 1, '┸': 1, '┺': 1, '┾': 1, '╀': 1, '╁': 1, '╂': 1, '╄': 1, '╆': 1, '╊': 1, '┐': 1, '┘': 1, '┄': 1
+    \ },
+    \ {
+    \ '═': 1, '╬': 1, '╣': 1, '╦': 1, '╩': 1, '╗': 1, '╝': 1, '╪': 1, '╧': 1, '╤': 1, '╡': 1, '╛': 1, '╕': 1
+    \ },
+    \ {
+    \ '━': 1, '╋': 1, '┫': 1, '┳': 1, '┻': 1, '┓': 1, '┛': 1, '┑': 1, '┙': 1, '┥': 1, '┩': 1, '┪': 1, '┭': 1, '┯': 1, '┱': 1, '┵': 1, '┷': 1, '┹': 1, '┽': 1, '┿': 1, '╃': 1, '╅': 1, '╇': 1, '╈': 1, '╉': 1, '┅': 1
+    \ },
+    \ {
+    \ '│': 1, '┼': 1, '┤': 1, '├': 1, '┬': 1, '╭': 1, '╮': 1, '╪': 1, '╤': 1, '╡': 1, '╞': 1, '╕': 1, '╒': 1, '┍': 1, '┑': 1, '┝': 1, '┞': 1, '┡': 1, '┥': 1, '┦': 1, '┩': 1, '┭': 1, '┮': 1, '┯': 1, '┽': 1, '┾': 1, '┿': 1, '╀': 1, '╃': 1, '╄': 1, '╇': 1, '┌': 1, '┐': 1, '┆': 1
+    \ },
+    \ {
+    \ '║': 1, '╬': 1, '╣': 1, '╠': 1, '╦': 1, '╔': 1, '╗': 1, '╫': 1, '╥': 1, '╢': 1, '╟': 1, '╖': 1, '╓': 1
+    \ },
+    \ {
+    \ '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┳': 1, '┏': 1, '┓': 1, '┎': 1, '┒': 1, '┟': 1, '┠': 1, '┢': 1, '┧': 1, '┨': 1, '┪': 1, '┰': 1, '┱': 1, '┲': 1, '╁': 1, '╂': 1, '╅': 1, '╆': 1, '╈': 1, '╉': 1, '╊': 1, '┇': 1
+    \ },
+    \ {
+    \ '│': 1, '┼': 1, '┤': 1, '├': 1, '┴': 1, '╯': 1, '╰': 1, '╪': 1, '╧': 1, '╡': 1, '╞': 1, '╛': 1, '╘': 1, '┕': 1, '┙': 1, '┝': 1, '┟': 1, '┢': 1, '┥': 1, '┧': 1, '┪': 1, '┵': 1, '┶': 1, '┷': 1, '┽': 1, '┾': 1, '┿': 1, '╁': 1, '╅': 1, '╆': 1, '╈': 1, '└': 1, '┘': 1, '┆': 1
+    \ },
+    \ {
+    \ '║': 1, '╬': 1, '╣': 1, '╠': 1, '╩': 1, '╝': 1, '╚': 1, '╫': 1, '╨': 1, '╢': 1, '╟': 1, '╜': 1, '╙': 1
+    \ },
+    \ {
+    \ '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┻': 1, '┛': 1, '┗': 1, '┖': 1, '┚': 1, '┞': 1, '┠': 1, '┡': 1, '┦': 1, '┨': 1, '┩': 1, '┸': 1, '┹': 1, '┺': 1, '╀': 1, '╂': 1, '╃': 1, '╄': 1, '╇': 1, '╉': 1, '╊': 1, '┇': 1
+    \ }
+    \ ]
+
+let g:left_thin_index    = 0
+let g:left_double_index  = 1
+let g:left_bold_index    = 2
+let g:right_thin_index   = 3
+let g:right_double_index = 4
+let g:right_bold_index   = 5
+let g:up_thin_index      = 6
+let g:up_double_index    = 7
+let g:up_bold_index      = 8
+let g:down_thin_index    = 9
+let g:down_double_index  = 10
+let g:down_bold_index    = 11
+
+let g:left_index_map = {g:left_thin_index: 1, g:left_double_index: 1, g:left_bold_index: 1}
+let g:right_index_map = {g:right_thin_index: 1, g:right_double_index: 1, g:right_bold_index: 1}
+let g:up_index_map = {g:up_thin_index: 1, g:up_double_index: 1, g:up_bold_index: 1}
+let g:down_index_map = {g:down_thin_index: 1, g:down_double_index: 1, g:down_bold_index: 1}
+
+" Arranging them in order can reduce logical judgment. Because calculations are done sequentially
+" 1. First are cross, 
+" 2. then are corner missing
+" 3. and finally are two corners missing.
+" Therefore, the order of functions in the array cannot be disrupted
+let g:draw_smartline_normal_char_func = [
+    \ ['+',  "SceneCross",     []                                  ],
+    \ ['.',  "SceneDot",       []                                  ],
+    \ ["'", "SceneApostrophe", []                                  ],
+    \ ['┽' , "SceneUnicode" , [g:left_bold_index   , g:right_thin_index   , g:up_thin_index   , g:down_thin_index   ]],
+    \ ['┾' , "SceneUnicode" , [g:left_thin_index   , g:right_bold_index   , g:up_thin_index   , g:down_thin_index   ]],
+    \ ['┿' , "SceneUnicode" , [g:left_bold_index   , g:right_bold_index   , g:up_thin_index   , g:down_thin_index   ]],
+    \ ['╀' , "SceneUnicode" , [g:left_thin_index   , g:right_thin_index   , g:up_bold_index   , g:down_thin_index   ]],
+    \ ['╁' , "SceneUnicode" , [g:left_thin_index   , g:right_thin_index   , g:up_thin_index   , g:down_bold_index   ]],
+    \ ['╂' , "SceneUnicode" , [g:left_thin_index   , g:right_thin_index   , g:up_bold_index   , g:down_bold_index   ]],
+    \ ['╃' , "SceneUnicode" , [g:left_bold_index   , g:right_thin_index   , g:up_bold_index   , g:down_thin_index   ]],
+    \ ['╄' , "SceneUnicode" , [g:left_thin_index   , g:right_bold_index   , g:up_bold_index   , g:down_thin_index   ]],
+    \ ['╅' , "SceneUnicode" , [g:left_bold_index   , g:right_thin_index   , g:up_thin_index   , g:down_bold_index   ]],
+    \ ['╆' , "SceneUnicode" , [g:left_thin_index   , g:right_bold_index   , g:up_thin_index   , g:down_bold_index   ]],
+    \ ['╇' , "SceneUnicode" , [g:left_bold_index   , g:right_bold_index   , g:up_bold_index   , g:down_thin_index   ]],
+    \ ['╈' , "SceneUnicode" , [g:left_bold_index   , g:right_bold_index   , g:up_thin_index   , g:down_bold_index   ]],
+    \ ['╉' , "SceneUnicode" , [g:left_bold_index   , g:right_thin_index   , g:up_bold_index   , g:down_bold_index   ]],
+    \ ['╊' , "SceneUnicode" , [g:left_thin_index   , g:right_bold_index   , g:up_bold_index   , g:down_bold_index   ]],
+    \ ['╫' , "SceneUnicode" , [g:left_thin_index   , g:right_thin_index   , g:up_double_index , g:down_double_index ]],
+    \ ['╪' , "SceneUnicode" , [g:left_double_index , g:right_double_index , g:up_thin_index   , g:down_thin_index   ]],
+    \ ['┼' , "SceneUnicode" , [g:left_thin_index   , g:right_thin_index   , g:up_thin_index   , g:down_thin_index   ]],
+    \ ['╋' , "SceneUnicode" , [g:left_bold_index   , g:right_bold_index   , g:up_bold_index   , g:down_bold_index   ]],
+    \ ['╬' , "SceneUnicode" , [g:left_double_index , g:right_double_index , g:up_double_index , g:down_double_index ]],
+    \ ['┵' , "SceneUnicode" , [g:left_bold_index    , g:right_thin_index   , g:up_thin_index     ]],
+    \ ['┶' , "SceneUnicode" , [g:left_thin_index    , g:right_bold_index   , g:up_thin_index     ]],
+    \ ['┷' , "SceneUnicode" , [g:left_bold_index    , g:right_bold_index   , g:up_thin_index     ]],
+    \ ['┸' , "SceneUnicode" , [g:left_thin_index    , g:right_thin_index   , g:up_bold_index     ]],
+    \ ['┹' , "SceneUnicode" , [g:left_bold_index    , g:right_thin_index   , g:up_bold_index     ]],
+    \ ['┺' , "SceneUnicode" , [g:left_thin_index    , g:right_bold_index   , g:up_bold_index     ]],
+    \ ['┭' , "SceneUnicode" , [g:left_bold_index    , g:right_thin_index   , g:down_thin_index   ]],
+    \ ['┮' , "SceneUnicode" , [g:left_thin_index    , g:right_bold_index   , g:down_thin_index   ]],
+    \ ['┯' , "SceneUnicode" , [g:left_bold_index    , g:right_bold_index   , g:down_thin_index   ]],
+    \ ['┰' , "SceneUnicode" , [g:left_thin_index    , g:right_thin_index   , g:down_bold_index   ]],
+    \ ['┱' , "SceneUnicode" , [g:left_bold_index    , g:right_thin_index   , g:down_bold_index   ]],
+    \ ['┲' , "SceneUnicode" , [g:left_thin_index    , g:right_bold_index   , g:down_bold_index   ]],
+    \ ['┥' , "SceneUnicode" , [g:left_bold_index    , g:up_thin_index      , g:down_thin_index   ]],
+    \ ['┦' , "SceneUnicode" , [g:left_thin_index    , g:up_bold_index      , g:down_thin_index   ]],
+    \ ['┧' , "SceneUnicode" , [g:left_thin_index    , g:up_thin_index      , g:down_bold_index   ]],
+    \ ['┨' , "SceneUnicode" , [g:left_thin_index    , g:up_bold_index      , g:down_bold_index   ]],
+    \ ['┩' , "SceneUnicode" , [g:left_bold_index    , g:up_bold_index      , g:down_thin_index   ]],
+    \ ['┪' , "SceneUnicode" , [g:left_bold_index    , g:up_thin_index      , g:down_bold_index   ]],
+    \ ['┝' , "SceneUnicode" , [g:right_bold_index   , g:up_thin_index      , g:down_thin_index   ]],
+    \ ['┞' , "SceneUnicode" , [g:right_thin_index   , g:up_bold_index      , g:down_thin_index   ]],
+    \ ['┟' , "SceneUnicode" , [g:right_thin_index   , g:up_thin_index      , g:down_bold_index   ]],
+    \ ['┠' , "SceneUnicode" , [g:right_thin_index   , g:up_bold_index      , g:down_bold_index   ]],
+    \ ['┡' , "SceneUnicode" , [g:right_bold_index   , g:up_bold_index      , g:down_thin_index   ]],
+    \ ['┢' , "SceneUnicode" , [g:right_bold_index   , g:up_thin_index      , g:down_bold_index   ]],
+    \ ['╨' , "SceneUnicode" , [g:left_thin_index    , g:right_thin_index   , g:up_double_index   ]],
+    \ ['╧' , "SceneUnicode" , [g:left_double_index  , g:right_double_index , g:up_thin_index     ]],
+    \ ['╥' , "SceneUnicode" , [g:left_thin_index    , g:right_thin_index   , g:down_double_index ]],
+    \ ['╤' , "SceneUnicode" , [g:left_double_index  , g:right_double_index , g:down_thin_index   ]],
+    \ ['╢' , "SceneUnicode" , [g:left_thin_index    , g:up_double_index    , g:down_double_index ]],
+    \ ['╡' , "SceneUnicode" , [g:left_double_index  , g:up_thin_index      , g:down_thin_index   ]],
+    \ ['╟' , "SceneUnicode" , [g:right_thin_index   , g:up_double_index    , g:down_double_index ]],
+    \ ['╞' , "SceneUnicode" , [g:right_double_index , g:up_thin_index      , g:down_thin_index   ]],
+    \ ['┤' , "SceneUnicode" , [g:left_thin_index    , g:up_thin_index      , g:down_thin_index   ]],
+    \ ['├' , "SceneUnicode" , [g:right_thin_index   , g:up_thin_index      , g:down_thin_index   ]],
+    \ ['┬' , "SceneUnicode" , [g:left_thin_index    , g:right_thin_index   , g:down_thin_index   ]],
+    \ ['┴' , "SceneUnicode" , [g:left_thin_index    , g:right_thin_index   , g:up_thin_index     ]],
+    \ ['┫' , "SceneUnicode" , [g:left_bold_index    , g:up_bold_index      , g:down_bold_index   ]],
+    \ ['┣' , "SceneUnicode" , [g:right_bold_index   , g:up_bold_index      , g:down_bold_index   ]],
+    \ ['┳' , "SceneUnicode" , [g:left_bold_index    , g:right_bold_index   , g:down_bold_index   ]],
+    \ ['┻' , "SceneUnicode" , [g:left_bold_index    , g:right_bold_index   , g:up_bold_index     ]],
+    \ ['╣' , "SceneUnicode" , [g:left_double_index  , g:up_double_index    , g:down_double_index ]],
+    \ ['╠' , "SceneUnicode" , [g:right_double_index , g:up_double_index    , g:down_double_index ]],
+    \ ['╦' , "SceneUnicode" , [g:left_double_index  , g:right_double_index , g:down_double_index ]],
+    \ ['╩' , "SceneUnicode" , [g:left_double_index  , g:right_double_index , g:up_double_index   ]],
+    \ ['╜' , "SceneUnicode" , [g:left_thin_index    , g:up_double_index   ]],
+    \ ['╛' , "SceneUnicode" , [g:left_double_index  , g:up_thin_index     ]],
+    \ ['╙' , "SceneUnicode" , [g:right_thin_index   , g:up_double_index   ]],
+    \ ['╘' , "SceneUnicode" , [g:right_double_index , g:up_thin_index     ]],
+    \ ['╖' , "SceneUnicode" , [g:left_thin_index    , g:down_double_index ]],
+    \ ['╕' , "SceneUnicode" , [g:left_double_index  , g:down_thin_index   ]],
+    \ ['╓' , "SceneUnicode" , [g:right_thin_index   , g:down_double_index ]],
+    \ ['╒' , "SceneUnicode" , [g:right_double_index , g:down_thin_index   ]],
+    \ ['┍' , "SceneUnicode" , [g:right_bold_index   , g:down_thin_index   ]],
+    \ ['┎' , "SceneUnicode" , [g:right_thin_index   , g:down_bold_index   ]],
+    \ ['┑' , "SceneUnicode" , [g:left_bold_index    , g:down_thin_index   ]],
+    \ ['┒' , "SceneUnicode" , [g:left_thin_index    , g:down_bold_index   ]],
+    \ ['┕' , "SceneUnicode" , [g:right_bold_index   , g:up_thin_index     ]],
+    \ ['┖' , "SceneUnicode" , [g:right_thin_index   , g:up_bold_index     ]],
+    \ ['┙' , "SceneUnicode" , [g:left_bold_index    , g:up_thin_index     ]],
+    \ ['┚' , "SceneUnicode" , [g:left_thin_index    , g:up_bold_index     ]],
+    \ ['╭' , "SceneUnicode" , [g:right_thin_index   , g:down_thin_index   ]],
+    \ ['╮' , "SceneUnicode" , [g:left_thin_index    , g:down_thin_index   ]],
+    \ ['╯' , "SceneUnicode" , [g:left_thin_index    , g:up_thin_index     ]],
+    \ ['╰' , "SceneUnicode" , [g:right_thin_index   , g:up_thin_index     ]],
+    \ ['┏' , "SceneUnicode" , [g:right_bold_index   , g:down_bold_index   ]],
+    \ ['┓' , "SceneUnicode" , [g:left_bold_index    , g:down_bold_index   ]],
+    \ ['┛' , "SceneUnicode" , [g:left_bold_index    , g:up_bold_index     ]],
+    \ ['┗' , "SceneUnicode" , [g:right_bold_index   , g:up_bold_index     ]],
+    \ ['╔' , "SceneUnicode" , [g:right_double_index , g:down_double_index ]],
+    \ ['╗' , "SceneUnicode" , [g:left_double_index  , g:down_double_index ]],
+    \ ['╝' , "SceneUnicode" , [g:left_double_index  , g:up_double_index   ]],
+    \ ['╚' , "SceneUnicode" , [g:right_double_index , g:up_double_index   ]]
+    \ ]
+
+let g:SmartDrawLines = [['-', '|'], ['─', '│'], ['━', '┃'], ['═', '║'], ['┅', '┇'], ['┄', '┆']]
+let g:SmartDrawLineIndex = 0
+
+function! SwitchSmartDrawLine(is_just_show)
+    if !a:is_just_show
+        let g:SmartDrawLineIndex = (g:SmartDrawLineIndex + 1) % len(g:SmartDrawLines)
+    endif
+    echo "now line type:" . string(g:SmartDrawLines[g:SmartDrawLineIndex])
+endfunction
+
+" 获取当前光标下的线形并且切换到它
+function! SwitchSmartDrawLineFromCharUnderCursor()
+    let smart_char_to_index = {'-': 0, '|': 0, '─': 1, '│': 1, '━': 2, '┃': 2, '═': 3, '║': 3, '┅': 4, '┇': 4, '┄': 5, '┆': 5}
+    let current_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
+    
+    if has_key(smart_char_to_index, current_char)
+        let g:SmartDrawLineIndex = smart_char_to_index[current_char]
+    endif
+    echo "now line type:" . string(g:SmartDrawLines[g:SmartDrawLineIndex])
+endfunction
+
+function! CopyCharUnderCursor()
+    " 复制当前光标下的字符
+    let current_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
+    let @a = current_char
+endfunction
+
+
+function! ReplaceCharUnderCursor(direction)
+    " 获取当前行的内容
+    let l:line = getline('.')
+    let cursor_char = matchstr(l:line, '\%' . col('.') . 'c.')
+
+    " 替换目标位置的字符
+    execute "normal! r" . @a
+    " 获取替换后的字符
+    let new_char = @a
+    
+    " 获取替换后字符的宽度
+    let new_char_width = strdisplaywidth(new_char)
+    let cursor_char_width = strdisplaywidth(cursor_char)
+    if cursor_char_width == 0
+        let cursor_char_width = 1
+    endif
+
+    " 如果替换的是宽字符，删除多余的空格
+    if cursor_char_width != new_char_width
+        if new_char_width > 1
+            " 尝试向右移动光标
+            " 向右移动光标并删除字符
+            execute "normal! l"
+            execute "normal! x"
+            " " 向左移动光标还原位置
+            execute "normal! h"
+
+            if a:direction == 'l'
+                execute "normal! l"
+            elseif a:direction == 'h'
+                execute "normal! hh"
+            elseif a:direction == 'j'
+                execute "normal! j"
+            elseif a:direction == 'k'
+                execute "normal! k"
+            endif
+        else
+            " 替换后还要增加一个空格
+             call feedkeys("a \<Esc>h", 'n')
+        endif
+    else
+        if a:direction == 'l'
+            execute "normal! l"
+        elseif a:direction == 'h'
+            execute "normal! h"
+        elseif a:direction == 'j'
+            execute "normal! j"
+        elseif a:direction == 'k'
+            execute "normal! k"
+        endif
+
+    endif
+endfunction
+
+
+function! SceneUnicode(up, down, left, right, char_category_indexs)
+    for char_index in a:char_category_indexs
+        if has_key(g:left_index_map, char_index)
+            if ! has_key(g:draw_smartline_all_cross_chars, a:left)
+                return 0
+            endif
+            if ! has_key(g:unicode_cross_chars[char_index], a:left)
+                return 0
+            endif
+        elseif has_key(g:right_index_map, char_index)
+            if ! has_key(g:draw_smartline_all_cross_chars, a:right)
+                return 0
+            endif
+            if ! has_key(g:unicode_cross_chars[char_index], a:right)
+                return 0
+            endif
+        elseif has_key(g:up_index_map, char_index)
+            if ! has_key(g:draw_smartline_all_cross_chars, a:up)
+                return 0
+            endif
+            if ! has_key(g:unicode_cross_chars[char_index], a:up)
+                return 0
+            endif
+        else
+            if ! has_key(g:draw_smartline_all_cross_chars, a:down)
+                return 0
+            endif
+            if ! has_key(g:unicode_cross_chars[char_index], a:down)
+                return 0
+            endif
+        endif
+    endfor
+
+    return 1
+endfunction
+
+" 绘制加号的场景
+function! SceneCross(up, down, left, right, char_category_indexs)
+    " 检查参数是否定义
+    if a:up == '' || a:down == '' || a:left == '' || a:right == ''
+        return 0
+    endif
+
+    " 定义有效字符的字典
+    let valid_chars = {
+    \ 'up': {'|': 1, '.': 1, "'": 1, '+': 1, '^': 1},
+    \ 'down': {'|': 1, '.': 1, "'": 1, '+': 1, 'v': 1},
+    \ 'left': {'-': 1, '.': 1, "'": 1, '+': 1, '<': 1},
+    \ 'right': {'-': 1, '.': 1, "'": 1, '+': 1, '>': 1}
+    \ }
+
+    " 返回结果
+    return has_key(valid_chars['up'], a:up) && has_key(valid_chars['down'], a:down) && has_key(valid_chars['left'], a:left) && has_key(valid_chars['right'], a:right)
+endfunction
+
+" 绘制点号的场景
+function! SceneDot(up, down, left, right, char_category_indexs)
+    " 检查参数是否定义并满足条件
+    if a:up == '|' && a:down == '|' && a:left == '-' && a:right == '-'
+        return 0
+    endif
+
+    " 检查左下或右下是否满足条件
+    return ((a:left == '-' && a:down == '|') || (a:right == '-' && a:down == '|'))
+endfunction
+
+" 绘制单引号的场景
+function! SceneApostrophe(up, down, left, right, char_category_indexs)
+    if ((a:up == '|' && a:right == '-') && a:down != '|')
+        return 1
+    endif
+
+    return (a:up == '|' && a:left == '-' && !(a:down == '|' || a:right == '|'))
+endfunction
+
+function! SumList(list)
+    let sum = 0
+    for item in a:list
+        let sum += item
+    endfor
+    return sum
+endfunction
+
+
+
+
+function! ProcessLine(row, ...)
+    if a:row < 0
+        return [[], [], [], 0]
+    endif
+
+    let line_str = getline(a:row)
+    " 获取传入的phy_col参数，如果未传入则使用virtcol('.')
+    let phy_col = get(a:, 1, virtcol('.'))
+
+    let line_byte_len_array = []
+    let line_phy_len_array = []
+    let line_chars_array = []
+    let index = 0
+    let total_phy_len = 0
+
+    for char in split(line_str, '\zs')
+        " 累加字符的长度
+        let phy_len = strdisplaywidth(char)
+        let total_phy_len += 1
+
+        " 放到两个长度数组中
+        call add(line_byte_len_array, len(char))
+        call add(line_phy_len_array, strdisplaywidth(char))
+        call add(line_chars_array, char)
+
+        if phy_len == 2
+            call add(line_byte_len_array, 0)
+            call add(line_phy_len_array, 0)
+            call add(line_chars_array, '')
+        endif
+
+        " 记录字符数量
+        if total_phy_len < phy_col
+            let index += 1
+        endif
+        if phy_len == 2
+            let total_phy_len += 1
+
+            if total_phy_len < phy_col
+                let index += 1
+            endif
+        endif
+    endfor
+
+    " 如果最后字符的长度小于phy_col,用空格填充
+    let sum_len = SumList(line_phy_len_array)
+    if sum_len < phy_col
+        call extend(line_byte_len_array, repeat([1], phy_col - sum_len))
+        call extend(line_phy_len_array, repeat([1], phy_col - sum_len))
+        call extend(line_chars_array, repeat([' '], phy_col - sum_len))
+        let index = len(line_byte_len_array) - 1
+    endif
+
+    return [line_byte_len_array, line_phy_len_array, line_chars_array, index]
+endfunction
+
+
+" 绘制线并且决定边界字符
+function! DrawSmartLineLeftRight(direction)
+    let row = line('.')
+    " :TODO: 不支持阿拉伯语言或者其它语言中的0宽度字符
+
+    let [line_byte_len_array, line_phy_len_array, line_chars_array, index] = ProcessLine(row)
+    let [up_line_byte_len_array, up_line_phy_len_array, up_line_chars_array, up_index] = ProcessLine(row-1)
+    let [down_line_byte_len_array, down_line_phy_len_array, down_line_chars_array, down_index] = ProcessLine(row+1)
+
+    let col = SumList(line_byte_len_array[0:index])
+
+    " 获取前一个字符的上下左右
+    if a:direction == 'l'
+        let pre_right = g:SmartDrawLines[g:SmartDrawLineIndex][0]
+        let pre_left = (index>1)?get(line_chars_array, index-2, ''):''
+        let pre_up = (up_index>0)?get(up_line_chars_array, up_index-1, ''):''
+        let pre_down = (down_index>0)?get(down_line_chars_array, down_index-1, ''):''
+    elseif a:direction == 'h'
+        let pre_left = g:SmartDrawLines[g:SmartDrawLineIndex][0]
+        let pre_right = get(line_chars_array, index+2, '')
+        let pre_up = get(up_line_chars_array, up_index+1, '')
+        let pre_down = get(down_line_chars_array, down_index+1, '')
+    endif
+
+    let pre_index = index + (a:direction == 'l' ? -1 : 1)
+    if pre_index >= 0 && pre_index < len(line_chars_array)
+        let pre_char = line_chars_array[index+(a:direction=='l'?-1:1)]
+        if has_key(g:draw_smartline_all_cross_chars, pre_char)
+            for table_param in g:draw_smartline_normal_char_func
+                if call(table_param[1], [pre_up, pre_down, pre_left, pre_right, table_param[2]])
+                    let line_chars_array[pre_index] = table_param[0]
+                    let line_byte_len_array[pre_index] = len(table_param[0])
+                    call SetLineStr(line_chars_array, row, row, col)
+                    break
+                endif
+            endfor
+        endif
+    endif
+
+    " 获取当前字符的上下左右
+    let left = (index>0)?get(line_chars_array, index-1, ''):''
+    let right = get(line_chars_array, index+1, '')
+    let up = get(up_line_chars_array, up_index, '')
+    let down = get(down_line_chars_array, down_index, '')
+
+    let entered_if = 0
+    for table_param in g:draw_smartline_normal_char_func
+        if call(table_param[1], [up, down, left, right, table_param[2]])
+            let line_chars_array[index] = table_param[0]
+            let entered_if = 1
+            break
+        endif
+    endfor
+
+    if entered_if == 0
+        let line_chars_array[index] = g:SmartDrawLines[g:SmartDrawLineIndex][0]
+    endif
+
+    let line_byte_len_array[index] = len(line_chars_array[index])
+    let col = SumList(line_byte_len_array[0:index])
+    
+    call SetLineStr(line_chars_array, row, row, (a:direction=='l')?col+1:col-line_byte_len_array[index])
+endfunction
+
+function! DrawSmartLineEraser(direction)
+    let row = line('.')
+    
+    let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row)
+    let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1)
+    let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1)
+
+    let col = SumList(byte_len_arr[0:index])
+    if phy_len_arr[index] == 2
+        let line_chars_arr[index] = '  '
+    elseif phy_len_arr[index] == 1
+        let line_chars_arr[index] = ' '
+    elseif phy_len_arr[index] == 0
+        let line_chars_arr[index-1] = '  '
+    endif
+    call setline(row, join(line_chars_arr, ''))
+
+    let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row)
+    let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1)
+    let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1)
+    let col = SumList(byte_len_arr[0:index])
+
+    if a:direction == 'l'
+        call cursor(row, col+1)
+    elseif a:direction == 'h'
+        call cursor(row, col-1)
+    elseif a:direction == 'j'
+        let next_col = SumList(down_byte_len_arr[0:down_index])
+        call cursor(row+1, next_col)
+    elseif a:direction == 'k'
+        let next_col = SumList(up_byte_len_arr[0:up_index])
+        call cursor(row-1, next_col)
+    endif
+endfunction
+
+function! DrawSmartLineUpDown(direction)
+    let row = line('.')
+
+    let [line_byte_len_array, line_phy_len_array, line_chars_array, index] = ProcessLine(row)
+    let [up1_line_byte_len_array, up1_line_phy_len_array, up1_line_chars_array, up1_index] = ProcessLine(row-1)
+    let [up2_line_byte_len_array, up2_line_phy_len_array, up2_line_chars_array, up2_index] = ProcessLine(row-2)
+    let [down1_line_byte_len_array, down1_line_phy_len_array, down1_line_chars_array, down1_index] = ProcessLine(row+1)
+    let [down2_line_byte_len_array, down2_line_phy_len_array, down2_line_chars_array, down2_index] = ProcessLine(row+2)
+
+    let col = SumList(line_byte_len_array[0:index])
+
+    " 获取前一个字符的上下左右
+    if a:direction == 'j'
+        let pre_down = g:SmartDrawLines[g:SmartDrawLineIndex][1]
+        let pre_up = get(up2_line_chars_array, up2_index, '')
+        let pre_left = (up1_index>0)?get(up1_line_chars_array, up1_index-1, ''):''
+        let pre_right = get(up1_line_chars_array, up1_index+1, '')
+    elseif a:direction == 'k'
+        let pre_down = get(down2_line_chars_array, down2_index, '')
+        let pre_up = g:SmartDrawLines[g:SmartDrawLineIndex][1]
+        let pre_left = (index>0)?get(down1_line_chars_array, down1_index-1, ''):''
+        let pre_right = get(down1_line_chars_array, down1_index+1, '')
+    endif
+
+    if a:direction == 'j'
+        let pre_char = get(up1_line_chars_array, up1_index, '')
+    else
+        let pre_char = get(down1_line_chars_array, down1_index, '')
+    endif
+
+    if has_key(g:draw_smartline_all_cross_chars, pre_char)
+
+        let entered_if = 0
+        for table_param in g:draw_smartline_normal_char_func
+            if call(table_param[1], [pre_up, pre_down, pre_left, pre_right, table_param[2]])
+                let result_char = table_param[0]
+                let entered_if = 1
+                break
+            endif
+        endfor
+
+        if entered_if == 1
+            if a:direction == 'j'
+                if row > 0
+                    let up1_line_chars_array[up1_index] = result_char
+                    call SetLineStr(up1_line_chars_array, row-1, row, SumList(up1_line_byte_len_array[0:up1_index]))
+                endif
+            else
+                let down1_line_chars_array[down1_index] = result_char
+                call SetLineStr(down1_line_chars_array, row+1, row, SumList(down1_line_byte_len_array[0:down1_index]))
+            endif
+        endif
+    endif
+
+    " 取当前字符的上下左右
+    let down = get(down1_line_chars_array, down1_index, '')
+    let up = get(up1_line_chars_array, up1_index, '')
+    let left = (index>0)?get(line_chars_array, index-1, ''):''
+    let right = get(line_chars_array, index+1, '')
+
+    let entered_if = 0
+    for table_param in g:draw_smartline_normal_char_func
+        if call(table_param[1], [up, down, left, right, table_param[2]])
+            let line_chars_array[index] = table_param[0]
+            let entered_if = 1
+            break
+        endif
+    endfor
+
+    if entered_if == 0
+        let line_chars_array[index] = g:SmartDrawLines[g:SmartDrawLineIndex][1]
+    endif
+
+    if a:direction == 'j'
+        let next_col = SumList(down1_line_byte_len_array[0:down1_index])
+    else
+        let next_col = SumList(up1_line_byte_len_array[0:up1_index])
+    endif
+
+
+    call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
+endfunction
+
+function! TraverseRectangle()
+    " 获取可视块选择的起始和结束位置
+    let [line_start, col_start] = getpos("'<")[1:2]
+    let [line_end, col_end] = getpos("'>")[1:2]
+
+    " 获取虚拟列位置
+    let col_start = virtcol("'<")
+    let col_end = virtcol("'>")
+
+    if col_start > col_end
+        let [col_start, col_end] = [col_end, col_start]
+    endif
+
+    let width = col_end - col_start
+    let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
+
+    let col_start = SumList(start_byte_len_arr[0:start_index])
+    let col_end = col_start + width
+
+    " 绕矩形区域一圈半
+    " 从左上角开始
+    call cursor(line_start, col_start)
+
+    " 向右移动
+    for col in range(col_start, col_end - 2)
+        call DrawSmartLineLeftRight('l')
+    endfor
+
+    " 向下移动
+    for line in range(line_start, line_end - 1)
+        call DrawSmartLineUpDown('j')
+    endfor
+
+    " 向左移动
+    for col in range(col_end - 2, col_start, -1)
+        call DrawSmartLineLeftRight('h')
+    endfor
+
+    " 向上移动
+    for line in range(line_end - 1, line_start, -1)
+        call DrawSmartLineUpDown('k')
+    endfor
+
+    " 再次向右移动，完成半圈
+    for col in range(col_start, col_end - 2)
+        call DrawSmartLineLeftRight('l')
+    endfor
+endfunction
 
 
 " There is a space after the mapping below. In visual mode, 
@@ -652,6 +1346,40 @@ vnoremap <C-j> <Esc>:call VisualBlockMove("j")<cr>| " 辅助: 基于绘图的移
 vnoremap <C-k> <Esc>:call VisualBlockMove("k")<cr>| " 辅助: 基于绘图的移动
 vnoremap <C-h> <Esc>:call VisualBlockMove("h")<cr>| " 辅助: 基于绘图的移动
 vnoremap <C-l> <Esc>:call VisualBlockMove("l")<cr>| " 辅助: 基于绘图的移动
+
+vnoremap <silent>slw <Esc>:call TraverseRectangle()<cr>| " 辅助: 矩形绕行
+
+
+" 切换绘制的线形并且打印出来
+
+nnoremap <silent> slc :call SwitchSmartDrawLine(0)<CR>| " 辅助: 绘图循环改变线形
+nnoremap <silent> sls :call SwitchSmartDrawLine(1)<CR>| " 辅助: 绘图显示当前线形
+nnoremap <silent> slu :call SwitchSmartDrawLineFromCharUnderCursor()<CR>| " 辅助: 绘图根据当前光标下字符改变线形
+nnoremap <silent> sly :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当前光标下的字符
+nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
+nnoremap <silent> <C-S-Right> :call ReplaceCharUnderCursor('l')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向右移动
+nnoremap <silent> <C-S-Left> :call ReplaceCharUnderCursor('h')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向左移动
+nnoremap <silent> <C-S-Up> :call ReplaceCharUnderCursor('k')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向上移动
+nnoremap <silent> <C-S-Down> :call ReplaceCharUnderCursor('j')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向下移动
+
+
+" 绘制一条线，智能决定边界
+nnoremap <silent> <M-l> :call DrawSmartLineLeftRight('l')<CR>| " 辅助: 绘图右线绘制
+nnoremap <silent> <M-h> :call DrawSmartLineLeftRight('h')<CR>| " 辅助: 绘图左线绘制
+nnoremap <silent> <M-j> :call DrawSmartLineUpDown('j')<CR>| " 辅助: 绘图下线绘制
+nnoremap <silent> <M-k> :call DrawSmartLineUpDown('k')<CR>| " 辅助: 绘图上线绘制
+
+" 橡皮擦功能
+nnoremap <silent> <M-Right> :call DrawSmartLineEraser('l')<CR>| " 辅助: 绘图右边橡皮擦
+nnoremap <silent> <M-Left> :call DrawSmartLineEraser('h')<CR>| " 辅助: 绘图左边橡皮擦
+nnoremap <silent> <M-Down> :call DrawSmartLineEraser('j')<CR>| " 辅助: 绘图下边橡皮擦
+nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上边橡皮擦
+
+" :TODO: 实现斜线(M-u o n ,)
+
+
+" :TODO: 基于范围绘制一个圆(如果选择区域不满足要求按照最小规则生成一个,自动重新选择区域并且生成)
+
 vnoremap <leader>p "xp| " 辅助: 基于绘图的粘贴
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
@@ -784,7 +1512,8 @@ Plug 'qindapao/diffchar.vim'                                                   "
 " Plug 'terryma/vim-multiple-cursors'                                            " vim的多光标插件
 Plug 'qindapao/vim-visual-multi'                                               " 这个插件比上面插件更轻便更快
 " qindapao/colorizer这个插件的性能特别低!暂时不要打开,会导致gvim在处理大文件时候拆分窗口和TAB标签页的处理都非常缓慢
-Plug 'qindapao/vim-coloresque'                                                 " 这个也是颜色显示插件但是没有性能问题
+" 暂时可以先屏蔽,等需要显示颜色的时候打开
+" Plug 'qindapao/vim-coloresque'                                                 " 这个也是颜色显示插件但是没有性能问题
 Plug 'qindapao/vim-indent-object'                                              " 基于缩进的文本对象，用于python等语言
 Plug 'qindapao/vim-paragraph-motion'                                           " 增强{  }段落选择的功能,可以用全空格行作为段落
 " 这个插件的语法高亮需要说明下,可能是受默认的txt文件的语法高亮的影响
@@ -1880,7 +2609,7 @@ tnoremap <C-v> <C-S-_>"+| " 终端: 粘贴系统剪切板
 " " quick-scope 插件 }
 
 " vim9-stargate 插件配置 {
-let g:stargate_limit = 600
+let g:stargate_limit = 2000
 " vim9-stargate 插件配置 }
 
 " vim-fugitive 插件按键绑定 {
@@ -1991,8 +2720,8 @@ let g:mkdp_markdown_css = expand('~/.vim/markdown/github-markdown-light.css')
 " 这里最好不要直接用<CR>会覆盖掉一些重要的默认按键映射
 nnoremap <C-CR>  <Cmd>Hi><CR>| " 高亮: 当前高亮的下一个
 nnoremap <C-S-CR>  <Cmd>Hi<<CR>| " 高亮: 当前高亮的上一个
-nnoremap <S-N> <Cmd>Hi}<CR>| " 高亮: 所有高亮的下一个
-nnoremap <S-P> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
+nnoremap <M-CR> <Cmd>Hi}<CR>| " 高亮: 所有高亮的下一个
+nnoremap <M-S-CR> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
 
 " vim-highlighter 配置 }
 
@@ -2137,9 +2866,6 @@ vnoremap <leader>rca :s/\%x00/\r/g<cr>| " 编辑: 可视模式替换文本中的
 " :TODO: 后面可以支持跨字母匹配,比如 wind  输入wd,匹配它
 
 " 针对特种文件格式的自定义补全 }
-
-
-
 function! RemoveLastChar(str)
     if len(a:str) > 0
         let l:width = strchars(a:str) - 1
@@ -2589,7 +3315,7 @@ endfunction
 nnoremap <silent> <leader>smt :call StartAutoCmd()<cr>| " 辅助: 显示当前文件所有marks标记
 nnoremap <silent> <leader>smx :call StopPopUpAutoCmd()<cr>| " 辅助: 关闭显示当前文件所有marks标记
 nnoremap <silent> <leader>smu :call UploadDynamicPopupWin()<cr>| " 辅助: 更新显示当前文件所有marks标记
-autocmd BufEnter * call UploadDynamicPopupWin()| " 辅助: 进入buffer的时候更新标记
+autocmd BufEnter * if &buftype == '' | call UploadDynamicPopupWin()| " 辅助: 进入buffer的时候更新标记
 
 " 一键清除所有的小写和大写字母标记
 nnoremap <silent> <leader>smd :call DeleteMarks(join(map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)'), ' '))<cr>| " 辅助: 删除当前文件中所有的小写字母 marks 标记
@@ -2645,9 +3371,21 @@ function! AddOrRemoveMark(mark)
     call UploadDynamicPopupWin()
 endfunction
 
-for char in range(char2nr('a'), char2nr('z')) + range(char2nr('A'), char2nr('Z'))
-    execute 'nnoremap <silent> m' . nr2char(char) . ' :call AddOrRemoveMark("' . nr2char(char) . '")<CR>'
-endfor
+function! EnableMarkMappings()
+    for char in range(char2nr('a'), char2nr('z')) + range(char2nr('A'), char2nr('Z'))
+        execute 'nnoremap <silent> m' . nr2char(char) . ' :call AddOrRemoveMark("' . nr2char(char) . '")<CR>'
+    endfor
+endfunction
+
+function! DisableMarkMappings()
+    for char in range(char2nr('a'), char2nr('z')) + range(char2nr('A'), char2nr('Z'))
+        execute 'nunmap m' . nr2char(char)
+    endfor
+endfunction
+
+" :TODO: 当前配置中自动命令太多了,屏蔽m快捷键映射和NERD_tree的相关操作,也许还有更好的实现方式
+autocmd BufEnter * if ! bufname('%') =~ 'NERD_tree' | call EnableMarkMappings() | endif
+autocmd BufEnter * if bufname('%') =~ 'NERD_tree' | call DisableMarkMappings() | endif
 
 function! DeleteMarks(marks)
     let l:marks = split(a:marks)
@@ -2755,10 +3493,10 @@ endfunction
 " 在Vim退出时保存全局标记注释(:TODO:这里要判断下是不是最后一个实例,只有最后一个实例才能保存)
 autocmd VimLeavePre * call SaveGlobalMarkComments()
 " 在进入buffer时加载文件标记注释
-autocmd BufEnter * call LoadFileMarkComments()
+autocmd BufEnter * if &buftype == '' | call LoadFileMarkComments() | endif
 
 " 在离开buffer时保存文件标记注释
-autocmd BufLeave * call SaveFileMarkComments()
+autocmd BufLeave * if &buftype == '' | call SaveFileMarkComments() | endif
 " 在Vim退出之前保存所有文件标记注释
 autocmd VimLeavePre * call SaveFileMarkComments()
 
@@ -2858,4 +3596,7 @@ vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>| " 编辑: �
 
 " 增加映射手动重置当前的viminfo
 nnoremap <leader>svm :call SaveGlobalMarkComments()<cr> \| :call SetProjectViminfo()<cr>| " 辅助: 重置当前环境的viminfo(切换新项目时)
+
+" 定义一个自定义高亮组(这个只能放最后不然会被主题覆盖)
+highlight MyVirtualText ctermfg=Green guifg=green ctermbg=NONE guibg=NONE
 
