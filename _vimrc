@@ -375,9 +375,16 @@ function! PasteVisualXreg(is_space_replace)
     let row_chars = []
     let row_phy_lens = []
     let start_row = line('.')
+    let col = virtcol('.')
     for i in range(len(reg_text))
         let row = start_row + i
-        let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row)
+        let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
+        
+        if i == 0
+            " 这里如果发生了空格填充那么需要把光标位置填充正确
+            call SetLineStr(chars_arr, row, row, SumList(byte_len_arr[0:index]))
+        endif
+
         let reg_line = reg_text[i]
         let j = 0
         for char in split(reg_line, '\zs')
@@ -398,46 +405,46 @@ function! PasteVisualXreg(is_space_replace)
         endfor
 
         let k = 0
-        " echo "index:" . index . ';' . 'chars_arr:' . string(chars_arr) . ';' . 'reg_text:' . string(reg_text) . ';'
-        for k_index in range(index, len(chars_arr))
+        let k_index = index
+        while 1
             " 如果覆盖层字符不是空格就覆盖
-            let char_phy_len = strdisplaywidth(chars_arr[k_index])
             if reg_x_chars[i][k] == ' '
                 if a:is_space_replace
-                    let chars_arr[k_index] = reg_x_chars[i][k]
+                    if k_index >= len(chars_arr)
+                        call add(chars_arr, reg_x_chars[i][k])
+                    else
+                        let chars_arr[k_index] = reg_x_chars[i][k]
+                    endif
+                else
+                    if k_index >= len(chars_arr)
+                        call add(chars_arr, reg_x_chars[i][k])
+                    endif
                 endif
             else
-                let chars_arr[k_index] = reg_x_chars[i][k]
+                if k_index >= len(chars_arr)
+                    call add(chars_arr, reg_x_chars[i][k])
+                else
+                    let chars_arr[k_index] = reg_x_chars[i][k]
+                endif
             endif
 
-            let k += char_phy_len
+            let k += 1
             if k >= j
                 break
             endif
-        endfor
+            let k_index += 1
+        endwhile
 
         " 重新设置该行
-        " echo "row:" . row . ';' . "chars_arr:" . join(chars_arr, '') . ';' . 'len:' . len(reg_text) . ';'
         call setline(row, join(chars_arr, ''))
     endfor
 endfunction
-
-
-
 
 function CloseVisualBlockPopWin()
     if exists('g:visual_block_popup_id') && g:visual_block_popup_id != 0
         call popup_close(g:visual_block_popup_id)
     endif
 endfunction
-
-
-" 'moved': 'any' 替代
-" " 在退出可视模式时调用 prop_clear
-" augroup ClearMyVirtualText
-"     autocmd!
-"     autocmd ModeChanged [vV\x16]:n call CloseVisualBlockPopWin()
-" augroup END
 
 function! CloseHiddenBuffers()
 
@@ -1468,6 +1475,10 @@ nnoremap <silent> <M-Left> :call DrawSmartLineEraser('h')<CR>| " 辅助: 绘图�
 nnoremap <silent> <M-Down> :call DrawSmartLineEraser('j')<CR>| " 辅助: 绘图下边橡皮擦
 nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上边橡皮擦
 
+nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <silent> <leader><leader>p :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <silent> <leader>slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
+
 " :TODO: 实现斜线(M-u o n ,)
 
 
@@ -1476,9 +1487,6 @@ nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上
 " 键就是宽和高,然后可以分类，有圆有三角形还可以有五角星等等
 " 使用弹出窗口空格为空的预览效果即可。
 
-nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
-nnoremap <silent> <leader><leader>p :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
-nnoremap <silent> <leader>slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
 
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
