@@ -702,8 +702,8 @@ set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
 " set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
-set guifont=微软雅黑\ PragmataPro\ Mono:h8
-" set guifont=Fira\ Code:h8
+" set guifont=微软雅黑\ PragmataPro\ Mono:h8
+set guifont=Fira\ Code:h8
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
@@ -1483,9 +1483,11 @@ function! TraverseRectangle()
     call cursor(line_start, col_start)
 
     " 向右移动
-    for col in range(col_start, col_end - 2)
-        call DrawSmartLineLeftRight('l')
-    endfor
+    if col_start <= col_end - 2
+        for col in range(col_start, col_end - 2)
+            call DrawSmartLineLeftRight('l')
+        endfor
+    endif
 
     " 向下移动
     for line in range(line_start, line_end - 1)
@@ -1493,19 +1495,24 @@ function! TraverseRectangle()
     endfor
 
     " 向左移动
-    for col in range(col_end - 2, col_start, -1)
-        call DrawSmartLineLeftRight('h')
-    endfor
+    if col_end - 2 >= col_start
+        for col in range(col_end - 2, col_start, -1)
+            call DrawSmartLineLeftRight('h')
+        endfor
+    endif
 
     " 向上移动
     for line in range(line_end - 1, line_start, -1)
         call DrawSmartLineUpDown('k')
     endfor
 
+    " :TODO: 使用跟踪这里再绕半圈是否还有意义
     " 再次向右移动，完成半圈
-    for col in range(col_start, col_end - 2)
-        call DrawSmartLineLeftRight('l')
-    endfor
+    if col_start <= col_end - 2
+        for col in range(col_start, col_end - 2)
+            call DrawSmartLineLeftRight('l')
+        endfor
+    endif
 endfunction
 
 
