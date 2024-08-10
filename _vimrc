@@ -1201,6 +1201,27 @@ function! ProcessLine(row, ...)
     return [line_byte_len_array, line_phy_len_array, line_chars_array, index]
 endfunction
 
+" 绘制斜线(直接简单的实现)
+function! DrawSmartLineSlash(direction)
+    if a:direction == 'u'
+        normal! h
+        normal! k
+        normal! r\
+    elseif a:direction == 'n'
+        normal! h
+        normal! j
+        normal! r/
+    elseif a:direction == 'i'
+        normal! l
+        normal! k
+        normal! r/
+    elseif a:direction == 'm'
+        normal! l
+        normal! j
+        normal! r\
+    endif
+endfunction
+
 
 " 绘制线并且决定边界字符
 function! DrawSmartLineLeftRight(direction)
@@ -1479,7 +1500,14 @@ nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴
 nnoremap <silent> <leader><leader>p :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
 nnoremap <silent> <leader>slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
 
-" :TODO: 实现斜线(M-u o n ,)
+" 斜线(M-U O M I)
+nnoremap <silent> <m-U> :call DrawSmartLineSlash('u')<cr>
+nnoremap <silent> <m-N> :call DrawSmartLineSlash('n')<cr>
+nnoremap <silent> <m-I> :call DrawSmartLineSlash('i')<cr>
+nnoremap <silent> <m-M> :call DrawSmartLineSlash('m')<cr>
+
+
+
 
 
 " :TODO: 基于范围绘制一个圆(如果选择区域不满足要求按照最小规则生成一个,自动重新选择区域并且生成)
@@ -1487,6 +1515,7 @@ nnoremap <silent> <leader>slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 
 " 键就是宽和高,然后可以分类，有圆有三角形还可以有五角星等等
 " 使用弹出窗口空格为空的预览效果即可。
 
+" :TODO: 交叉策略，比如本来应该生成+的地方使用)括号填充(参考asciio交叉模式策略)
 
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
@@ -3253,7 +3282,7 @@ nnoremap <silent> <leader>ypwp :call GetAllInfoInPopupWin(1)<cr>| " 辅助: 粘�
 
 
 nnoremap <c-;> <Cmd>call stargate#OKvim('\<')<cr>| " 跳转: 跳转到某一个关键字
-nnoremap <leader>w <Cmd>call stargate#Galaxy()<cr>| " 跳转: 跳转到某一个窗口
+nnoremap <c-s-:> <Cmd>call stargate#Galaxy()<cr>| " 跳转: 跳转到某一个窗口
 
 
 
