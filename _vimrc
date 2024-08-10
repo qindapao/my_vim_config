@@ -979,6 +979,47 @@ let g:draw_smartline_normal_char_func = [
 let g:SmartDrawLines = [['-', '|'], ['─', '│'], ['━', '┃'], ['═', '║'], ['┅', '┇'], ['┄', '┆']]
 let g:SmartDrawLineIndex = 0
 
+" 交叉策略字典(比如+将会显示成)左小括号)
+let g:use_cross_mode_rules = [
+    \ {
+    \ },
+    \ {
+    \ '+' : ')',
+    \ '┼' : ')',
+    \ '╋' : '❫',
+    \ '╬' : '⟫',
+    \ '╫' : '⟫',
+    \ '╪' : ')',
+    \ '┽' : ')', 
+    \ '┾' : ')', 
+    \ '┿' : ')', 
+    \ '╀' : ')', 
+    \ '╁' : ')', 
+    \ '╂' : '❫', 
+    \ '╃' : ')',
+    \ '╄' : ')', 
+    \ '╅' : ')', 
+    \ '╆' : ')', 
+    \ '╇' : ')', 
+    \ '╈' : ')', 
+    \ '╉' : '❫', 
+    \ '╊' : '❫'
+    \ },
+    \ {
+    \ '╭' : '┌',
+    \ '╰' : '└',
+    \ '╯' : '┘',
+    \ '╮' : '┐'
+    \ }
+    \ ]
+let g:use_cross_mode_index = 0
+
+function! SwitchSmartLineCrossType()
+    let g:use_cross_mode_index = (g:use_cross_mode_index + 1) % len(g:use_cross_mode_rules)
+    echo "now index: " . g:use_cross_mode_index
+endfunction
+
+
 function! SwitchSmartDrawLine(is_just_show)
     if !a:is_just_show
         let g:SmartDrawLineIndex = (g:SmartDrawLineIndex + 1) % len(g:SmartDrawLines)
@@ -1253,7 +1294,11 @@ function! DrawSmartLineLeftRight(direction)
         if has_key(g:draw_smartline_all_cross_chars, pre_char)
             for table_param in g:draw_smartline_normal_char_func
                 if call(table_param[1], [pre_up, pre_down, pre_left, pre_right, table_param[2]])
-                    let line_chars_array[pre_index] = table_param[0]
+                    if has_key(g:use_cross_mode_rules[g:use_cross_mode_index], table_param[0])
+                        let line_chars_array[pre_index] = g:use_cross_mode_rules[g:use_cross_mode_index][table_param[0]]
+                    else
+                        let line_chars_array[pre_index] = table_param[0]
+                    endif
                     let line_byte_len_array[pre_index] = len(table_param[0])
                     call SetLineStr(line_chars_array, row, row, col)
                     break
@@ -1271,7 +1316,11 @@ function! DrawSmartLineLeftRight(direction)
     let entered_if = 0
     for table_param in g:draw_smartline_normal_char_func
         if call(table_param[1], [up, down, left, right, table_param[2]])
-            let line_chars_array[index] = table_param[0]
+            if has_key(g:use_cross_mode_rules[g:use_cross_mode_index], table_param[0])
+                let line_chars_array[index] = g:use_cross_mode_rules[g:use_cross_mode_index][table_param[0]]
+            else
+                let line_chars_array[index] = table_param[0]
+            endif
             let entered_if = 1
             break
         endif
@@ -1357,7 +1406,11 @@ function! DrawSmartLineUpDown(direction)
         let entered_if = 0
         for table_param in g:draw_smartline_normal_char_func
             if call(table_param[1], [pre_up, pre_down, pre_left, pre_right, table_param[2]])
-                let result_char = table_param[0]
+                if has_key(g:use_cross_mode_rules[g:use_cross_mode_index], table_param[0])
+                    let result_char = g:use_cross_mode_rules[g:use_cross_mode_index][table_param[0]]
+                else
+                    let result_char = table_param[0]
+                endif
                 let entered_if = 1
                 break
             endif
@@ -1385,7 +1438,11 @@ function! DrawSmartLineUpDown(direction)
     let entered_if = 0
     for table_param in g:draw_smartline_normal_char_func
         if call(table_param[1], [up, down, left, right, table_param[2]])
-            let line_chars_array[index] = table_param[0]
+            if has_key(g:use_cross_mode_rules[g:use_cross_mode_index], table_param[0])
+                let line_chars_array[index] = g:use_cross_mode_rules[g:use_cross_mode_index][table_param[0]]
+            else
+                let line_chars_array[index] = table_param[0]
+            endif
             let entered_if = 1
             break
         endif
@@ -1478,6 +1535,9 @@ nnoremap <silent> sls :call SwitchSmartDrawLine(1)<CR>| " 辅助: 绘图显示�
 nnoremap <silent> slu :call SwitchSmartDrawLineFromCharUnderCursor()<CR>| " 辅助: 绘图根据当前光标下字符改变线形
 nnoremap <silent> sly :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当前光标下的字符
 nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
+" 切换智能绘图交叉模式策略
+nnoremap <silent> slx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
+
 nnoremap <silent> <C-S-Right> :call ReplaceCharUnderCursor('l')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向右移动
 nnoremap <silent> <C-S-Left> :call ReplaceCharUnderCursor('h')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向左移动
 nnoremap <silent> <C-S-Up> :call ReplaceCharUnderCursor('k')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向上移动
