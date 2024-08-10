@@ -1,5 +1,5 @@
 " 按键组
-" 
+"
 " 按键组->补全
 " 按键组->标签导航
 " 按键组->书签
@@ -177,7 +177,7 @@ function! GenSectionNum(file_type)
         echo "filetype is not surport."
         return
     endif
-    
+
     let lvl = []
     let sect = []
     let out = ""
@@ -232,7 +232,7 @@ function! GenSectionNum(file_type)
                 call add(lvl, heading_lvl)
             endif
         endif
-        
+
         let cur_sect = ""
         for j in sect
             let cur_sect = cur_sect . "." . j
@@ -293,17 +293,18 @@ function! VisualBlockMove(direction)
         execute 'silent! normal! 1' . a:direction
     endif
 
+    call UpdateVisualBlockPopup()
+endfunction
+
+function! UpdateVisualBlockPopup()
     " 获取寄存器内容和类型
-    let regtype = getregtype("x")
     let regcontent = getreg("x")
-    let blockwidth = str2nr(regtype[1:])
-    let blockheight = len(split(regcontent, "\n"))
-    let l:text = split(regcontent, "\n")
+    let l:new_text = split(regcontent, "\n")
     let mask = []
     " 空格透明
     if g:visual_block_popup_types[g:visual_block_popup_types_index] == 'overlay'
-        for i in range(len(l:text))
-            let line = l:text[i]
+        for i in range(len(l:new_text))
+            let line = l:new_text[i]
             let j = 0
             for char in split(line, '\zs')
                 if char == ' '
@@ -314,10 +315,6 @@ function! VisualBlockMove(direction)
         endfor
     endif
 
-    call UpdateVisualBlockPopup(l:text, mask)
-endfunction
-
-function! UpdateVisualBlockPopup(new_text, new_mask)
     if exists('g:visual_block_popup_id') && g:visual_block_popup_id != 0
         try
             let l:pos = popup_getpos(g:visual_block_popup_id)
@@ -332,7 +329,7 @@ function! UpdateVisualBlockPopup(new_text, new_mask)
 
     if exists('g:visual_block_popup_id') && g:visual_block_popup_id != 0
         " 更新弹出窗口的文本
-        call popup_settext(g:visual_block_popup_id, a:new_text)
+        call popup_settext(g:visual_block_popup_id, l:new_text)
 
         " 更新弹出窗口的位置
         call popup_move(g:visual_block_popup_id, {
@@ -342,19 +339,19 @@ function! UpdateVisualBlockPopup(new_text, new_mask)
 
         " 更新弹出窗口的透明掩码和其他属性
         call popup_setoptions(g:visual_block_popup_id, {
-            \ 'mask': a:new_mask,
+            \ 'mask': mask,
             \ 'highlight': 'MyVirtualText',
             \ 'moved': 'any',
             \ 'zindex': 100
             \ })
     else
-        let g:visual_block_popup_id = popup_create(a:new_text, {
+        let g:visual_block_popup_id = popup_create(l:new_text, {
             \ 'line': 'cursor',
             \ 'col': 'cursor',
             \ 'zindex': 100,
             \ 'highlight': 'MyVirtualText',
             \ 'moved': 'any',
-            \ 'mask': a:new_mask
+            \ 'mask': mask
             \ })
     endif
 endfunction
@@ -379,7 +376,7 @@ function! PasteVisualXreg(is_space_replace)
     for i in range(len(reg_text))
         let row = start_row + i
         let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
-        
+
         if i == 0
             " 这里如果发生了空格填充那么需要把光标位置填充正确
             call SetLineStr(chars_arr, row, row, SumList(byte_len_arr[0:index]))
@@ -393,7 +390,7 @@ function! PasteVisualXreg(is_space_replace)
                 call add(reg_x_chars, [])
                 call add(reg_x_phy_lens, [])
             endif
-            
+
             if char_phy_len == 2
                 call extend(reg_x_chars[i], [char, ''])
                 call extend(reg_x_phy_lens[i], [2, 0])
@@ -449,11 +446,11 @@ endfunction
 function! CloseHiddenBuffers()
 
     let open_buffers = []
-    
+
     for i in range(tabpagenr('$'))
         call extend(open_buffers, tabpagebuflist(i + 1))
     endfor
-    
+
     for num in range(1, bufnr("$") + 1)
         if buflisted(num) && index(open_buffers, num) == -1 && getbufvar(num, "&buftype") !=#'terminal'
             " 这里使用bdelete命令比较安全,如果后面想换成bw命令也是可以的
@@ -488,10 +485,10 @@ function! OmniFuncPython(findstart, base)
     " echom 'python3complete#Complete returns: ' . string(l:res1)
     " echom ' gtagsomnicomplete#Complete returns: ' . string(l:res2)
     " 3是列表 0是数字
-   
+
     if ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0) && (type(l:res2) == 3 && !empty(l:res2))
         return l:res2+l:res3
-    elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && (type(l:res1) == 3 && !empty(l:res1)) 
+    elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && (type(l:res1) == 3 && !empty(l:res1))
         return l:res1+l:res3
     elseif ((type(l:res2) == 3 && empty(l:res2)) || type(l:res2) == 0) && ((type(l:res1) == 3 && empty(l:res1)) || type(l:res1) == 0)
         return l:res3
@@ -533,22 +530,22 @@ function! MyTabLine()
 
         " 响应鼠标事件
         let s .= '%' . (i+1) . 'T'
-    
+
         let s .= ' ' . (i + 1) . ' '
         let bufnr = tabpagebuflist(i+1)[tabpagewinnr(i+1) - 1]
         let filename = fnamemodify(bufname(bufnr), ':t')
         if strchars(filename) > 13
             let filename = strcharpart(filename, 0, 13) . '..'
         endif
-        
+
         let s .= filename
         if getbufvar(bufnr, "&modified")
             let s .= ' +'
         endif
-        
+
         let s .= ' |'
     endfor
-    
+
     " after the last tab fill with TabLineFill and reset tab page nr
     let s .= '%#TabLineFill#%T'
     return s
@@ -561,14 +558,14 @@ endfunction
 
 "     let remote_branch_info = system('git.exe rev-parse --abbrev-ref --symbolic-full-name @{upstream}')
 "     let [remote_name, branch_name] = split(remote_branch_info, '/')
-    
+
 "     let init_addr = system('git.exe config --get remote.origin.url')
 "     let middle_info = substitute(init_addr, 'xx.yy.com:2222', 'xx.yy.com', 'g')
 "     let middle_info = split(middle_info, '@')[1]
 "     let middle_info = split(middle_info, '.git')[0]
-    
+
 "     let get_adr = 'http://' . middle_info . '/file?ref=' . branch_name
-    
+
 "     silent execute '!chrome' get_adr
 " endfunction
 
@@ -803,9 +800,9 @@ let g:draw_smartline_all_ascii_chars = {
 let g:draw_smartline_all_cross_chars = {
     \ '-': 1, '|': 1, '+': 1, '.': 1, "'": 1, '^': 1, 'v': 1, '<': 1, '>': 1,
     \ '─': 1, '│': 1, '┼': 1, '┤': 1, '├': 1, '┬': 1, '┴': 1, '╭': 1, '╮': 1, '╯': 1, '╰': 1,
-    \ '━': 1, '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┳': 1, '┻': 1, '┏': 1, '┓': 1, '┛': 1, '┗': 1, 
+    \ '━': 1, '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┳': 1, '┻': 1, '┏': 1, '┓': 1, '┛': 1, '┗': 1,
     \ '═': 1, '║': 1, '╬': 1, '╣': 1, '╠': 1, '╦': 1, '╩': 1, '╔': 1, '╗': 1, '╝': 1, '╚': 1,
-    \ '╫': 1, '╪': 1, '╨': 1, '╧': 1, '╥': 1, '╤': 1, '╢': 1, '╡': 1, '╟': 1, '╞': 1, '╜': 1, 
+    \ '╫': 1, '╪': 1, '╨': 1, '╧': 1, '╥': 1, '╤': 1, '╢': 1, '╡': 1, '╟': 1, '╞': 1, '╜': 1,
     \ '╛': 1, '╙': 1, '╘': 1, '╖': 1, '╕': 1, '╓': 1, '╒': 1,
     \ '┍': 1, '┎': 1, '┑': 1, '┒': 1, '┕': 1, '┖': 1, '┙': 1, '┚': 1,
     \ '┝': 1, '┞': 1, '┟': 1, '┠': 1, '┡': 1, '┢': 1,
@@ -875,7 +872,7 @@ let g:up_index_map = {g:up_thin_index: 1, g:up_double_index: 1, g:up_bold_index:
 let g:down_index_map = {g:down_thin_index: 1, g:down_double_index: 1, g:down_bold_index: 1}
 
 " Arranging them in order can reduce logical judgment. Because calculations are done sequentially
-" 1. First are cross, 
+" 1. First are cross,
 " 2. then are corner missing
 " 3. and finally are two corners missing.
 " Therefore, the order of functions in the array cannot be disrupted
@@ -990,19 +987,19 @@ let g:use_cross_mode_rules = [
     \ '╬' : '⟫',
     \ '╫' : '⟫',
     \ '╪' : ')',
-    \ '┽' : ')', 
-    \ '┾' : ')', 
-    \ '┿' : ')', 
-    \ '╀' : ')', 
-    \ '╁' : ')', 
-    \ '╂' : '❫', 
+    \ '┽' : ')',
+    \ '┾' : ')',
+    \ '┿' : ')',
+    \ '╀' : ')',
+    \ '╁' : ')',
+    \ '╂' : '❫',
     \ '╃' : ')',
-    \ '╄' : ')', 
-    \ '╅' : ')', 
-    \ '╆' : ')', 
-    \ '╇' : ')', 
-    \ '╈' : ')', 
-    \ '╉' : '❫', 
+    \ '╄' : ')',
+    \ '╅' : ')',
+    \ '╆' : ')',
+    \ '╇' : ')',
+    \ '╈' : ')',
+    \ '╉' : '❫',
     \ '╊' : '❫'
     \ },
     \ {
@@ -1031,7 +1028,7 @@ endfunction
 function! SwitchSmartDrawLineFromCharUnderCursor()
     let smart_char_to_index = {'-': 0, '|': 0, '─': 1, '│': 1, '━': 2, '┃': 2, '═': 3, '║': 3, '┅': 4, '┇': 4, '┄': 5, '┆': 5}
     let current_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
-    
+
     if has_key(smart_char_to_index, current_char)
         let g:SmartDrawLineIndex = smart_char_to_index[current_char]
     endif
@@ -1054,7 +1051,7 @@ function! ReplaceCharUnderCursor(direction)
     execute "normal! r" . @a
     " 获取替换后的字符
     let new_char = @a
-    
+
     " 获取替换后字符的宽度
     let new_char_width = strdisplaywidth(new_char)
     let cursor_char_width = strdisplaywidth(cursor_char)
@@ -1332,13 +1329,13 @@ function! DrawSmartLineLeftRight(direction)
 
     let line_byte_len_array[index] = len(line_chars_array[index])
     let col = SumList(line_byte_len_array[0:index])
-    
+
     call SetLineStr(line_chars_array, row, row, (a:direction=='l')?col+1:col-line_byte_len_array[index])
 endfunction
 
 function! DrawSmartLineEraser(direction)
     let row = line('.')
-    
+
     let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row)
     let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1)
     let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1)
@@ -1512,8 +1509,9 @@ function! TraverseRectangle()
 endfunction
 
 
-" There is a space after the mapping below. In visual mode, 
-" a region is cut and saved in the x register, and all characters in the 
+
+" There is a space after the mapping below. In visual mode,
+" a region is cut and saved in the x register, and all characters in the
 " original region are replaced with spaces.
 vnoremap xc "xygvgr| " 辅助: 基于绘图的替换
 vnoremap xx "xygvgr | " 辅助: 基于绘图的剪切
@@ -1537,6 +1535,12 @@ nnoremap <silent> sly :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当
 nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
 " 切换智能绘图交叉模式策略
 nnoremap <silent> slx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
+nnoremap <silent> slf :call SwitchSmartDrawLev1Index(1)<CR>| " 辅助: 切换保存形状的大类正向
+nnoremap <silent> slb :call SwitchSmartDrawLev1Index(-1)<CR>| " 辅助: 切换保存形状的大类反向
+" 鼠标指针不能行到图形上,不然会导致不能响应命令
+nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
+nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
+
 
 nnoremap <silent> <C-S-Right> :call ReplaceCharUnderCursor('l')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向右移动
 nnoremap <silent> <C-S-Left> :call ReplaceCharUnderCursor('h')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向左移动
@@ -1574,9 +1578,6 @@ nnoremap <silent> <m-M> :call DrawSmartLineSlash('m')<cr>
 " :TODO: 圆的实现和其它图形的实现都不用使用标准的算法，直接在图形库中写死即可
 " 键就是宽和高,然后可以分类，有圆有三角形还可以有五角星等等
 " 使用弹出窗口空格为空的预览效果即可。
-
-" :TODO: 交叉策略，比如本来应该生成+的地方使用)括号填充(参考asciio交叉模式策略)
-
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
 " 位于autoload目录下(这个目录下可能还有不少好东西)
@@ -2054,7 +2055,7 @@ function! PreserveWindowSize(delta)
     let l:guifont_size_list = split(l:guifont_size_str, 'h')
     " split函数会默认忽略空元素 let l:guifont_size_list = split(l:guifont_size_str, 'h', 1) 这样才会保留
     let l:guifont_size = str2float(l:guifont_size_list[0])
-    
+
     let l:new_font_size = l:guifont_size + a:delta
     if l:new_font_size < 1
         let l:new_font_size = 1
@@ -2064,11 +2065,11 @@ function! PreserveWindowSize(delta)
         let guifont = substitute(&guifont, l:fontpat_unix,
                                \ '\1' . l:new_font_size, "")
     elseif has("win32")
-        let guifont = substitute(&guifont, l:fontpat_win32, 
+        let guifont = substitute(&guifont, l:fontpat_win32,
                                \ '\1' . l:new_font_size, "")
     endif
     let &guifont = guifont
-  
+
     " 这里可能需要乘以一个缩放比例,根据环境不同可能需要调整
     " call ResizeGvimWindow(l:x, l:y, l:window_width_px, l:window_height_px)
 endfunction
@@ -2730,7 +2731,7 @@ let g:regexPatterns = [
 \ ]
 
 " :TODO: 目前列表里面无法加注释只能放到外面来单独注释
-" ^：匹配行的开始。                                    " 辅助:regexPatterns 
+" ^：匹配行的开始。                                    " 辅助:regexPatterns
 " $：匹配行的结束。                                    " 辅助:regexPatterns
 " []：匹配括号内的任何字符。                           " 辅助:regexPatterns
 " .：匹配任何单个字符（除了换行符）。                  " 辅助:regexPatterns
@@ -2796,9 +2797,9 @@ tnoremap <C-v> <C-S-_>"+| " 终端: 粘贴系统剪切板
 " highlight QuickScopePrimary ctermfg=red guifg=red
 " highlight QuickScopeSecondary ctermfg=blue guifg=blue
 " " 这里设置的特殊字符好像无效
-" let g:qs_accepted_chars = map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)') 
-"             \+ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)') 
-"             \+ map(range(char2nr('0'), char2nr('9')), 'nr2char(v:val)') 
+" let g:qs_accepted_chars = map(range(char2nr('A'), char2nr('Z')), 'nr2char(v:val)')
+"             \+ map(range(char2nr('a'), char2nr('z')), 'nr2char(v:val)')
+"             \+ map(range(char2nr('0'), char2nr('9')), 'nr2char(v:val)')
 "             \+ ['"', ',', '.', "'", '!', '@', '+', '-']
 " " 终端中不要高亮
 " " let g:qs_buftype_blacklist = ['terminal', 'nofile']
@@ -2825,10 +2826,10 @@ nnoremap <silent> <leader>gbl :execute 'Git branch'<CR>| " git:branch 查看所�
 nnoremap <silent> <leader>gbc :execute 'normal "xyiw' \| execute 'Git checkout ' . getreg('x') \| close<CR>| "   git:branch 切换分支
 vnoremap <silent> <leader>gbc y:execute 'Git checkout ' . shellescape(@0) \| close<CR>| "                        git:branch 切换分支
 " 删除一个本地分支
-nnoremap <silent> <leader>gbxl :execute 'normal "xyiw' \| execute 'Git branch -d ' . getreg('x') \| close<CR>| " git:branch 删除一个本地分支 
-vnoremap <silent> <leader>gbxl y:execute 'Git branch -d ' . shellescape(@0) \| close<CR>| "                      git:branch 删除一个本地分支 
-nnoremap <silent> <leader>gbfxl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| close<CR>| "git:branch 删除一个本地分支 
-vnoremap <silent> <leader>gbfxl y:execute 'Git branch -D ' . shellescape(@0) \| close<CR>| "                     git:branch 删除一个本地分支 
+nnoremap <silent> <leader>gbxl :execute 'normal "xyiw' \| execute 'Git branch -d ' . getreg('x') \| close<CR>| " git:branch 删除一个本地分支
+vnoremap <silent> <leader>gbxl y:execute 'Git branch -d ' . shellescape(@0) \| close<CR>| "                      git:branch 删除一个本地分支
+nnoremap <silent> <leader>gbfxl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| close<CR>| "git:branch 删除一个本地分支
+vnoremap <silent> <leader>gbfxl y:execute 'Git branch -D ' . shellescape(@0) \| close<CR>| "                     git:branch 删除一个本地分支
 
 " 删除一个远程分支
 nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>| "  git:branch 删除一个远程分支
@@ -2961,9 +2962,9 @@ function! CustomCompleteList()
     if !empty(g:complete_list)
         let g:complete_list_all += g:complete_list
     endif
-    
+
     let g:word_to_complete = extend(copy(g:word_to_complete_all), g:word_to_complete)
-    
+
 endfunction
 
 " 这里多调用一次是因为如果重新加载vimrc,希望能生效
@@ -2984,12 +2985,12 @@ function! OmniCompleteCustom(findstart, base)
         " find matches for a:base
         let res = []
         " h complete-functions
-        " word: 补全的单词(无法多行,但是可以自己转换) 
-        " abbr: 补全菜单中显示的缩写 
+        " word: 补全的单词(无法多行,但是可以自己转换)
+        " abbr: 补全菜单中显示的缩写
         " menu: 补全菜单中显示的额外信息(我加个*表示这项含有info预览信息 -表示没有)
         " info: 在预览窗口中显示的详细信息(如果有信息要至少包含一个换行符)
-        " kind: 补全的类型 
-        " icase: 如果设置为1忽略大小写(需要后面的函数处理,否则无用) 
+        " kind: 补全的类型
+        " icase: 如果设置为1忽略大小写(需要后面的函数处理,否则无用)
         " dup: 如果设置为1标识允许添加重复项(只要word相同就能添加)(需要后面的代码处理否则没有作用)
         " :TODO: 这个变量移动到单独的字典文件中,然后每个语言一个文件,在vimrc中source进来(不是对应文件的字典清空,节省内存,要考虑字典文件的内存使用问题)
         " 还需要看下内存xnhc
@@ -3037,11 +3038,11 @@ function! CompleteShowPopup(item)
 
         let opts = { 'line': 'cursor+1',
                     \'col': (width<0)?'cursor' . width:'cursor' . '+' . width,
-                    \ 'padding': [0,1,0,1], 
-                    \ 'wrap': v:true, 
-                    \ 'border': [], 
-                    \ 'close': 'click', 
-                    \ 'highlight': 'Pmenu', 
+                    \ 'padding': [0,1,0,1],
+                    \ 'wrap': v:true,
+                    \ 'border': [],
+                    \ 'close': 'click',
+                    \ 'highlight': 'Pmenu',
                     \ 'zindex': 100}
         let s:winid = popup_create(split(a:item['info'], '\n'), opts)
     endif
@@ -3126,7 +3127,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                 let user_command_str = "null"
                 echoerr "执行的命令无效: " . v:exception
             endtry
-            
+
             let user_command_utf8 = iconv(user_command_str, &encoding, 'utf-8')
             let data_list = split(user_command_utf8, '\n')
         endif
@@ -3150,7 +3151,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
         \ 'dragall': 1}
     let help_win = popup_create([''], opts)
     let help_win_nr = winbufnr(help_win)
-    
+
     let input_str = ''
     while 1
         let c = getchar()
@@ -3167,7 +3168,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
         elseif c != 0
             let input_str .= nr2char(c)
         endif
-        
+
         let keyword_match = []
         let text_property_list = []
         let first_line_text_property = []
@@ -3183,7 +3184,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                         break
                     endif
                 endfor
-                
+
                 " :TODO: 这里可以优化性能,写一个总的正则,不用一个单词一个单词去匹配
                 for sub_item in split(item, '\n')
                     if fit_bool
@@ -3197,13 +3198,13 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                                 if match_str[0] == ''
                                     break
                                 endif
-                                
+
                                 let start = match_str[2]
                                 call add(first_line_text_property, [1, match_str[1]+1, match_str[2] - match_str[1], 'HelpPopupKeywordHighLightBlank'])
                             endwhile
                             let is_first_line = 0
                         endif
-                        
+
                         " 循环高亮组
                         let highlight_cnt = 0
                         for input_str_regex in split(input_str, '\s\+')
@@ -3213,7 +3214,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                                 if match_str[0] == ''
                                     break
                                 endif
-                                
+
                                 let start = match_str[2]
                                 call add(text_property_list, [match_line_cnt, match_str[1]+1, match_str[2]-match_str[1], highlight_cnt % len(g:help_popup_highlight_colors)])
                             endwhile
@@ -3228,7 +3229,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                 endif
             endfor
         endif
-        
+
         if (c != "\<Up>" && c != "\<Down>")
             call popup_settext(help_win, keyword_match)
             if !empty(text_property_list)
@@ -3236,7 +3237,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                     call prop_add(text_property[0], text_property[1], {'type': 'HelpPopupKeywordHighLight' . text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': g:help_win_text_prop_id})
                 endfor
             endif
-            
+
             if !empty(first_line_text_property)
                 for text_property in first_line_text_property
                     call prop_add(text_property[0], text_property[1], {'type': text_property[3], 'length': text_property[2], 'bufnr': help_win_nr, 'id': g:help_win_text_prop_id})
@@ -3250,7 +3251,7 @@ function! PopupMenuShowKeyBindings(search_mode, exec_mode, exec_cmd)
                 call popup_setoptions(help_win, #{firstline: firstline + 1})
             endif
         endif
-        
+
         redraw
     endwhile
 endfunction
@@ -3307,7 +3308,7 @@ function! GetAllInfoInPopupWin(paste_flag)
         endfor
         let @" = @a
         let @+ = @a
-    
+
         if a:paste_flag
             normal! p
         endif
@@ -3350,7 +3351,7 @@ nnoremap <c-s-:> <Cmd>call stargate#Galaxy()<cr>| " 跳转: 跳转到某一个�
 " :TODO: 这个设置无效会被覆盖需要定位
 set textwidth=0
 " 用这一行规避上面的问题
-autocmd filetype * set textwidth=0 
+autocmd filetype * set textwidth=0
 
 " :TODO: 所有需要映射的文件用一个windows下的批处理脚本来处理
 " :TODO: 目前不确定我自定义的补全是否会和coc还有completor的补全相冲突
@@ -3748,7 +3749,7 @@ function! SurroundWith(symbol, visual, fill_char) range
         let l:end_pos = getpos("'>")
         let l:first_line = getline(l:start_pos[1])
         let l:last_line = getline(l:end_pos[1])
-        
+
         if g:saved_cursor_pos[1] == l:start_pos[1]
             let l:offset = len(a:symbol[0]) + len(a:fill_char)
         endif
@@ -3782,17 +3783,157 @@ function! SurroundWith(symbol, visual, fill_char) range
 endfunction
 
 " 创建新的命令，S)，来调用这个函数
-vnoremap <silent> S( :call SurroundWith('()', visualmode(), ' ')<CR>| " 编辑: 小括号包围有空格 
+vnoremap <silent> S( :call SurroundWith('()', visualmode(), ' ')<CR>| " 编辑: 小括号包围有空格
 " 创建新的命令，S}，来调用这个函数
 vnoremap <silent> S{ :call SurroundWith('{}', visualmode(), ' ')<CR>| " 编辑: 大括号包围有空格
 " 创建新的命令，$)，来调用这个函数
-vnoremap <silent> S) :call SurroundWith('()', visualmode(), '')<CR>| " 编辑: 小括号包围无空格 
+vnoremap <silent> S) :call SurroundWith('()', visualmode(), '')<CR>| " 编辑: 小括号包围无空格
 " 创建新的命令，$}，来调用这个函数
-vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>| " 编辑: 大括号包围无空格 
+vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>| " 编辑: 大括号包围无空格
 
 " 增加映射手动重置当前的viminfo
 nnoremap <leader>svm :call SaveGlobalMarkComments()<cr> \| :call SetProjectViminfo()<cr>| " 辅助: 重置当前环境的viminfo(切换新项目时)
 
 " 定义一个自定义高亮组(这个只能放最后不然会被主题覆盖)
 highlight MyVirtualText ctermfg=Green guifg=green ctermbg=NONE guibg=NONE
+
+" 自定义的图形
+" 图形大类别索引
+let g:SmartDrawLev1Index = 0
+
+function! SwitchSmartDrawLev1Index(direction)
+    if a:direction == 1
+        let g:SmartDrawLev1Index = (g:SmartDrawLev1Index+1) % len(g:SmartDrawShapes)
+    else
+        let g:SmartDrawLev1Index = (g:SmartDrawLev1Index-1 + len(g:SmartDrawShapes)) % len(g:SmartDrawShapes)
+    endif
+
+    " 更新x寄存器内容
+    let lev2_index = g:SmartDrawShapes[g:SmartDrawLev1Index]['index']
+    let @x = join(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'][lev2_index], "\n")
+
+    call UpdateVisualBlockPopup()
+endfunction
+
+function! SwitchSmartDrawLev2Index(direction)
+    if a:direction == 1
+        let g:SmartDrawShapes[g:SmartDrawLev1Index]['index'] = (g:SmartDrawShapes[g:SmartDrawLev1Index]['index']+1) % len(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'])
+    else
+        let g:SmartDrawShapes[g:SmartDrawLev1Index]['index'] = (g:SmartDrawShapes[g:SmartDrawLev1Index]['index']-1 + len(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'])) % len(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'])
+    endif
+    " 更新x寄存器内容
+    let lev2_index = g:SmartDrawShapes[g:SmartDrawLev1Index]['index']
+    let @x = join(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'][lev2_index], "\n")
+
+    call UpdateVisualBlockPopup()
+endfunction
+
+
+let g:circle1 =<< EOF
+ _
+( )
+ '
+EOF
+
+let g:circle2 =<< EOF
+ .-.
+(   )
+ '-'
+EOF
+
+let g:circle3 =<< EOF
+ .---.
+(     )
+ '---'
+EOF
+
+let g:circle4 =<< EOF
+    _.---._
+ .''       ''.
+:             :
+|             |
+:             :
+ '..       ..'
+    '-...-'
+EOF
+
+let g:triangle1 =<< EOF
+.---.
+ \ /
+  '
+EOF
+
+let g:triangle2 =<< EOF
+.-----.
+ \   /
+  \ /
+   '
+EOF
+
+
+let g:triangle3 =<< EOF
+.-------------.
+ \           /
+  \         /
+   \       /
+    \     /
+     \   /
+      \ /
+       '
+EOF
+
+let g:rhombus1 =<< EOF
+   ,',
+ ,'   ',
+:       :
+ ',   ,'
+   ','
+EOF
+
+let g:rhombus2 =<< EOF
+       ,',
+     ,'   ',
+   ,'       ',
+ ,'           ',
+:               :
+ ',           ,'
+   ',       ,'
+     ',   ,'
+       ','
+EOF
+
+let g:rhombus3 =<< EOF
+               ,',
+             ,'   ',
+           ,'       ',
+         ,'           ',
+       ,'               ',
+     ,'                   ',
+   ,'                       ',
+ ,'                           ',
+:                               :
+ ',                           ,'
+   ',                       ,'
+     ',                   ,'
+       ',               ,'
+         ',           ,'
+           ',       ,'
+             ',   ,'
+               ','
+EOF
+
+let g:SmartDrawShapes = [
+\ {
+\ 'index': 0,
+\ 'value': [ g:circle1, g:circle2, g:circle3, g:circle4 ]
+\ },
+\ {
+\ 'index': 0,
+\ 'value': [ g:triangle1, g:triangle2, g:triangle3 ]
+\ },
+\ {
+\ 'index': 0,
+\ 'value': [ g:rhombus1, g:rhombus2, g:rhombus3 ]
+\ }
+\ ]
 
