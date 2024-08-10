@@ -296,6 +296,21 @@ function! VisualBlockMove(direction)
     call UpdateVisualBlockPopup()
 endfunction
 
+function! VisualBlockMouseMoveStart()
+    set mouse=n
+    augroup VisualBlockMouseMove
+        autocmd!
+        autocmd CursorMoved * call UpdateVisualBlockPopup()
+    augroup END
+endfunction
+
+function! VisualBlockMouseMoveCancel()
+    augroup VisualBlockMouseMove
+        autocmd!
+    augroup END
+    set mouse=a
+endfunction
+
 function! UpdateVisualBlockPopup()
     " 获取寄存器内容和类型
     let regcontent = getreg("x")
@@ -1544,6 +1559,8 @@ nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘
 nnoremap <silent> slx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
 nnoremap <silent> slf :call SwitchSmartDrawLev1Index(1)<CR>| " 辅助: 切换保存形状的大类正向
 nnoremap <silent> slb :call SwitchSmartDrawLev1Index(-1)<CR>| " 辅助: 切换保存形状的大类反向
+nnoremap <silent> slms :call VisualBlockMouseMoveStart()<CR>| " 辅助: 绘图鼠标预览模式开启
+nnoremap <silent> slmc :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图鼠标预览模式取消
 " 鼠标指针不能行到图形上,不然会导致不能响应命令
 nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
 nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
