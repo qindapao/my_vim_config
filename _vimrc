@@ -277,67 +277,89 @@ endfunction
 runtime macros/matchit.vim
 " :TODO: GUI VIM中设置垂直和水平的滚动条的宽度(目前没有找到方法,可能要通过windows系统设置)
 
+" VisualBlock弹出窗口的显示模式(cover overlay)
+let g:visual_block_popup_types = ['cover', 'overlay']
+let g:visual_block_popup_types_index = 0
+
+function! SwitchVisualBlockPopupType()
+    let g:visual_block_popup_types_index = (g:visual_block_popup_types_index + 1) % len(g:visual_block_popup_types)
+endfunction
+
 " vim enters visual mode and selects an area the same size as the x register
 " ctrl j k h l move this selection area
 function! VisualBlockMove(direction)
-    call CloseVisualBlockPopWin()
-
     " 移动光标
-    if a:direction == 'j'
-        normal! 1j
-    elseif a:direction == 'k'
-        normal! 1k
-    elseif a:direction == 'h'
-        normal! 1h
-    elseif a:direction == 'l'
-        normal! 1l
+    if a:direction != 'null'
+        execute 'silent! normal! 1' . a:direction
     endif
-
-    " 进入可视模式
-    execute "normal! \<C-S-V>"
 
     " 获取寄存器内容和类型
     let regtype = getregtype("x")
     let regcontent = getreg("x")
     let blockwidth = str2nr(regtype[1:])
     let blockheight = len(split(regcontent, "\n"))
-
-    " 更新光标位置
-    if blockheight > 1
-        execute "normal! " . (blockheight - 1) . "j"
-    else
-        let blockwidth = strdisplaywidth(regcontent)
-    endif
-
-    execute "normal! " . blockwidth . "l"
-    execute 'normal! o'
-
     let l:text = split(regcontent, "\n")
     let mask = []
     " 空格透明
-    for i in range(len(l:text))
-        let line = l:text[i]
-        let j = 0
-        for char in split(line, '\zs')
-            if char == ' '
-                call add(mask, [j + 1, j + 1, i + 1, i + 1])
-            endif
-            let j += strdisplaywidth(char)
+    if g:visual_block_popup_types[g:visual_block_popup_types_index] == 'overlay'
+        for i in range(len(l:text))
+            let line = l:text[i]
+            let j = 0
+            for char in split(line, '\zs')
+                if char == ' '
+                    call add(mask, [j + 1, j + 1, i + 1, i + 1])
+                endif
+                let j += strdisplaywidth(char)
+            endfor
         endfor
-    endfor
+    endif
 
-    let g:visual_block_popup_id = popup_create(l:text, {
-        \ 'line': 'cursor',
-        \ 'col': 'cursor',
-        \ 'zindex': 100,
-        \ 'highlight': 'MyVirtualText',
-        \ 'moved': 'any',
-        \ 'mask': mask
-        \ })
+    call UpdateVisualBlockPopup(l:text, mask)
 endfunction
 
+function! UpdateVisualBlockPopup(new_text, new_mask)
+    if exists('g:visual_block_popup_id') && g:visual_block_popup_id != 0
+        try
+            let l:pos = popup_getpos(g:visual_block_popup_id)
+            if empty(l:pos)
+                throw 'Popup closed'
+            endif
+        catch
+            " 弹出窗口不存在
+            let g:visual_block_popup_id = 0
+        endtry
+    endif
 
-function! PasteXWithoutSpace()
+    if exists('g:visual_block_popup_id') && g:visual_block_popup_id != 0
+        " 更新弹出窗口的文本
+        call popup_settext(g:visual_block_popup_id, a:new_text)
+
+        " 更新弹出窗口的位置
+        call popup_move(g:visual_block_popup_id, {
+            \ 'line': 'cursor',
+            \ 'col': 'cursor'
+            \ })
+
+        " 更新弹出窗口的透明掩码和其他属性
+        call popup_setoptions(g:visual_block_popup_id, {
+            \ 'mask': a:new_mask,
+            \ 'highlight': 'MyVirtualText',
+            \ 'moved': 'any',
+            \ 'zindex': 100
+            \ })
+    else
+        let g:visual_block_popup_id = popup_create(a:new_text, {
+            \ 'line': 'cursor',
+            \ 'col': 'cursor',
+            \ 'zindex': 100,
+            \ 'highlight': 'MyVirtualText',
+            \ 'moved': 'any',
+            \ 'mask': a:new_mask
+            \ })
+    endif
+endfunction
+
+function! PasteVisualXreg(is_space_replace)
     " 获取寄存器中的数据
     let regtype = getregtype("x")
     let regcontent = getreg("x")
@@ -380,7 +402,11 @@ function! PasteXWithoutSpace()
         for k_index in range(index, len(chars_arr))
             " 如果覆盖层字符不是空格就覆盖
             let char_phy_len = strdisplaywidth(chars_arr[k_index])
-            if reg_x_chars[i][k] != ' '
+            if reg_x_chars[i][k] == ' '
+                if a:is_space_replace
+                    let chars_arr[k_index] = reg_x_chars[i][k]
+                endif
+            else
                 let chars_arr[k_index] = reg_x_chars[i][k]
             endif
 
@@ -633,6 +659,10 @@ nnoremap <S-Tab> gT<cr>| " 多标签: 向后切换标签页
 
 nnoremap <silent> <leader>new :new<cr>| " 文件: 创建一个新文件
 nnoremap <silent> <leader>enew :enew<cr>| " 文件: 创建一个新文件并编辑
+
+" 替换保持列的位置不变
+nnoremap gR R
+nnoremap R gR
 
 set scrolloff=3
 
@@ -1405,10 +1435,10 @@ vnoremap xx "xygvgr | " 辅助: 基于绘图的剪切
 vnoremap xy "xy| " 辅助: 基于绘图的复制
 
 nnoremap <leader>xv :call VisualBlockMove("null")<cr>| " 辅助: 基于绘图的选择
-vnoremap <C-j> <Esc>:call VisualBlockMove("j")<cr>| " 辅助: 基于绘图的移动
-vnoremap <C-k> <Esc>:call VisualBlockMove("k")<cr>| " 辅助: 基于绘图的移动
-vnoremap <C-h> <Esc>:call VisualBlockMove("h")<cr>| " 辅助: 基于绘图的移动
-vnoremap <C-l> <Esc>:call VisualBlockMove("l")<cr>| " 辅助: 基于绘图的移动
+nnoremap <silent> <C-j> :call VisualBlockMove("j")<cr>| " 辅助: 基于绘图的移动
+nnoremap <silent> <C-k> :call VisualBlockMove("k")<cr>| " 辅助: 基于绘图的移动
+nnoremap <silent> <C-h> :call VisualBlockMove("h")<cr>| " 辅助: 基于绘图的移动
+nnoremap <silent> <C-l> :call VisualBlockMove("l")<cr>| " 辅助: 基于绘图的移动
 
 vnoremap <silent>slw <Esc>:call TraverseRectangle()<cr>| " 辅助: 矩形绕行
 
@@ -1446,10 +1476,9 @@ nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上
 " 键就是宽和高,然后可以分类，有圆有三角形还可以有五角星等等
 " 使用弹出窗口空格为空的预览效果即可。
 
-vnoremap <leader>p "xp| " 辅助: 基于绘图的粘贴
-
-" 清除当前行内容,确保函数只被调用一次
-vnoremap <silent> <leader><leader>p :<C-u>call PasteXWithoutSpace()<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <silent> <leader><leader>p :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <silent> <leader>slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
 
 
 " 设置html的自动补全(使用vim内置的补全插件)ctrl-x-o触发
@@ -3152,12 +3181,12 @@ source $VIM/keybinding_help.vim
 " 如果要搜 索所有的，输入.点号即可
 
 " :TODO: 增加获取某个文件的行的后几行功能,用于查看_vimrc的注释信息和实际配置信息
-nnoremap <silent> <c-h> :call PopupMenuShowKeyBindings('and', '', '')<cr>| " 辅助: 在自定义的列表中查找关键字,与的关系
-nnoremap <silent> <c-s-h> :call PopupMenuShowKeyBindings('or', '', '')<cr>| " 辅助: 在自定义的列表中查找关键字,或的关系
-nnoremap <silent> <c-s-c> :call PopupMenuShowKeyBindings('and', 'auto', 'map')<cr>| " 辅助: 在map命令中查找关键字,与的关系
-nnoremap <silent> <leader><leader>ca :call PopupMenuShowKeyBindings('or', 'auto', 'map')<cr>| " 辅助: 在map命令中查找关键字,或的关系
-nnoremap <silent> <leader><leader>cv :call PopupMenuShowKeyBindings('and', 'auto', 'get_vimrc_content')<cr>| " 辅助: 在vimrc配置文件中查找关键字,与的关系
-nnoremap <silent> <leader><leader>ce :call PopupMenuShowKeyBindings('and', 'auto', 'get_initel_content')<cr>| " 辅助: 在emacs配置文件中查找关键字,与的关系
+nnoremap <silent> <leader><leader>psba :call PopupMenuShowKeyBindings('and', '', '')<cr>| " 辅助: 在自定义的列表中查找关键字,与的关系
+nnoremap <silent> <leader><leader>psbo :call PopupMenuShowKeyBindings('or', '', '')<cr>| " 辅助: 在自定义的列表中查找关键字,或的关系
+nnoremap <silent> <leader><leader>psbma :call PopupMenuShowKeyBindings('and', 'auto', 'map')<cr>| " 辅助: 在map命令中查找关键字,与的关系
+nnoremap <silent> <leader><leader>psbmo :call PopupMenuShowKeyBindings('or', 'auto', 'map')<cr>| " 辅助: 在map命令中查找关键字,或的关系
+nnoremap <silent> <leader><leader>psbva :call PopupMenuShowKeyBindings('and', 'auto', 'get_vimrc_content')<cr>| " 辅助: 在vimrc配置文件中查找关键字,与的关系
+nnoremap <silent> <leader><leader>psbea :call PopupMenuShowKeyBindings('and', 'auto', 'get_initel_content')<cr>| " 辅助: 在emacs配置文件中查找关键字,与的关系
 
 " 输入命令 marks 可以显示当前所有的标记
 nnoremap <silent> <leader><leader>cm :call PopupMenuShowKeyBindings('and', 'manu', '')<cr>| " 辅助: 弹出窗口中显示所有的标记marks

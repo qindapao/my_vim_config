@@ -22,6 +22,7 @@ vim configuration file for my personal use
 + [git可执行文件的位置](#git可执行文件的位置)
 + [文件备份](#文件备份)
 + [字体](#字体)
++ [windows系统下调整光标的移动速度](#windows系统下调整光标的移动速度)
 
 <!-- vim-markdown-toc -->
 
@@ -332,4 +333,18 @@ https://hanleylee.com/articles/usage-of-vim-editor-basic/
 # 字体
 
 一个很好看的适合`vim`使用的[字体](https://github.com/hanleylee/yahei-fira-icon-hybrid-font)。
+
+# windows系统下调整光标的移动速度
+
+按 Win + R 打开运行对话框，输入 control keyboard 并按回车。
+
+如果发现无法直接打开运行对话框，可以找到`cmd`命令行，然后以管理员的身份运行。
+
+在“键盘属性”窗口中，选择“速度”选项卡。
+
+调整“重复延迟”和“重复速率”滑块以设置你想要的速度。
+
+点击“应用”然后“确定”保存更改。
+
+
 
