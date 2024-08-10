@@ -1560,9 +1560,9 @@ nnoremap <silent> <M-Left> :call DrawSmartLineEraser('h')<CR>| " 辅助: 绘图�
 nnoremap <silent> <M-Down> :call DrawSmartLineEraser('j')<CR>| " 辅助: 绘图下边橡皮擦
 nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上边橡皮擦
 
-nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
-nnoremap <silent> <leader><leader>p :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
-nnoremap <silent> <leader>slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
+nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴完全覆盖
+nnoremap <leader>P :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <silent> slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
 
 " 斜线(M-U O M I)
 nnoremap <silent> <m-U> :call DrawSmartLineSlash('u')<cr>
