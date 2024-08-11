@@ -297,6 +297,12 @@ function! VisualBlockMove(direction)
 endfunction
 
 function! VisualBlockMouseMoveStart()
+    let g:save_ctrl_mouseleft = maparg('<C-LeftMouse>', 'n')
+    let g:save_ctrl_mouseright = maparg('<C-RightMouse>', 'n')
+
+    nnoremap <C-LeftMouse> :call PasteVisualXreg(1)<CR>
+    nnoremap <C-RightMouse> :call PasteVisualXreg(0)<CR>
+
     set mouse=n
     augroup VisualBlockMouseMove
         autocmd!
@@ -305,6 +311,15 @@ function! VisualBlockMouseMoveStart()
 endfunction
 
 function! VisualBlockMouseMoveCancel()
+    if exists('g:save_ctrl_mouseleft')
+        execute 'nnoremap <C-LeftMouse> ' . g:save_ctrl_mouseleft
+    endif
+
+    if exists('g:save_ctrl_mouseright')
+        " :TODO: 目前发现这里没有被正常还原
+        execute 'nnoremap <C-RightMouse> ' . g:save_ctrl_mouseright
+    endif
+
     augroup VisualBlockMouseMove
         autocmd!
     augroup END
