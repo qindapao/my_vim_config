@@ -283,6 +283,9 @@ let g:visual_block_popup_types_index = 0
 
 function! SwitchVisualBlockPopupType()
     let g:visual_block_popup_types_index = (g:visual_block_popup_types_index + 1) % len(g:visual_block_popup_types)
+
+    " 更新弹出窗口
+    call UpdateVisualBlockPopup()
 endfunction
 
 " vim enters visual mode and selects an area the same size as the x register
@@ -308,6 +311,8 @@ function! VisualBlockMouseMoveStart()
         autocmd!
         autocmd CursorMoved * call UpdateVisualBlockPopup()
     augroup END
+
+    call UpdateVisualBlockPopup()
 endfunction
 
 function! VisualBlockMouseMoveCancel()
@@ -333,6 +338,17 @@ function! UpdateVisualBlockPopup()
     let mask = []
     " 空格透明
     if g:visual_block_popup_types[g:visual_block_popup_types_index] == 'overlay'
+        " 得到最长行(使用copy保证不修改原始列表)
+        let l:max_display_length = max(map(copy(l:new_text), 'strdisplaywidth(v:val)'))
+        " 行不够的补空格
+        echo "new_text len:" . len(l:new_text) . ';'
+        for i in range(0, len(l:new_text)-1)
+            let l:line_length = strdisplaywidth(l:new_text[i])
+            if l:line_length < l:max_display_length
+                let l:new_text[i] .= repeat(' ', l:max_display_length - l:line_length)
+            endif
+        endfor 
+
         for i in range(len(l:new_text))
             let line = l:new_text[i]
             let j = 0
@@ -1484,64 +1500,93 @@ function! DrawSmartLineUpDown(direction)
     else
         let next_col = SumList(up1_line_byte_len_array[0:up1_index])
     endif
-
-
-    call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
+call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
 endfunction
+
+
+" 进入可视模式前记录光标位置
+augroup VisualModeMappings
+    autocmd!
+    autocmd ModeChanged *:[vV\x16]* let g:initial_pos_before_enter_visual = [line('.'), virtcol('.')]
+augroup END
 
 function! TraverseRectangle()
     " 获取可视块选择的起始和结束位置
-    let [line_start, col_start] = getpos("'<")[1:2]
-    let [line_end, col_end] = getpos("'>")[1:2]
+    let [line_start, col_start] = [g:initial_pos_before_enter_visual[0], g:initial_pos_before_enter_visual[1]]
+    
+    let line_left = line("'<")
+    let line_right = line("'>")
+    let line_end = (line_left==line_start)?line_right:line_left
 
-    " 获取虚拟列位置
-    let col_start = virtcol("'<")
-    let col_end = virtcol("'>")
+    let col_left= virtcol("'<")
+    let col_right = virtcol("'>")
+    let col_end = (col_left==col_start)?col_right:col_left
 
-    if col_start > col_end
-        let [col_start, col_end] = [col_end, col_start]
-    endif
-
-    let width = col_end - col_start
     let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
+    let col_byte_start = SumList(start_byte_len_arr[0:start_index])
+    call cursor(line_start, col_byte_start)
 
-    let col_start = SumList(start_byte_len_arr[0:start_index])
-    let col_end = col_start + width
-
-    " 绕矩形区域一圈半
-    " 从左上角开始
-    call cursor(line_start, col_start)
-
-    " 向右移动
-    if col_start <= col_end - 2
+    " 向下
+    if col_start == col_end && line_start < line_end
+        for col in range(line_start, line_end - 1)
+            call DrawSmartLineUpDown('j')
+        endfor
+        call DrawSmartLineUpDown('k')
+        call DrawSmartLineUpDown('j')
+    " 向上
+    elseif col_start == col_end && line_start > line_end
+        for col in range(line_end, line_start - 1)
+            call DrawSmartLineUpDown('k')
+        endfor
+        call DrawSmartLineUpDown('j')
+        call DrawSmartLineUpDown('k')
+    " 向右
+    elseif line_start == line_end && col_start < col_end
         for col in range(col_start, col_end - 2)
             call DrawSmartLineLeftRight('l')
         endfor
-    endif
-
-    " 向下移动
-    for line in range(line_start, line_end - 1)
-        call DrawSmartLineUpDown('j')
-    endfor
-
-    " 向左移动
-    if col_end - 2 >= col_start
-        for col in range(col_end - 2, col_start, -1)
+        call DrawSmartLineLeftRight('h')
+        call DrawSmartLineLeftRight('l')
+    " 向左
+    elseif line_start == line_end && col_start > col_end
+        for col in range(col_end, col_start - 2)
             call DrawSmartLineLeftRight('h')
         endfor
-    endif
-
-    " 向上移动
-    for line in range(line_end - 1, line_start, -1)
-        call DrawSmartLineUpDown('k')
-    endfor
-
-    " :TODO: 使用跟踪这里再绕半圈是否还有意义
-    " 再次向右移动，完成半圈
-    if col_start <= col_end - 2
+        call DrawSmartLineLeftRight('l')
+        call DrawSmartLineLeftRight('h')
+    " 矩形向右
+    elseif line_start < line_end && col_start < col_end
+        " 右下左上
         for col in range(col_start, col_end - 2)
             call DrawSmartLineLeftRight('l')
         endfor
+        for col in range(line_start, line_end - 1)
+            call DrawSmartLineUpDown('j')
+        endfor
+        for col in range(col_start, col_end - 2)
+            call DrawSmartLineLeftRight('h')
+        endfor
+        for col in range(line_start, line_end - 1)
+            call DrawSmartLineUpDown('k')
+        endfor
+        call DrawSmartLineLeftRight('l')
+        call DrawSmartLineLeftRight('h')
+    else
+        " 左上右下
+        for col in range(col_end, col_start - 2)
+            call DrawSmartLineLeftRight('h')
+        endfor
+        for col in range(line_end, line_start - 1)
+            call DrawSmartLineUpDown('k')
+        endfor
+        for col in range(col_end, col_start - 2)
+            call DrawSmartLineLeftRight('l')
+        endfor
+        for col in range(line_end, line_start - 1)
+            call DrawSmartLineUpDown('j')
+        endfor
+        call DrawSmartLineLeftRight('h')
+        call DrawSmartLineLeftRight('l')
     endif
 endfunction
 
@@ -1572,6 +1617,10 @@ nnoremap <silent> sly :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当
 nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
 " 切换智能绘图交叉模式策略
 nnoremap <silent> slx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
+
+
+nnoremap <silent> slg :call SwitchDefineSmartDrawGraphSet(1)<CR>| " 辅助: 切换保存形状的函数集
+
 nnoremap <silent> slf :call SwitchSmartDrawLev1Index(1)<CR>| " 辅助: 切换保存形状的大类正向
 nnoremap <silent> slb :call SwitchSmartDrawLev1Index(-1)<CR>| " 辅助: 切换保存形状的大类反向
 nnoremap <silent> slms :call VisualBlockMouseMoveStart()<CR>| " 辅助: 绘图鼠标预览模式开启
@@ -3838,141 +3887,87 @@ highlight MyVirtualText ctermfg=Green guifg=green ctermbg=NONE guibg=NONE
 
 " 自定义的图形
 " 图形大类别索引
-let g:SmartDrawLev1Index = 0
 
 function! SwitchSmartDrawLev1Index(direction)
     if a:direction == 1
-        let g:SmartDrawLev1Index = (g:SmartDrawLev1Index+1) % len(g:SmartDrawShapes)
+        let g:SmartDrawShapes['set_index'] = (g:SmartDrawShapes['set_index']+1) % len(g:SmartDrawShapes['value'])
     else
-        let g:SmartDrawLev1Index = (g:SmartDrawLev1Index-1 + len(g:SmartDrawShapes)) % len(g:SmartDrawShapes)
+        let g:SmartDrawShapes['set_index'] = (g:SmartDrawShapes['set_index']-1 + len(g:SmartDrawShapes['value'])) % len(g:SmartDrawShapes['value'])
     endif
 
     " 更新x寄存器内容
-    let lev2_index = g:SmartDrawShapes[g:SmartDrawLev1Index]['index']
-    let @x = join(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'][lev2_index], "\n")
+    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
+    let @x = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
 
     call UpdateVisualBlockPopup()
 endfunction
 
 function! SwitchSmartDrawLev2Index(direction)
     if a:direction == 1
-        let g:SmartDrawShapes[g:SmartDrawLev1Index]['index'] = (g:SmartDrawShapes[g:SmartDrawLev1Index]['index']+1) % len(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'])
+        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+1) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
     else
-        let g:SmartDrawShapes[g:SmartDrawLev1Index]['index'] = (g:SmartDrawShapes[g:SmartDrawLev1Index]['index']-1 + len(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'])) % len(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'])
+        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']-1 + len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
     endif
     " 更新x寄存器内容
-    let lev2_index = g:SmartDrawShapes[g:SmartDrawLev1Index]['index']
-    let @x = join(g:SmartDrawShapes[g:SmartDrawLev1Index]['value'][lev2_index], "\n")
+    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
+    let @x = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
 
     call UpdateVisualBlockPopup()
 endfunction
 
 
-let g:circle1 =<< EOF
- _
-( )
- '
-EOF
-
-let g:circle2 =<< EOF
- .-.
-(   )
- '-'
-EOF
-
-let g:circle3 =<< EOF
- .---.
-(     )
- '---'
-EOF
-
-let g:circle4 =<< EOF
-    _.---._
- .''       ''.
-:             :
-|             |
-:             :
- '..       ..'
-    '-...-'
-EOF
-
-let g:triangle1 =<< EOF
-.---.
- \ /
-  '
-EOF
-
-let g:triangle2 =<< EOF
-.-----.
- \   /
-  \ /
-   '
-EOF
+" 'index': 函数集索引
+" '[0, 0, 0]': 函数集中每个大类的小类的索引
+" 0: 函数集中大类的索引
+" :TODO: 后面这个数组可以和具体的定义文件彻底解耦,数组的元素个数要根据文件中的内容自动创建
+let g:DefineSmartDrawGraphFunctions = {
+    \ 'index': -1,
+    \ 'value': [
+    \ ['DefineSmartDrawShapesBasic', [0, 0, 0], 0, 'basic.vim'],
+    \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim']
+    \ ]
+    \ }
 
 
-let g:triangle3 =<< EOF
-.-------------.
- \           /
-  \         /
-   \       /
-    \     /
-     \   /
-      \ /
-       '
-EOF
+function! LoadAndUseCustomDrawSetFunctions(func_name, indexes, index, file_name)
+    let file_path = expand('$VIM/draw_shaps/' . a:file_name)
+    execute 'source' file_path
 
-let g:rhombus1 =<< EOF
-   ,',
- ,'   ',
-:       :
- ',   ,'
-   ','
-EOF
+    " 调用函数
+    let result = call(a:func_name, [a:indexes, a:index])
 
-let g:rhombus2 =<< EOF
-       ,',
-     ,'   ',
-   ,'       ',
- ,'           ',
-:               :
- ',           ,'
-   ',       ,'
-     ',   ,'
-       ','
-EOF
+    " 全局变量已经加载后删除函数定义
+    " 这里删除函数的目的是节省内存(因为函数初始化的局部变量中有可能包含大量字符串)
+    execute 'delfunction!' a:func_name
+endfunction
 
-let g:rhombus3 =<< EOF
-               ,',
-             ,'   ',
-           ,'       ',
-         ,'           ',
-       ,'               ',
-     ,'                   ',
-   ,'                       ',
- ,'                           ',
-:                               :
- ',                           ,'
-   ',                       ,'
-     ',                   ,'
-       ',               ,'
-         ',           ,'
-           ',       ,'
-             ',   ,'
-               ','
-EOF
+function! SwitchDefineSmartDrawGraphSet(is_show)
+    " 首先记录所有小类的index
+    if exists('g:SmartDrawShapes')
+        let old_index = g:DefineSmartDrawGraphFunctions['index']
+        for i in range(len(g:DefineSmartDrawGraphFunctions['value'][old_index][1]))
+            let g:DefineSmartDrawGraphFunctions['value'][old_index][1][i] = g:SmartDrawShapes['value'][i]['index']
+        endfor
+        
+        " 记录大类的index
+        let g:DefineSmartDrawGraphFunctions['value'][old_index][2] = g:SmartDrawShapes['set_index']
+    endif
 
-let g:SmartDrawShapes = [
-\ {
-\ 'index': 0,
-\ 'value': [ g:circle1, g:circle2, g:circle3, g:circle4 ]
-\ },
-\ {
-\ 'index': 0,
-\ 'value': [ g:triangle1, g:triangle2, g:triangle3 ]
-\ },
-\ {
-\ 'index': 0,
-\ 'value': [ g:rhombus1, g:rhombus2, g:rhombus3 ]
-\ }
-\ ]
+    let g:DefineSmartDrawGraphFunctions['index'] = (g:DefineSmartDrawGraphFunctions['index']+1) % len(g:DefineSmartDrawGraphFunctions['value'])
+    let index_value = g:DefineSmartDrawGraphFunctions['index']
+
+    " 这里只能赋值,不能使用call直接调用函数而不处理返回值
+    call LoadAndUseCustomDrawSetFunctions(g:DefineSmartDrawGraphFunctions['value'][index_value][0], g:DefineSmartDrawGraphFunctions['value'][index_value][1], g:DefineSmartDrawGraphFunctions['value'][index_value][2], g:DefineSmartDrawGraphFunctions['value'][index_value][3])
+
+    " 更新x寄存器中的内容
+    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
+    let @x = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
+
+    if a:is_show
+        call UpdateVisualBlockPopup()
+    endif
+endfunction
+
+call SwitchDefineSmartDrawGraphSet(0)
+
 
