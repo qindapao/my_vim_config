@@ -321,7 +321,7 @@ function! VisualBlockMouseMoveCancel()
     endif
 
     if exists('g:save_ctrl_mouseright')
-        " :TODO: 目前发现这里没有被正常还原
+        " :TODO: 目前发现这里没有被正常还原成以前的操作
         execute 'nnoremap <C-RightMouse> ' . g:save_ctrl_mouseright
     endif
 
@@ -764,7 +764,7 @@ set guioptions+=r
 " 隐藏左侧滚动条
 set guioptions-=L
 
-nnoremap <leader>o o<Esc>| " 编辑: 下面插入一行保持普通模式(不能设置为oo,会导致严重延迟)
+nnoremap <leader><leader>o o<Esc>| " 编辑: 下面插入一行保持普通模式(不能设置为oo,会导致严重延迟)
 nnoremap <leader>O O<Esc>| " 编辑: 上面插入一行保持普通模式(不能设置为OO,会导致严重延迟)
 " 由于环境变量的问题,下面这行暂时不使用
 " command -nargs=1 Sch noautocmd vimgrep /<args>/gj `git ls-files` | cw            " 搜索git关注的文件 :Sch xx
@@ -804,7 +804,9 @@ nnoremap <leader>lv :lv /<c-r>=expand("<cword>")<cr>/%<cr>:lw<cr>| " 搜索: 在
 nnoremap <leader><leader><space> :%s/\s\+$//e<CR>| " 编辑: 移除文件中所有行尾的空白字符
 iab xtime <c-r>=strftime("%Y-%m-%d %H:%M:%S")<cr>| " 编辑: 在插入模式下快速插入当前日期(需要按两个TAB键触发)
 
-nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>| " 文件: 外部文件浏览器中打开当前文件所在目录
+" nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>| " 文件: 外部文件浏览器中打开当前文件所在目录
+" 用下面的方式避免黑框弹出
+nnoremap <silent> <leader>exp :silent !start explorer %:p:h<CR><CR>| " 文件: 外部文件浏览器中打开当前文件所在目录
 
 " 某些插件可能需要手动指定python3库的地址,不过大多情况下这个值是默认的并不需要设置，只有出问题才需要设置
 " set pythonthreedll = D:\python\python38.dll
@@ -1379,12 +1381,14 @@ function! DrawSmartLineLeftRight(direction)
     call SetLineStr(line_chars_array, row, row, (a:direction=='l')?col+1:col-line_byte_len_array[index])
 endfunction
 
-function! DrawSmartLineEraser(direction)
-    let row = line('.')
+function! DrawSmartLineEraser(direction, ...)
 
-    let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row)
-    let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1)
-    let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1)
+    let row = get(a:, 1, line('.'))
+    let virtcol = get(a:, 2, virtcol('.'))
+
+    let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row, virtcol)
+    let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
+    let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
 
     let col = SumList(byte_len_arr[0:index])
     if phy_len_arr[index] == 2
@@ -1394,23 +1398,27 @@ function! DrawSmartLineEraser(direction)
     elseif phy_len_arr[index] == 0
         let line_chars_arr[index-1] = '  '
     endif
+
+
     call setline(row, join(line_chars_arr, ''))
 
-    let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row)
-    let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1)
-    let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1)
-    let col = SumList(byte_len_arr[0:index])
+    if a:direction != 'null'
+        let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row, virtcol)
+        let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
+        let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
+        let col = SumList(byte_len_arr[0:index])
 
-    if a:direction == 'l'
-        call cursor(row, col+1)
-    elseif a:direction == 'h'
-        call cursor(row, col-1)
-    elseif a:direction == 'j'
-        let next_col = SumList(down_byte_len_arr[0:down_index])
-        call cursor(row+1, next_col)
-    elseif a:direction == 'k'
-        let next_col = SumList(up_byte_len_arr[0:up_index])
-        call cursor(row-1, next_col)
+        if a:direction == 'l'
+            call cursor(row, col+1)
+        elseif a:direction == 'h'
+            call cursor(row, col-1)
+        elseif a:direction == 'j'
+            let next_col = SumList(down_byte_len_arr[0:down_index])
+            call cursor(row+1, next_col)
+        elseif a:direction == 'k'
+            let next_col = SumList(up_byte_len_arr[0:up_index])
+            call cursor(row-1, next_col)
+        endif
     endif
 endfunction
 
@@ -1500,7 +1508,9 @@ function! DrawSmartLineUpDown(direction)
     else
         let next_col = SumList(up1_line_byte_len_array[0:up1_index])
     endif
-call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
+
+
+    call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
 endfunction
 
 
@@ -1509,6 +1519,36 @@ augroup VisualModeMappings
     autocmd!
     autocmd ModeChanged *:[vV\x16]* let g:initial_pos_before_enter_visual = [line('.'), virtcol('.')]
 augroup END
+
+
+function! VisualReplaceToSpace()
+    " 重新选择可视选框
+    execute "normal! gv"
+    " call feedkeys("r ")
+    " 先替换所有的字符为空格(feedkeys不会立即生效,normal!才会立即生效)
+    execute "normal! r "
+endfunction
+
+function! VisualReplaceChar() range
+    let [line_start, col_start] = [g:initial_pos_before_enter_visual[0], g:initial_pos_before_enter_visual[1]]
+    let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
+
+    let char = getreg('a')
+    let char = empty(char) ? ' ' : strcharpart(char, 0, 1)
+
+    " 获取当前选中的文本范围
+    execute "normal! gv"
+    " 进入命令模式并执行替换操作
+    if strdisplaywidth(char) == 2
+        execute "normal! :s/\\%V  /" . char . "/g\<CR>"
+    else
+        execute "normal! :s/\\%V /" . '\' . char . "/g\<CR>"
+    endif
+
+    let col_byte_start = SumList(start_byte_len_arr[0:start_index])
+    call cursor(line_start, col_byte_start)
+endfunction
+
 
 function! TraverseRectangle()
     " 获取可视块选择的起始和结束位置
@@ -1599,7 +1639,7 @@ vnoremap xc "xygvgr| " 辅助: 基于绘图的替换
 vnoremap xx "xygvgr | " 辅助: 基于绘图的剪切
 vnoremap xy "xy| " 辅助: 基于绘图的复制
 
-nnoremap <leader>xv :call VisualBlockMove("null")<cr>| " 辅助: 基于绘图的选择
+nnoremap <silent>slv :call VisualBlockMove("null")<cr>| " 辅助: 基于绘图的选择
 nnoremap <silent> <C-j> :call VisualBlockMove("j")<cr>| " 辅助: 基于绘图的移动
 nnoremap <silent> <C-k> :call VisualBlockMove("k")<cr>| " 辅助: 基于绘图的移动
 nnoremap <silent> <C-h> :call VisualBlockMove("h")<cr>| " 辅助: 基于绘图的移动
@@ -1615,6 +1655,9 @@ nnoremap <silent> sls :call SwitchSmartDrawLine(1)<CR>| " 辅助: 绘图显示�
 nnoremap <silent> slu :call SwitchSmartDrawLineFromCharUnderCursor()<CR>| " 辅助: 绘图根据当前光标下字符改变线形
 nnoremap <silent> sly :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当前光标下的字符
 nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
+vnoremap <silent> slr :<C-u>call VisualReplaceToSpace()<cr> \| :call VisualReplaceChar()<cr>| " 辅助: 绘图可视区域替换当前光标下的字符
+
+
 " 切换智能绘图交叉模式策略
 nnoremap <silent> slx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
 
@@ -1628,6 +1671,10 @@ nnoremap <silent> slmc :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图�
 " 鼠标指针不能行到图形上,不然会导致不能响应命令
 nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
 nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
+nnoremap <silent> sli :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
+nnoremap <silent> slj :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
+let g:switch_smart_draw_lev2_step_index = 0
+nnoremap <silent> slk :let g:switch_smart_draw_lev2_step_index = !g:switch_smart_draw_lev2_step_index<CR>| " 辅助: 切换保存形状的小类步长索引(决定某些形状的长宽的)
 
 
 nnoremap <silent> <C-S-Right> :call ReplaceCharUnderCursor('l')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向右移动
@@ -1869,12 +1916,12 @@ call plug#end()
 " + " 辅助:vim-expand-region 普通模式下扩大选区
 " _ " 辅助:vim-expand-region 普通模式下缩小选区
 " 扩大选区
-nnoremap <C-s-j> <Plug>(expand_region_expand)| " 编辑: 普通模式下扩大选区
-vnoremap <C-s-j> <Plug>(expand_region_expand)| " 编辑: 可视模式下扩大选区
+nnoremap <C-s-i> <Plug>(expand_region_expand)| " 编辑: 普通模式下扩大选区
+vnoremap <C-s-i> <Plug>(expand_region_expand)| " 编辑: 可视模式下扩大选区
 
 " 缩小选区
-nnoremap <C-s-k> <Plug>(expand_region_shrink)| " 编辑: 普通模式下缩小选区
-vnoremap <C-s-k> <Plug>(expand_region_shrink)| " 编辑: 可视模式下缩小选区
+nnoremap <C-s-o> <Plug>(expand_region_shrink)| " 编辑: 普通模式下缩小选区
+vnoremap <C-s-o> <Plug>(expand_region_shrink)| " 编辑: 可视模式下缩小选区
 " vim-expand-region }
 
 " table-mode {
@@ -2894,7 +2941,7 @@ tnoremap <C-v> <C-S-_>"+| " 终端: 粘贴系统剪切板
 " " quick-scope 插件 }
 
 " vim9-stargate 插件配置 {
-let g:stargate_limit = 2000
+let g:stargate_limit = 300
 " vim9-stargate 插件配置 }
 
 " vim-fugitive 插件按键绑定 {
@@ -2922,7 +2969,6 @@ vnoremap <silent> <leader>gbfxl y:execute 'Git branch -D ' . shellescape(@0) \| 
 " 删除一个远程分支
 nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>| "  git:branch 删除一个远程分支
 nnoremap <silent> <leader>gbfxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>| " git:branch 删除一个远程分支
-
 
 " 查看所有的远程分支
 nnoremap <silent> <leader>gbr :execute 'Git remote prune origin' \| execute 'Git branch -r'<CR>| " git:branch 查看所有在远程分支
@@ -3903,10 +3949,13 @@ function! SwitchSmartDrawLev1Index(direction)
 endfunction
 
 function! SwitchSmartDrawLev2Index(direction)
+    let step_index = g:switch_smart_draw_lev2_step_index
+    let step = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['step'][step_index]
+
     if a:direction == 1
-        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+1) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
+        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+step) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
     else
-        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']-1 + len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
+        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']-step + len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
     endif
     " 更新x寄存器内容
     let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
@@ -3920,10 +3969,11 @@ endfunction
 " '[0, 0, 0]': 函数集中每个大类的小类的索引
 " 0: 函数集中大类的索引
 " :TODO: 后面这个数组可以和具体的定义文件彻底解耦,数组的元素个数要根据文件中的内容自动创建
+" 这里不设置为-1是因为基本图形组比较多担心影响启动速度,所以设置为最后一个组
 let g:DefineSmartDrawGraphFunctions = {
-    \ 'index': -1,
+    \ 'index': 0,
     \ 'value': [
-    \ ['DefineSmartDrawShapesBasic', [0, 0, 0], 0, 'basic.vim'],
+    \ ['DefineSmartDrawShapesBasic', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 'basic.vim'],
     \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim']
     \ ]
     \ }
@@ -3942,6 +3992,9 @@ function! LoadAndUseCustomDrawSetFunctions(func_name, indexes, index, file_name)
 endfunction
 
 function! SwitchDefineSmartDrawGraphSet(is_show)
+    " " 记录开始时间
+    " let l:start_time = reltime()
+
     " 首先记录所有小类的index
     if exists('g:SmartDrawShapes')
         let old_index = g:DefineSmartDrawGraphFunctions['index']
@@ -3956,7 +4009,6 @@ function! SwitchDefineSmartDrawGraphSet(is_show)
     let g:DefineSmartDrawGraphFunctions['index'] = (g:DefineSmartDrawGraphFunctions['index']+1) % len(g:DefineSmartDrawGraphFunctions['value'])
     let index_value = g:DefineSmartDrawGraphFunctions['index']
 
-    " 这里只能赋值,不能使用call直接调用函数而不处理返回值
     call LoadAndUseCustomDrawSetFunctions(g:DefineSmartDrawGraphFunctions['value'][index_value][0], g:DefineSmartDrawGraphFunctions['value'][index_value][1], g:DefineSmartDrawGraphFunctions['value'][index_value][2], g:DefineSmartDrawGraphFunctions['value'][index_value][3])
 
     " 更新x寄存器中的内容
@@ -3966,8 +4018,119 @@ function! SwitchDefineSmartDrawGraphSet(is_show)
     if a:is_show
         call UpdateVisualBlockPopup()
     endif
+
+    " " 记录结束时间
+    " let l:end_time = reltime()
+
+    " " 计算执行时间
+    " let l:elapsed_time = reltimestr(reltime(l:start_time, l:end_time))
+
+    " " 输出执行时间
+    " echo "Execution time: " . l:elapsed_time
 endfunction
 
 call SwitchDefineSmartDrawGraphSet(0)
+
+
+
+" 定义一个全局变量来存储光标物理位置和对应的字符
+let g:multi_cursors = []
+highlight MultiCursor cterm=reverse gui=reverse guibg=Yellow guifg=Black
+
+" 添加光标的函数
+function! AddCursor(direction)
+    let row = line('.')
+    let virtcol = virtcol('.')
+    let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
+    let col = SumList(byte_len_arr[0:index])
+
+    let length = len(chars_arr[index])
+    if length == 0
+        let length = len(chars_arr[index-1])
+        let col -= 2
+        call add(g:multi_cursors, [chars_arr[index-1], row, virtcol-1])
+    else
+        call add(g:multi_cursors, [chars_arr[index], row, virtcol])
+    endif
+
+    call matchaddpos('MultiCursor', [[row, col, length]])
+
+    if a:direction == 'l'
+        normal! l
+    elseif a:direction == 'h'
+        normal! h
+    elseif a:direction == 'j'
+        normal! j
+    elseif a:direction == 'k'
+        normal! k
+    endif
+endfunction
+
+" 删除所有光标的函数
+function! ClearCursors()
+    let g:multi_cursors = []
+    call clearmatches()
+endfunction
+
+function! CreateRectangleString(data, is_delate_ori_data)
+    " 获取矩形的最小和最大行、列
+    let min_row = min(map(copy(a:data), 'v:val[1]'))
+    let max_row = max(map(copy(a:data), 'v:val[1]'))
+    let min_col = min(map(copy(a:data), 'v:val[2]'))
+    let max_col = max(map(copy(a:data), 'v:val[2]'))
+
+    " 初始化矩形字符串为二维矩阵
+    let rectangle = []
+    for i in range(min_row, max_row + 1)
+        let row = []
+        for j in range(min_col, max_col + 1)
+            call add(row, ' ')
+        endfor
+        call add(rectangle, row)
+    endfor
+
+    " 遍历数据，插入字符到矩形字符串中
+    for item in a:data
+        let char = item[0]
+        let row = item[1]
+        let col = item[2]
+        let rectangle[row - min_row][col - min_col] = char
+        " 如果是宽字符那么后面的字符设置为空
+        if strdisplaywidth(char) == 2
+            let rectangle[row - min_row][col - min_col+1] = ''
+        endif
+    endfor
+
+    " 将二维矩阵转换为字符串
+    let result = []
+    for row in rectangle
+        call add(result, join(row, ''))
+    endfor
+
+    " 放入x寄存器中用于绘图
+    let @x = join(result, "\n")
+
+    " 清空高亮组
+    call ClearCursors()
+    " 是否删除原字符
+    if a:is_delate_ori_data
+        for item in a:data
+            let row = item[1]
+            let col = item[2]
+            call DrawSmartLineEraser('null', row, col)
+        endfor
+    endif
+endfunction
+
+" 绑定快捷键
+nnoremap <silent> <C-S-N> :call AddCursor('null')<CR>
+nnoremap <silent> <C-S-J> :call AddCursor('j')<CR>
+nnoremap <silent> <C-S-K> :call AddCursor('k')<CR>
+nnoremap <silent> <C-S-L> :call AddCursor('l')<CR>
+nnoremap <silent> <C-S-H> :call AddCursor('h')<CR>
+
+nnoremap <silent> <C-S-G> :call ClearCursors()<CR>
+nnoremap <silent> <C-x> :call CreateRectangleString(g:multi_cursors, 0)<CR>
+nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1)<CR>
 
 
