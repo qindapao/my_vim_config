@@ -1,5 +1,4 @@
-
-" :TODO: 文件中的替换操作或者别的需要传入参数的操作可能因为转移字符出错,暂时没处理,如果遇到问题可以在这方面排查
+" :TODO: 文件中的替换操作或者别的需要传入参数的操作可能因为转义字符出错,暂时没处理,如果遇到问题可以在这方面排查
 " 按键组
 "
 " 按键组->补全
@@ -335,7 +334,7 @@ endfunction
 
 function! UpdateVisualBlockPopup()
     " 获取寄存器内容和类型
-    let regcontent = getreg("x")
+    let regcontent = getreg('+')
     let l:new_text = split(regcontent, "\n")
     let mask = []
     " 空格透明
@@ -343,7 +342,6 @@ function! UpdateVisualBlockPopup()
         " 得到最长行(使用copy保证不修改原始列表)
         let l:max_display_length = max(map(copy(l:new_text), 'strdisplaywidth(v:val)'))
         " 行不够的补空格
-        echo "new_text len:" . len(l:new_text) . ';'
         for i in range(0, len(l:new_text)-1)
             let l:line_length = strdisplaywidth(l:new_text[i])
             if l:line_length < l:max_display_length
@@ -406,8 +404,8 @@ endfunction
 
 function! PasteVisualXreg(is_space_replace)
     " 获取寄存器中的数据
-    let regtype = getregtype("x")
-    let regcontent = getreg("x")
+    let regtype = getregtype('+')
+    let regcontent = getreg('+')
     let blockwidth = str2nr(regtype[1:])
     let blockheight = len(split(regcontent, "\n"))
     let reg_text = split(regcontent, "\n")
@@ -615,6 +613,8 @@ endfunction
 "     let get_adr = 'http://' . middle_info . '/file?ref=' . branch_name
 
 "     silent execute '!chrome' get_adr
+"     " 下面这种方式避免命令执行黑框弹出
+"     call job_start(['chrome', get_adr])
 " endfunction
 
 
@@ -1088,7 +1088,7 @@ endfunction
 function! CopyCharUnderCursor()
     " 复制当前光标下的字符
     let current_char = matchstr(getline('.'), '\%' . col('.') . 'c.')
-    let @a = current_char
+    let @+ = current_char
 endfunction
 
 
@@ -1098,9 +1098,9 @@ function! ReplaceCharUnderCursor(direction)
     let cursor_char = matchstr(l:line, '\%' . col('.') . 'c.')
 
     " 替换目标位置的字符
-    execute "normal! r" . @a
+    execute "normal! r" . @+
     " 获取替换后的字符
-    let new_char = @a
+    let new_char = @+
 
     " 获取替换后字符的宽度
     let new_char_width = strdisplaywidth(new_char)
@@ -1515,7 +1515,6 @@ function! DrawSmartLineUpDown(direction)
     call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
 endfunction
 
-
 " 进入可视模式前记录光标位置
 augroup VisualModeMappings
     autocmd!
@@ -1535,7 +1534,7 @@ function! VisualReplaceChar() range
     let [line_start, col_start] = [g:initial_pos_before_enter_visual[0], g:initial_pos_before_enter_visual[1]]
     let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
 
-    let char = getreg('a')
+    let char = getreg('+')
     let char = empty(char) ? ' ' : strcharpart(char, 0, 1)
 
     " 获取当前选中的文本范围
@@ -1637,46 +1636,46 @@ endfunction
 " There is a space after the mapping below. In visual mode,
 " a region is cut and saved in the x register, and all characters in the
 " original region are replaced with spaces.
-vnoremap xc "xygvgr| " 辅助: 基于绘图的替换
-vnoremap xx "xygvgr | " 辅助: 基于绘图的剪切
-vnoremap xy "xy| " 辅助: 基于绘图的复制
+vnoremap xc "+ygvgr| " 辅助: 基于绘图的替换
+vnoremap xx "+ygvgr | " 辅助: 基于绘图的剪切
+vnoremap xy "+y| " 辅助: 基于绘图的复制
 
-nnoremap <silent>slv :call VisualBlockMove("null")<cr>| " 辅助: 基于绘图的选择
+nnoremap <silent>sv :call VisualBlockMove("null")<cr>| " 辅助: 基于绘图的选择
 nnoremap <silent> <C-j> :call VisualBlockMove("j")<cr>| " 辅助: 基于绘图的移动
 nnoremap <silent> <C-k> :call VisualBlockMove("k")<cr>| " 辅助: 基于绘图的移动
 nnoremap <silent> <C-h> :call VisualBlockMove("h")<cr>| " 辅助: 基于绘图的移动
 nnoremap <silent> <C-l> :call VisualBlockMove("l")<cr>| " 辅助: 基于绘图的移动
 
-vnoremap <silent>slw <Esc>:call TraverseRectangle()<cr>| " 辅助: 矩形绕行
+vnoremap <silent>sw <Esc>:call TraverseRectangle()<cr>| " 辅助: 矩形绕行
 
 
 " 切换绘制的线形并且打印出来
 
-nnoremap <silent> slc :call SwitchSmartDrawLine(0)<CR>| " 辅助: 绘图循环改变线形
-nnoremap <silent> sls :call SwitchSmartDrawLine(1)<CR>| " 辅助: 绘图显示当前线形
-nnoremap <silent> slu :call SwitchSmartDrawLineFromCharUnderCursor()<CR>| " 辅助: 绘图根据当前光标下字符改变线形
-nnoremap <silent> sly :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当前光标下的字符
-nnoremap <silent> slp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
-vnoremap <silent> slr :<C-u>call VisualReplaceToSpace()<cr> \| :call VisualReplaceChar()<cr>| " 辅助: 绘图可视区域替换当前光标下的字符
+nnoremap <silent> sc :call SwitchSmartDrawLine(0)<CR>| " 辅助: 绘图循环改变线形
+nnoremap <silent> ss :call SwitchSmartDrawLine(1)<CR>| " 辅助: 绘图显示当前线形
+nnoremap <silent> su :call SwitchSmartDrawLineFromCharUnderCursor()<CR>| " 辅助: 绘图根据当前光标下字符改变线形
+nnoremap <silent> sy :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当前光标下的字符
+nnoremap <silent> sp :call ReplaceCharUnderCursor('n')<CR>| " 辅助: 绘图粘贴当前光标下的字符
+vnoremap <silent> sr :<C-u>call VisualReplaceToSpace()<cr> \| :call VisualReplaceChar()<cr>| " 辅助: 绘图可视区域替换当前光标下的字符
 
 
 " 切换智能绘图交叉模式策略
-nnoremap <silent> slx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
+nnoremap <silent> sx :call SwitchSmartLineCrossType()<CR>| " 辅助: 切换绘图的交叉模式
 
 
-nnoremap <silent> slg :call SwitchDefineSmartDrawGraphSet(1)<CR>| " 辅助: 切换保存形状的函数集
+nnoremap <silent> sg :call SwitchDefineSmartDrawGraphSet(1)<CR>| " 辅助: 切换保存形状的函数集
 
-nnoremap <silent> slf :call SwitchSmartDrawLev1Index(1)<CR>| " 辅助: 切换保存形状的大类正向
-nnoremap <silent> slb :call SwitchSmartDrawLev1Index(-1)<CR>| " 辅助: 切换保存形状的大类反向
-nnoremap <silent> slms :call VisualBlockMouseMoveStart()<CR>| " 辅助: 绘图鼠标预览模式开启
-nnoremap <silent> slmc :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图鼠标预览模式取消
+nnoremap <silent> sf :call SwitchSmartDrawLev1Index(1)<CR>| " 辅助: 切换保存形状的大类正向
+nnoremap <silent> sb :call SwitchSmartDrawLev1Index(-1)<CR>| " 辅助: 切换保存形状的大类反向
+nnoremap <silent> sms :call VisualBlockMouseMoveStart()<CR>| " 辅助: 绘图鼠标预览模式开启
+nnoremap <silent> smc :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图鼠标预览模式取消
 " 鼠标指针不能行到图形上,不然会导致不能响应命令
 nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
 nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
-nnoremap <silent> sli :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
-nnoremap <silent> slj :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
+nnoremap <silent> si :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
+nnoremap <silent> sj :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
 let g:switch_smart_draw_lev2_step_index = 0
-nnoremap <silent> slk :let g:switch_smart_draw_lev2_step_index = !g:switch_smart_draw_lev2_step_index<CR>| " 辅助: 切换保存形状的小类步长索引(决定某些形状的长宽的)
+nnoremap <silent> sk :let g:switch_smart_draw_lev2_step_index = !g:switch_smart_draw_lev2_step_index<CR>| " 辅助: 切换保存形状的小类步长索引(决定某些形状的长宽的)
 
 
 nnoremap <silent> <C-S-Right> :call ReplaceCharUnderCursor('l')<CR>| " 辅助: 绘图粘贴当前光标下的字符，并向右移动
@@ -1699,7 +1698,7 @@ nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上
 
 nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴完全覆盖
 nnoremap <leader>P :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
-nnoremap <silent> slt :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
+nnoremap <silent> st :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
 
 " 斜线(M-U O M I)
 nnoremap <silent> <m-U> :call DrawSmartLineSlash('u')<cr>
@@ -1918,12 +1917,12 @@ call plug#end()
 " + " 辅助:vim-expand-region 普通模式下扩大选区
 " _ " 辅助:vim-expand-region 普通模式下缩小选区
 " 扩大选区
-nnoremap <C-s-i> <Plug>(expand_region_expand)| " 编辑: 普通模式下扩大选区
-vnoremap <C-s-i> <Plug>(expand_region_expand)| " 编辑: 可视模式下扩大选区
+nnoremap <M-i> <Plug>(expand_region_expand)| " 编辑: 普通模式下扩大选区
+vnoremap <M-i> <Plug>(expand_region_expand)| " 编辑: 可视模式下扩大选区
 
 " 缩小选区
-nnoremap <C-s-o> <Plug>(expand_region_shrink)| " 编辑: 普通模式下缩小选区
-vnoremap <C-s-o> <Plug>(expand_region_shrink)| " 编辑: 可视模式下缩小选区
+nnoremap <M-o> <Plug>(expand_region_shrink)| " 编辑: 普通模式下缩小选区
+vnoremap <M-o> <Plug>(expand_region_shrink)| " 编辑: 可视模式下缩小选区
 " vim-expand-region }
 
 " table-mode {
@@ -3931,7 +3930,7 @@ vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>| " 编辑: �
 nnoremap <leader>svm :call SaveGlobalMarkComments()<cr> \| :call SetProjectViminfo()<cr>| " 辅助: 重置当前环境的viminfo(切换新项目时)
 
 " 定义一个自定义高亮组(这个只能放最后不然会被主题覆盖)
-highlight MyVirtualText ctermfg=Green guifg=green ctermbg=NONE guibg=NONE
+highlight MyVirtualText ctermfg=LightGray guifg=#D3D3D3 ctermbg=NONE guibg=NONE
 
 " 自定义的图形
 " 图形大类别索引
@@ -3945,7 +3944,7 @@ function! SwitchSmartDrawLev1Index(direction)
 
     " 更新x寄存器内容
     let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
-    let @x = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
+    let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
 
     call UpdateVisualBlockPopup()
 endfunction
@@ -3961,7 +3960,7 @@ function! SwitchSmartDrawLev2Index(direction)
     endif
     " 更新x寄存器内容
     let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
-    let @x = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
+    let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
 
     call UpdateVisualBlockPopup()
 endfunction
@@ -4015,7 +4014,7 @@ function! SwitchDefineSmartDrawGraphSet(is_show)
 
     " 更新x寄存器中的内容
     let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
-    let @x = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
+    let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
 
     if a:is_show
         call UpdateVisualBlockPopup()
@@ -4110,7 +4109,7 @@ function! CreateRectangleString(data, is_delate_ori_data)
     endfor
 
     " 放入x寄存器中用于绘图
-    let @x = join(result, "\n")
+    let @+ = join(result, "\n")
 
     " 清空高亮组
     call ClearCursors()
@@ -4134,5 +4133,109 @@ nnoremap <silent> <C-S-H> :call AddCursor('h')<CR>
 nnoremap <silent> <C-S-G> :call ClearCursors()<CR>
 nnoremap <silent> <C-x> :call CreateRectangleString(g:multi_cursors, 0)<CR>
 nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1)<CR>
+
+
+" 代码笔记跳转功能 {
+function! JumpToCode()
+    " 获取根目录
+    " #[:meta:root:/project/root/path]
+    let l:root_line = getline('$')
+    if l:root_line =~ '[:meta:root:'
+        let l:root_path = substitute(l:root_line, '\[:meta:root:\(.*\)\]', '\1', '')
+    else
+        echo "未找到根目录标记"
+        return
+    endif
+
+    " 获取当前光标下的行和列
+    let l:line = getline('.')
+    let l:col = col('.')
+
+    " 查找所有匹配的路径和行号
+    " [os/os_uname_a.sh:12]
+    let l:start = 0
+    let l:is_find_position = 0
+    let l:match = []
+    while l:start >= 0
+        let l:start = match(l:line, '\v\[([^\[]+):(\d+)\]', l:start)
+        if l:start >= 0
+            let match_str = matchstr(l:line, '\v\[([^\[]+):(\d+)\]', l:start)
+            let l:end = l:start + strlen(match_str)
+            if l:col > l:start && l:col <= l:end
+                let l:match = [l:start, l:end, match_str]
+                break
+            endif
+            let l:start = l:end
+        endif
+    endwhile
+
+    if empty(l:match)
+        echo "光标不在有效的路径和行号范围内"
+        return
+    endif
+
+    let l:matches_list = matchlist(match_str, '\v\[([^\[]+):(\d+)\]')
+    let [ l:relative_path, l:line_number ] = [ l:matches_list[1], l:matches_list[2] ]
+
+    " 拼接完整路径
+    let l:full_path = l:root_path . '/' . l:relative_path
+
+    " 检查当前窗口布局并决定如何分屏
+    if winnr('$') == 1
+        " 只有一个窗口，直接垂直分屏
+        execute 'vsplit ' . l:full_path
+    else
+        " 多个窗口，先切换到左边窗口
+        execute 'wincmd h'
+        " 在左边窗口中水平分屏
+        execute 'split ' . l:full_path
+    endif
+
+    execute l:line_number
+endfunction
+
+" 把当前的相对路径和行号信息保存到系统剪切板中
+" [os/os_uname_a.sh:12]
+function! RecordCodePathAndLineToSystemReg()
+    " 获取当前文件的绝对路径和行号
+    let l:absolute_path = expand('%:p')
+    let l:absolute_path = substitute(l:absolute_path, '\\', '/', 'g')
+    let l:line_number = line('.')
+
+    " 查找项目根目录
+    let l:root_dir = FindRootDir()
+    if l:root_dir == ''
+        echo "未找到项目根目录"
+        return
+    endif
+
+    " 计算相对路径
+    let l:relative_path = absolute_path[len(l:root_dir)+1:]
+
+    " 生成路径和行号字符串
+    let l:result = '[' . l:relative_path . ':' . l:line_number . ']'
+    let @+ = l:result
+endfunction
+
+" 当前只支持.git目录和.root文件
+function! FindRootDir()
+    let l:current_dir = expand('%:p:h')
+    let l:current_dir = substitute(l:current_dir, '\\', '/', 'g')
+
+    while l:current_dir != '/'
+        if isdirectory(l:current_dir . '/.git') || filereadable(l:current_dir . '/.root')
+            return l:current_dir
+        endif
+        let l:current_dir = fnamemodify(l:current_dir, ':h')
+    endwhile
+    return ''
+endfunction
+
+
+" :TODO: 后续如果中括号和冒号不够防呆,可以使用另外的特殊的unicode字符替代,或者使用更多的边界字符防呆,不过目前这样就够
+nnoremap <leader>jj :call JumpToCode()<CR>
+nnoremap <leader>jl :call RecordCodePathAndLineToSystemReg()<CR>
+
+" 代码笔记跳转功能 }
 
 
