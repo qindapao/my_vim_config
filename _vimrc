@@ -304,8 +304,8 @@ function! VisualBlockMouseMoveStart()
     let g:save_ctrl_mouseleft = maparg('<C-LeftMouse>', 'n')
     let g:save_ctrl_mouseright = maparg('<C-RightMouse>', 'n')
 
-    nnoremap <C-LeftMouse> :call PasteVisualXreg(1)<CR>
-    nnoremap <C-RightMouse> :call PasteVisualXreg(0)<CR>
+    nnoremap <silent> <C-LeftMouse> :call PasteVisualXreg(1)<CR>
+    nnoremap <silent> <C-RightMouse> :call PasteVisualXreg(0)<CR>
 
     set mouse=n
     augroup VisualBlockMouseMove
@@ -318,12 +318,12 @@ endfunction
 
 function! VisualBlockMouseMoveCancel()
     if exists('g:save_ctrl_mouseleft')
-        execute 'nnoremap <C-LeftMouse> ' . g:save_ctrl_mouseleft
+        execute 'nnoremap <silent> <C-LeftMouse> ' . g:save_ctrl_mouseleft
     endif
 
     if exists('g:save_ctrl_mouseright')
         " :TODO: 目前发现这里没有被正常还原成以前的操作
-        execute 'nnoremap <C-RightMouse> ' . g:save_ctrl_mouseright
+        execute 'nnoremap <silent> <C-RightMouse> ' . g:save_ctrl_mouseright
     endif
 
     augroup VisualBlockMouseMove
@@ -332,9 +332,26 @@ function! VisualBlockMouseMoveCancel()
     set mouse=a
 endfunction
 
+function! GetRegContent(reg_name)
+    let regcontent = getreg(a:reg_name)
+    let attempts = 0
+    while empty(regcontent) && attempts < 20
+        sleep 1m
+        let regcontent = getreg(a:reg_name)
+        let attempts += 1
+    endwhile
+    echo "read reg: " . a:reg_name . "times: " . attempts . ';' 
+    return regcontent
+endfunction
+
 function! UpdateVisualBlockPopup()
     " 获取寄存器内容和类型
-    let regcontent = getreg('+')
+    " 由于当前使用的是系统剪切板会比较慢,所以增加一个延时让弹窗稳定
+    " 使用系统寄存器虽然可能慢,但是可以跨vim实体复制粘贴非常方便
+    " 后面如果对速度敏感那么可以考虑使用别的寄存器
+    " 也有可能是弹窗无法响应太快的请求,所以这里让更新慢一些
+    let regcontent = GetRegContent('+')
+
     let l:new_text = split(regcontent, "\n")
     let mask = []
     " 空格透明
@@ -1514,7 +1531,6 @@ function! DrawSmartLineUpDown(direction)
 
     call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
 endfunction
-
 " 进入可视模式前记录光标位置
 augroup VisualModeMappings
     autocmd!
@@ -1672,8 +1688,8 @@ nnoremap <silent> smc :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图�
 " 鼠标指针不能行到图形上,不然会导致不能响应命令
 nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
 nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
-nnoremap <silent> si :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
-nnoremap <silent> sj :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
+nnoremap <silent> <M-u> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
+nnoremap <silent> <M-y> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
 let g:switch_smart_draw_lev2_step_index = 0
 nnoremap <silent> sk :let g:switch_smart_draw_lev2_step_index = !g:switch_smart_draw_lev2_step_index<CR>| " 辅助: 切换保存形状的小类步长索引(决定某些形状的长宽的)
 
@@ -1696,8 +1712,8 @@ nnoremap <silent> <M-Left> :call DrawSmartLineEraser('h')<CR>| " 辅助: 绘图�
 nnoremap <silent> <M-Down> :call DrawSmartLineEraser('j')<CR>| " 辅助: 绘图下边橡皮擦
 nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上边橡皮擦
 
-nnoremap <leader>p :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴完全覆盖
-nnoremap <leader>P :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
+nnoremap <silent> <C-M-Space> :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴完全覆盖
+nnoremap <silent> <C-S-Space> :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
 nnoremap <silent> st :call SwitchVisualBlockPopupType()<CR>| " 辅助: 绘图更改弹出窗口类型
 
 " 斜线(M-U O M I)
@@ -3972,10 +3988,11 @@ endfunction
 " :TODO: 后面这个数组可以和具体的定义文件彻底解耦,数组的元素个数要根据文件中的内容自动创建
 " 这里不设置为-1是因为基本图形组比较多担心影响启动速度,所以设置为最后一个组
 let g:DefineSmartDrawGraphFunctions = {
-    \ 'index': 0,
+    \ 'index': 1,
     \ 'value': [
     \ ['DefineSmartDrawShapesBasic', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 'basic.vim'],
-    \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim']
+    \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim'],
+    \ ['DefineSmartDrawShapesFiglet', [0, 0, 0], 0, 'figlet.vim']
     \ ]
     \ }
 
@@ -4137,13 +4154,19 @@ nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1)<CR>
 
 " 代码笔记跳转功能 {
 function! JumpToCode()
-    " 获取根目录
-    " #[:meta:root:/project/root/path]
-    let l:root_line = getline('$')
-    if l:root_line =~ '[:meta:root:'
-        let l:root_path = substitute(l:root_line, '\[:meta:root:\(.*\)\]', '\1', '')
-    else
-        echo "未找到根目录标记"
+    " " 获取根目录
+    " " #[:meta:root:/project/root/path]
+    " let l:root_line = getline('$')
+    " if l:root_line =~ '[:meta:root:'
+    "     let l:root_path = substitute(l:root_line, '\[:meta:root:\(.*\)\]', '\1', '')
+    " else
+    "     echo "未找到根目录标记"
+    "     return
+    " endif
+    " 查找项目根目录
+    let l:root_path = FindRootDir()
+    if l:root_path == ''
+        echo "未找到项目根目录"
         return
     endif
 
@@ -4157,9 +4180,9 @@ function! JumpToCode()
     let l:is_find_position = 0
     let l:match = []
     while l:start >= 0
-        let l:start = match(l:line, '\v\[([^\[]+):(\d+)\]', l:start)
+        let l:start = match(l:line, '\v\[\[([^\[\]]+):(\d+)\]\]', l:start)
         if l:start >= 0
-            let match_str = matchstr(l:line, '\v\[([^\[]+):(\d+)\]', l:start)
+            let match_str = matchstr(l:line, '\v\[\[([^\[\]]+):(\d+)\]\]', l:start)
             let l:end = l:start + strlen(match_str)
             if l:col > l:start && l:col <= l:end
                 let l:match = [l:start, l:end, match_str]
@@ -4174,7 +4197,7 @@ function! JumpToCode()
         return
     endif
 
-    let l:matches_list = matchlist(match_str, '\v\[([^\[]+):(\d+)\]')
+    let l:matches_list = matchlist(match_str, '\v\[\[([^\[\]]+):(\d+)\]\]')
     let [ l:relative_path, l:line_number ] = [ l:matches_list[1], l:matches_list[2] ]
 
     " 拼接完整路径
@@ -4194,26 +4217,36 @@ function! JumpToCode()
     execute l:line_number
 endfunction
 
-" 把当前的相对路径和行号信息保存到系统剪切板中
-" [os/os_uname_a.sh:12]
-function! RecordCodePathAndLineToSystemReg()
+function! GetRelationPath()
     " 获取当前文件的绝对路径和行号
     let l:absolute_path = expand('%:p')
     let l:absolute_path = substitute(l:absolute_path, '\\', '/', 'g')
-    let l:line_number = line('.')
 
     " 查找项目根目录
     let l:root_dir = FindRootDir()
     if l:root_dir == ''
         echo "未找到项目根目录"
-        return
+        return ''
     endif
 
     " 计算相对路径
     let l:relative_path = absolute_path[len(l:root_dir)+1:]
+    return l:relative_path
+endfunction
+
+
+" 把当前的相对路径和行号信息保存到系统剪切板中
+" [os/os_uname_a.sh:12]
+function! RecordCodePathAndLineToSystemReg()
+    " 计算相对路径
+    let l:relative_path = GetRelationPath()
+    if empty(l:relative_path)
+        return
+    endif
+    let l:line_number = line('.')
 
     " 生成路径和行号字符串
-    let l:result = '[' . l:relative_path . ':' . l:line_number . ']'
+    let l:result = '[[' . l:relative_path . ':' . l:line_number . ']]'
     let @+ = l:result
 endfunction
 
@@ -4231,10 +4264,113 @@ function! FindRootDir()
     return ''
 endfunction
 
+" 锚点的格式
+" {{id:这是一个锚点}}
+" 定义快捷方式在锚点上生成指向锚点的链接并保存到系统剪切板中
+" [[src/os/os_uname_a.sh:#这是一个锚点]]
+function! RecordHunkToSystemReg()
+    let l:line = getline('.')
+    let l:col = col('.')
+    let l:start = 0
+    let l:is_find_position = 0
+    let l:match = []
+    while l:start >= 0
+        let l:start = match(l:line, '\v\{\{id:([^\{\}]+)\}\}', l:start)
+        if l:start >= 0
+            let match_str = matchstr(l:line, '\v\{\{id:([^\{\}]+)\}\}', l:start)
+            let l:end = l:start + strlen(match_str)
+            if l:col > l:start && l:col <= l:end
+                let l:match = [l:start, l:end, match_str]
+                break
+            endif
+            let l:start = l:end
+        endif
+    endwhile
+
+    if empty(l:match)
+        echo "光标不在有效的锚点内"
+        return
+    endif
+
+    let l:relative_path = GetRelationPath()
+    if empty(l:relative_path)
+        return
+    endif
+
+    let l:matches_list = matchlist(match_str, '\v\{\{id:([^\{\}]+)\}\}')
+    let l:hunk_str = '[[' . l:relative_path . ':#' . l:matches_list[1] . ']]'
+    let @+ = l:hunk_str
+endfunction
+
+" 通过锚点链接跳转到锚点
+function! JumpToHunkPoint()
+    " 查找项目根目录
+    let l:root_path = FindRootDir()
+    if l:root_path == ''
+        echo "未找到项目根目录"
+        return
+    endif
+
+    " 获取当前光标下的行和列
+    let l:line = getline('.')
+    let l:col = col('.')
+
+    " 查找所有匹配的路径和锚点名
+    " [[os/os_uname_a.sh:#我是一个锚点]]
+    let l:start = 0
+    let l:is_find_position = 0
+    let l:match = []
+    while l:start >= 0
+        let l:start = match(l:line, '\v\[\[([^\[\]]+):#([^\[\]]+)\]\]', l:start)
+        if l:start >= 0
+            let match_str = matchstr(l:line, '\v\[\[([^\[\]]+):#([^\[\]]+)\]\]', l:start)
+            let l:end = l:start + strlen(match_str)
+            if l:col > l:start && l:col <= l:end
+                let l:match = [l:start, l:end, match_str]
+                break
+            endif
+            let l:start = l:end
+        endif
+    endwhile
+
+    if empty(l:match)
+        echo "光标不在有效的路径和行号范围内"
+        return
+    endif
+
+    let l:matches_list = matchlist(match_str, '\v\[\[([^\[\]]+):#([^\[\]]+)\]\]')
+    let [ l:relative_path, l:hunk_str ] = [ l:matches_list[1], '{{id:' . l:matches_list[2] . '}}' ]
+
+    " 拼接完整路径
+    let l:full_path = l:root_path . '/' . l:relative_path
+    " echo "full_path:" . l:full_path . ';' . 'hunk_str:' . l:hunk_str . ';'
+
+    let cur_path = expand('%:p')
+    let cur_path = substitute(cur_path, '\\', '/', 'g')
+
+    " 先在文件中找到锚点字符串的行列值
+    try
+        " 搜索的时候就跳转到文件了,不需要单独打开文件
+        if cur_path == l:full_path
+            silent execute 'vimgrep /' . l:hunk_str . '/ ' . '%'
+        else
+            silent execute 'vimgrep /' . l:hunk_str . '/ ' . l:full_path
+        endif
+        let result = getqflist({'items': 0}).items[0]    
+    catch
+        echo "没有找到匹配的锚点"
+        return
+    endtry
+
+    call cursor(result.lnum, result.col)
+endfunction
+
 
 " :TODO: 后续如果中括号和冒号不够防呆,可以使用另外的特殊的unicode字符替代,或者使用更多的边界字符防呆,不过目前这样就够
-nnoremap <leader>jj :call JumpToCode()<CR>
-nnoremap <leader>jl :call RecordCodePathAndLineToSystemReg()<CR>
+nnoremap <silent> <leader>jj :call JumpToCode()<CR>
+nnoremap <silent> <leader>jl :call RecordCodePathAndLineToSystemReg()<CR>
+nnoremap <silent> <leader>jr :call RecordHunkToSystemReg()<CR>
+nnoremap <silent> <leader>jh :call JumpToHunkPoint()<CR>
 
 " 代码笔记跳转功能 }
 

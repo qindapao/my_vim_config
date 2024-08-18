@@ -27,6 +27,7 @@ function New-SymbolicLink {
 # New-SymbolicLink -Name "led.vim" -Target (Join-Path -Path $args[1] -ChildPath "led.vim")
 New-SymbolicLink -Name "basic.vim" -Target (Join-Path -Path $args[1] -ChildPath "basic.vim")
 New-SymbolicLink -Name "led.vim" -Target (Join-Path -Path $args[1] -ChildPath "led.vim")
+New-SymbolicLink -Name "figlet.vim" -Target (Join-Path -Path $args[1] -ChildPath "figlet.vim")
 
 Get-ChildItem -Attributes ReparsePoint
 Pop-Location # 回到原来的目录
