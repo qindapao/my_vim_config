@@ -3989,7 +3989,7 @@ let g:DefineSmartDrawGraphFunctions = {
     \ 'value': [
     \ ['DefineSmartDrawShapesBasic', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 'basic.vim'],
     \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim'],
-    \ ['DefineSmartDrawShapesFiglet', [0, 0, 0], 0, 'figlet.vim']
+    \ ['DefineSmartDrawShapesFiglet', [0, 0, 0, 0, 0, 0], 0, 'figlet.vim']
     \ ]
     \ }
 
@@ -4349,6 +4349,7 @@ function! JumpToHunkPoint()
     try
         " 搜索的时候就跳转到文件了,不需要单独打开文件
         if cur_path == l:full_path
+            " 这里使用%的作用是防止重新打开文件
             silent execute 'vimgrep /' . l:hunk_str . '/ ' . '%'
         else
             silent execute 'vimgrep /' . l:hunk_str . '/ ' . l:full_path
