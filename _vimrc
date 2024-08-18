@@ -1690,6 +1690,7 @@ nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " �
 nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
 nnoremap <silent> <M-u> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
 nnoremap <silent> <M-y> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
+nnoremap <silent> <M-t> :call SwitchSmartDrawLev2Index(0)<CR>| " 辅助: 切换保存形状的小类反向
 let g:switch_smart_draw_lev2_step_index = 0
 nnoremap <silent> sk :let g:switch_smart_draw_lev2_step_index = !g:switch_smart_draw_lev2_step_index<CR>| " 辅助: 切换保存形状的小类步长索引(决定某些形状的长宽的)
 
@@ -3967,13 +3968,9 @@ endfunction
 
 function! SwitchSmartDrawLev2Index(direction)
     let step_index = g:switch_smart_draw_lev2_step_index
-    let step = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['step'][step_index]
+    let step = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['step'][step_index] * a:direction
 
-    if a:direction == 1
-        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+step) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
-    else
-        let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']-step + len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
-    endif
+    let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+step) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
     " 更新x寄存器内容
     let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
     let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
