@@ -1,3 +1,20 @@
+" VIM使用最大原则(只要功能够用就不要折腾,不要轻易更新.时间要花在对的事情上)
+"       o                                  
+"       o                ooooooooo         
+"       o      ooooo     o       o         
+"      oooooo  o   o     o       o         
+"      o  o    o   o     o       o         
+"     o   o    o   o     o       o         
+"         o    o   o     ooooooooo         
+"         o    o   o         o             
+"     oooooooo o   o         o             
+"         o    o   o     o   o             
+"        o o   o   o     o   oooooo        
+"        o o   o   o     o   o             
+"       o   o  ooooo    o o  o             
+"       o   o  o   o    o  o o             
+"      o    o          o    ooooooooo      
+"     o               o                    
 " :TODO: 文件中的替换操作或者别的需要传入参数的操作可能因为转义字符出错,暂时没处理,如果遇到问题可以在这方面排查
 " 按键组
 "
