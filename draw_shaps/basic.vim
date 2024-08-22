@@ -1,77 +1,121 @@
+function! GenerateLeftRightTriangle(index)
+    " .   .    .   
+    " |\  |\   |\  
+    " '-' | \  | \ 
+    "     '--' |  \
+    "          '---'
+    let triangle = []
+    call add(triangle, '.')
+    for j in range(0, a:index)
+        call add(triangle, '|' . repeat(' ', j) . '\')
+    endfor
+    call add(triangle, "'" . repeat('-', a:index+1) . "'")
+    
+    return triangle
+endfunction
+
+" :TODO: 还有3种三角形
+"              . 
+"        .    /| 
+"   .   /|   / | 
+"  /|  / |  /  | 
+" '-' '--' '---' 
+" .-.  .--. .---.
+"  \|   \ |  \  |
+"   '    \|   \ |
+"         '    \|
+"               '
+"  .-. .--. .---.
+"  |/  | /  |  / 
+"  '   |/   | /  
+"      '    |/   
+"           '    
+
+
+" :TODO: 空了再实现吧,这个图形还有点麻烦
+function! GenerateSixPointedStar(index)
+    "  __/\__       /\                /\         
+    "  \    /  ____/  \____          /  \        
+    "  /_  _\  \          /   ______/    \______ 
+    "    \/     \        /    \                / 
+    "           /        \     \              /  
+    "          /___    ___\     \            /   
+    "              \  /         /            \   
+    "               \/         /              \  
+    "                         /_____      _____\ 
+    "                               \    /       
+    "                                \  /        
+    "                                 \/         
+    let six_pointed_star = []
+    let range = a:index
+endfunction
+
 
 " https://waylonwalker.com/drawing-ascii-boxes/
-function! GenerateUpTriangles(count)
+function! GenerateUpTriangle(index)
     "   .      .       .
     "  / \    / \     / \
     " '---'  /   \   /   \
     "       '-----' /     \
     "              '-------'
-    let triangles = []
-    for i in range(1, a:count)
-        let triangle = []
-        call add(triangle, repeat(' ', i+1) . '.' . repeat(' ', i+1))
-        for j in range(1, i)
-            call add(triangle, repeat(' ', i-j+1) . '/' . repeat(' ', j*2-1) . '\')
-        endfor
-        call add(triangle, "'" . repeat('-', 2*i+1) . "'")
-        call add(triangles, triangle)
-    endfor
+    let i = a:index + 1
 
-    return triangles
+    let triangle = []
+    call add(triangle, repeat(' ', i+1) . '.' . repeat(' ', i+1))
+    for j in range(1, i)
+        call add(triangle, repeat(' ', i-j+1) . '/' . repeat(' ', j*2-1) . '\')
+    endfor
+    call add(triangle, "'" . repeat('-', 2*i+1) . "'")
+
+    return triangle
 endfunction
 
 
-function! GenerateDownTriangles(count)
+function! GenerateDownTriangle(index)
     " .---. .-----. .-------.
     "  \ /   \   /   \     / 
     "   '     \ /     \   /  
     "          '       \ /   
     "                   '    
-    let triangles = []
-    for i in range(1, a:count)
-        let width = i * 2 + 1
-        let triangle = []
-        call add(triangle, '.' . repeat('-', width) . '.')
-        for j in range(1, i)
-            call add(triangle, repeat(' ', j) . '\' . repeat(' ', width - 2 * j) . '/')
-        endfor
-        call add(triangle, repeat(' ', i + 1) . "'")
-        call add(triangles, triangle)
-    endfor
+    let i = a:index + 1
 
-    return triangles
+    let width = i * 2 + 1
+    let triangle = []
+    call add(triangle, '.' . repeat('-', width) . '.')
+    for j in range(1, i)
+        call add(triangle, repeat(' ', j) . '\' . repeat(' ', width - 2 * j) . '/')
+    endfor
+    call add(triangle, repeat(' ', i + 1) . "'")
+
+    return triangle
 endfunction
 
-function! GenerateHexagons(count)
+function! GenerateHexagon(index)
     "    ____
     "   / __ \
     "  / /  \ \
     "  \ \__/ /
     "   \____/
-    let hexagons = []
-    for i in range(1, a:count)
-        let hexagon = []
-        " 顶部
-        call add(hexagon, repeat(' ', i) . repeat('_', i*2))
-        " 上半部
-        for j in range(1, i)
-            call add(hexagon, repeat(' ', i-j) . '/' . repeat(' ', i*2+(j-1)*2) . '\')
-        endfor
-        " 下半部
-        for j in range(1, i-1)
-            call add(hexagon, repeat(' ', j-1) . '\' . repeat(' ', i*2+(i-j)*2) . '/')
-        endfor
+    let i = a:index + 1
 
-        " 底部边缘
-        call add(hexagon, repeat(' ', i-1) . '\' . repeat('_', i*2) . '/')
-
-        call add(hexagons, hexagon)
+    let hexagon = []
+    " 顶部
+    call add(hexagon, repeat(' ', i) . repeat('_', i*2))
+    " 上半部
+    for j in range(1, i)
+        call add(hexagon, repeat(' ', i-j) . '/' . repeat(' ', i*2+(j-1)*2) . '\')
     endfor
+    " 下半部
+    for j in range(1, i-1)
+        call add(hexagon, repeat(' ', j-1) . '\' . repeat(' ', i*2+(i-j)*2) . '/')
+    endfor
+    " 底部边缘
+    call add(hexagon, repeat(' ', i-1) . '\' . repeat('_', i*2) . '/')
 
-    return hexagons
+    return hexagon
 endfunction
 
-function! GenerateProcessRight(row_count, col_count)
+function! GenerateProcessRight(row_index, col_index)
     " __   _____  
     " \ \  \    \ 
     "  ) )  )    )
@@ -82,33 +126,29 @@ function! GenerateProcessRight(row_count, col_count)
     "   )         )
     "  /         / 
     " /_________/  
-    let process_rights = []
-    for i in range(1, a:row_count)
-        for j in range(1, a:col_count)
-            let process_right = []
-            " 绘制上部
-            call add(process_right, repeat('_', j))
-            " 绘制上半部
-            for k in range(1, i)
-                call add(process_right, repeat(' ', k-1) . '\' . repeat(' ', j-1) . '\')
-            endfor
-            " 绘制中间部分
-            call add(process_right, repeat(' ', i) . ')' . repeat(' ', j-1) . ')')
-            " 绘制下半部分
-            for k in range(1, i-1)
-                call add(process_right, repeat(' ', i-k) . '/' . repeat(' ', j-1) . '/')
-            endfor
-            " 绘制最下面
-            call add(process_right, '/' . repeat('_', j-1) . '/')
+    let i = a:row_index
+    let j = a:col_index
 
-            call add(process_rights, process_right)
-        endfor
+    let process_right = []
+    " 绘制上部
+    call add(process_right, repeat('_', j))
+    " 绘制上半部
+    for k in range(1, i)
+        call add(process_right, repeat(' ', k-1) . '\' . repeat(' ', j-1) . '\')
     endfor
+    " 绘制中间部分
+    call add(process_right, repeat(' ', i) . ')' . repeat(' ', j-1) . ')')
+    " 绘制下半部分
+    for k in range(1, i-1)
+        call add(process_right, repeat(' ', i-k) . '/' . repeat(' ', j-1) . '/')
+    endfor
+    " 绘制最下面
+    call add(process_right, '/' . repeat('_', j-1) . '/')
 
-    return process_rights
+    return process_right
 endfunction
 
-function! GenerateProcessLeft(row_count, col_count)
+function! GenerateProcessLeft(row_index, col_index)
     "   __   ___
     "  / /  /  /
     " ( (  (  ( 
@@ -119,32 +159,29 @@ function! GenerateProcessLeft(row_count, col_count)
     " (  (
     "  \  \
     "   \__\
-    let process_lefts = []
-    for i in range(1, a:row_count)
-        for j in range(1, a:col_count)
-            let process_left = []
-            " 上
-            call add(process_left, repeat(' ', i+1) . repeat('_', j))
-            " 上半
-            for k in range(1, i)
-                call add(process_left, repeat(' ', i-k+1) . '/' . repeat(' ', j-1) . '/')
-            endfor
-            " 中间
-            call add(process_left, '(' . repeat(' ', j-1) . '(')
-            " 下半
-            for k in range(1, i-1)
-                call add(process_left, repeat(' ', k) . '\' . repeat(' ', j-1) . '\')
-            endfor
-            " 下
-            call add(process_left, repeat(' ', i) . '\' . repeat('_', j-1) . '\')
-            call add(process_lefts, process_left)
-        endfor
-    endfor
+    let i = a:row_index
+    let j = a:col_index
 
-    return process_lefts
+    let process_left = []
+    " 上
+    call add(process_left, repeat(' ', i+1) . repeat('_', j))
+    " 上半
+    for k in range(1, i)
+        call add(process_left, repeat(' ', i-k+1) . '/' . repeat(' ', j-1) . '/')
+    endfor
+    " 中间
+    call add(process_left, '(' . repeat(' ', j-1) . '(')
+    " 下半
+    for k in range(1, i-1)
+        call add(process_left, repeat(' ', k) . '\' . repeat(' ', j-1) . '\')
+    endfor
+    " 下
+    call add(process_left, repeat(' ', i) . '\' . repeat('_', j-1) . '\')
+
+    return process_left
 endfunction
 
-function! GenerateIfBox(row_count, col_count)
+function! GenerateIfBox(row_index, col_index)
     "
     "    .-.    .--.
     "   (   )  (    )
@@ -154,29 +191,26 @@ function! GenerateIfBox(row_count, col_count)
     "(     )   (      )                
     " \   /     \    / 
     "  '-'       '--'  
-    let if_boxs = []
-    for i in range(1, a:row_count)
-        for j in range(1, a:col_count)
-            let if_box = []
-            " 上
-            call add(if_box, repeat(' ', i) . '.' . repeat('-', j) . '.')
-            " 上半
-            for k in range(1, i-1)
-                call add(if_box, repeat(' ', i-k). '/' . repeat(' ', j+k*2) . '\')
-            endfor
-            " 中间
-            call add(if_box, '(' . repeat(' ', 2*i+j) . ')')
-            " 下半
-            for k in range(1, i-1)
-                call add(if_box, repeat(' ', k) . '\' . repeat(' ', j+(i-k)*2) . '/')
-            endfor
-            " 下
-            call add(if_box, repeat(' ', i) . "'" . repeat('-', j) . "'")
-            call add(if_boxs, if_box)
-        endfor
-    endfor
+    let i = a:row_index + 1
+    let j = a:col_index + 1
 
-    return if_boxs
+    let if_box = []
+    " 上
+    call add(if_box, repeat(' ', i) . '.' . repeat('-', j) . '.')
+    " 上半
+    for k in range(1, i-1)
+        call add(if_box, repeat(' ', i-k). '/' . repeat(' ', j+k*2) . '\')
+    endfor
+    " 中间
+    call add(if_box, '(' . repeat(' ', 2*i+j) . ')')
+    " 下半
+    for k in range(1, i-1)
+        call add(if_box, repeat(' ', k) . '\' . repeat(' ', j+(i-k)*2) . '/')
+    endfor
+    " 下
+    call add(if_box, repeat(' ', i) . "'" . repeat('-', j) . "'")
+
+    return if_box
 endfunction
 
 function! GenerateRhombus(radius)
@@ -209,29 +243,25 @@ function! GenerateRhombus(radius)
     "     '.   .'     
     "       '.'       
     " max_col = 2 * max_row - 1
-    let rhombuses = []
-    for i in range(1, a:radius)
-        let rhombus = []
+    let i = a:radius + 1
+    let rhombus = []
 
-        " 顶部
-        call add(rhombus, repeat(' ', i*2-1) . ".'.")
-        " 上半
-        for j in range(1, i-1)
-            call add(rhombus, repeat(' ', (i-j)*2-1) . ".'" . repeat(' ', j*4-1) . "'.")
-        endfor
-        " 中间
-        call add(rhombus, ':' . repeat(' ', 4*i-1) . ':')
-        " 下半
-        for j in range(1, i-1)
-            call add(rhombus, repeat(' ', 2*j-1) . "'." . repeat(' ', (i-j)*4-1) . ".'")
-        endfor
-        " 底部
-        call add(rhombus, repeat(' ', i*2-1) . "'.'")
-        call add(rhombuses, rhombus)
+    " 顶部
+    call add(rhombus, repeat(' ', i*2-1) . ".'.")
+    " 上半
+    for j in range(1, i-1)
+        call add(rhombus, repeat(' ', (i-j)*2-1) . ".'" . repeat(' ', j*4-1) . "'.")
     endfor
-         
+    " 中间
+    call add(rhombus, ':' . repeat(' ', 4*i-1) . ':')
+    " 下半
+    for j in range(1, i-1)
+        call add(rhombus, repeat(' ', 2*j-1) . "'." . repeat(' ', (i-j)*4-1) . ".'")
+    endfor
+    " 底部
+    call add(rhombus, repeat(' ', i*2-1) . "'.'")
 
-    return rhombuses
+    return rhombus
 endfunction
 
 
@@ -858,32 +888,32 @@ let g:SmartDrawShapes = {'set_index': a:index, 'value': [
     \ {
     \ 'index': a:indexes[1],
     \ 'step': [1, 1],
-    \ 'value': GenerateDownTriangles(30)
+    \ 'value': 'GenerateDownTriangle'
     \ },
     \ {
     \ 'index': a:indexes[2],
     \ 'step': [1, 1],
-    \ 'value': GenerateUpTriangles(30)
+    \ 'value': 'GenerateUpTriangle'
     \ },
     \ {
     \ 'index': a:indexes[3],
     \ 'step': [1, 1],
-    \ 'value': GenerateRhombus(20)
+    \ 'value': 'GenerateRhombus'
     \ },
     \ {
     \ 'index': a:indexes[4],
     \ 'step': [1, 1],
-    \ 'value': GenerateHexagons(20)
+    \ 'value': 'GenerateHexagon'
     \ },
     \ {
     \ 'index': a:indexes[5],
     \ 'step': [1, 30],
-    \ 'value': GenerateProcessRight(10, 30)
+    \ 'value': 'GenerateProcessRight'
     \ },
     \ {
     \ 'index': a:indexes[6],
     \ 'step': [1, 30],
-    \ 'value': GenerateProcessLeft(10, 30)
+    \ 'value': 'GenerateProcessLeft'
     \ },
     \ {
     \ 'index': a:indexes[7],
@@ -908,24 +938,25 @@ let g:SmartDrawShapes = {'set_index': a:index, 'value': [
     \ {
     \ 'index': a:indexes[9],
     \ 'step': [1, 30],
-    \ 'value': GenerateIfBox(10, 30)
+    \ 'value': 'GenerateIfBox'
     \ },
     \ {
     \ 'index': a:indexes[10],
     \ 'step': [1, 1],
     \ 'value':  [l:fill_box_1]
     \ },
+    \ {
+    \ 'index': a:indexes[11],
+    \ 'step': [1, 1],
+    \ 'value': 'GenerateLeftRightTriangle'
+    \ },
     \ ],
     \ }
 
-" 取消所有的子函数节省内存
-delfunction! GenerateDownTriangles
-delfunction! GenerateHexagons
-delfunction! GenerateProcessRight
-delfunction! GenerateProcessLeft
-delfunction! GenerateIfBox
-delfunction! GenerateUpTriangles
-delfunction! GenerateRhombus
+" " 取消所有的子函数节省内存(这一步当前不需要了,函数用于动态生成图形)
+" delfunction! GenerateDownTriangle
+" ... ...
 
 endfunction
+
 

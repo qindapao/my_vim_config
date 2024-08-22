@@ -347,6 +347,9 @@ function! VisualBlockMouseMoveCancel()
         autocmd!
     augroup END
     set mouse=a
+
+    " 这里直接关闭弹出窗口
+    call CloseVisualBlockPopWin()
 endfunction
 
 function! GetRegContent(reg_name)
@@ -443,6 +446,13 @@ function! PasteVisualXreg(is_space_replace)
     let blockwidth = str2nr(regtype[1:])
     let blockheight = len(split(regcontent, "\n"))
     let reg_text = split(regcontent, "\n")
+
+    " 空元素用一个空格填充
+    for i in range(len(reg_text))
+        if empty(reg_text[i])
+            let reg_text[i] = ' '
+        endif
+    endfor
 
     " 得到基于物理行列的字符数组,如果是宽字符,那么放置两份,但是合并的时候只取一份
     " 这是一个二维数组,第一维是行,第二维是每行的字符
@@ -784,8 +794,9 @@ set guicursor+=a:blinkon0
 
 " set guifont=sarasa\ mono\ sc:h13
 " set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
-set guifont=微软雅黑\ PragmataPro\ Mono:h8
-" set guifont=Fira\ Code:h8
+" set guifont=微软雅黑\ PragmataPro\ Mono:h8
+" 这个字体某些方向符号无法显示
+set guifont=Fira\ Code:h8
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
@@ -878,7 +889,7 @@ endfunction
 
 
 let g:draw_smartline_all_ascii_chars = {
-    \ '-': 1, '|': 1, '+': 1, '.': 1, "'": 1, '^': 1, 'v': 1, '<': 1, '>': 1
+    \ '-': 1, '|': 1, '+': 1, '.': 1, "'": 1, '^': 1, 'v': 1, '<': 1, '>': 1, ')': 1
     \ }
 
 let g:draw_smartline_all_cross_chars = {
@@ -895,45 +906,46 @@ let g:draw_smartline_all_cross_chars = {
     \ '┵': 1, '┶': 1, '┷': 1, '┸': 1, '┹': 1, '┺': 1,
     \ '┽': 1, '┾': 1, '┿': 1, '╀': 1, '╁': 1, '╂': 1, '╃': 1,
     \ '╄': 1, '╅': 1, '╆': 1, '╇': 1, '╈': 1, '╉': 1, '╊': 1,
-    \ '┌': 1, '┐': 1, '└': 1, '┘': 1, '┅': 1, '┄': 1, '┆': 1, '┇': 1, ')': 1, '❫': 1, '⟫': 1
+    \ '┌': 1, '┐': 1, '└': 1, '┘': 1, '┅': 1, '┄': 1, '┆': 1, '┇': 1, ')': 1, '❫': 1, '⟫': 1, '▲': 1, '▼': 1, '◀': 1, '▶': 1,
+    \ '△': 1, '▽': 1, '◁': 1, '▷': 1
     \ }
 
 let g:unicode_cross_chars = [
     \ {
-    \ '─': 1, '┼': 1, '├': 1, '┬': 1, '┴': 1, '╭': 1, '╰': 1, '╫': 1, '╨': 1, '╥': 1, '╟': 1, '╙': 1, '╓': 1, '┎': 1, '┖': 1, '┞': 1, '┟': 1, '┠': 1, '┭': 1, '┰': 1, '┱': 1, '┵': 1, '┸': 1, '┹': 1, '┽': 1, '╀': 1, '╁': 1, '╂': 1, '╃': 1, '╅': 1, '╉': 1, '┌': 1, '└': 1, '┄': 1
+    \ '─': 1, '┼': 1, '├': 1, '┬': 1, '┴': 1, '╭': 1, '╰': 1, '╫': 1, '╨': 1, '╥': 1, '╟': 1, '╙': 1, '╓': 1, '┎': 1, '┖': 1, '┞': 1, '┟': 1, '┠': 1, '┭': 1, '┰': 1, '┱': 1, '┵': 1, '┸': 1, '┹': 1, '┽': 1, '╀': 1, '╁': 1, '╂': 1, '╃': 1, '╅': 1, '╉': 1, '┌': 1, '└': 1, '┄': 1, '<': 1
     \ },
     \ {
-    \ '═': 1, '╬': 1, '╠': 1, '╦': 1, '╩': 1, '╔': 1, '╚': 1, '╪': 1, '╧': 1, '╤': 1, '╞': 1, '╘': 1, '╒': 1
+    \ '═': 1, '╬': 1, '╠': 1, '╦': 1, '╩': 1, '╔': 1, '╚': 1, '╪': 1, '╧': 1, '╤': 1, '╞': 1, '╘': 1, '╒': 1, '◁': 1
     \ },
     \ {
-    \ '━': 1, '╋': 1, '┣': 1, '┳': 1, '┻': 1, '┏': 1, '┗': 1, '┍': 1, '┕': 1, '┝': 1, '┡': 1, '┢': 1, '┮': 1, '┯': 1, '┲': 1, '┶': 1, '┷': 1, '┺': 1, '┾': 1, '┿': 1, '╄': 1, '╆': 1, '╇': 1, '╈': 1, '╊': 1, '┅': 1
+    \ '━': 1, '╋': 1, '┣': 1, '┳': 1, '┻': 1, '┏': 1, '┗': 1, '┍': 1, '┕': 1, '┝': 1, '┡': 1, '┢': 1, '┮': 1, '┯': 1, '┲': 1, '┶': 1, '┷': 1, '┺': 1, '┾': 1, '┿': 1, '╄': 1, '╆': 1, '╇': 1, '╈': 1, '╊': 1, '┅': 1, '◀': 1
     \ },
     \ {
-    \ '─': 1, '┼': 1, '┤': 1, '┬': 1, '┴': 1, '╮': 1, '╯': 1, '╫': 1, '╨': 1, '╥': 1, '╢': 1, '╜': 1, '╖': 1, '┒': 1, '┚': 1, '┦': 1, '┧': 1, '┨': 1, '┮': 1, '┰': 1, '┲': 1, '┶': 1, '┸': 1, '┺': 1, '┾': 1, '╀': 1, '╁': 1, '╂': 1, '╄': 1, '╆': 1, '╊': 1, '┐': 1, '┘': 1, '┄': 1
+    \ '─': 1, '┼': 1, '┤': 1, '┬': 1, '┴': 1, '╮': 1, '╯': 1, '╫': 1, '╨': 1, '╥': 1, '╢': 1, '╜': 1, '╖': 1, '┒': 1, '┚': 1, '┦': 1, '┧': 1, '┨': 1, '┮': 1, '┰': 1, '┲': 1, '┶': 1, '┸': 1, '┺': 1, '┾': 1, '╀': 1, '╁': 1, '╂': 1, '╄': 1, '╆': 1, '╊': 1, '┐': 1, '┘': 1, '┄': 1, '>': 1
     \ },
     \ {
-    \ '═': 1, '╬': 1, '╣': 1, '╦': 1, '╩': 1, '╗': 1, '╝': 1, '╪': 1, '╧': 1, '╤': 1, '╡': 1, '╛': 1, '╕': 1
+    \ '═': 1, '╬': 1, '╣': 1, '╦': 1, '╩': 1, '╗': 1, '╝': 1, '╪': 1, '╧': 1, '╤': 1, '╡': 1, '╛': 1, '╕': 1, '▷': 1 
     \ },
     \ {
-    \ '━': 1, '╋': 1, '┫': 1, '┳': 1, '┻': 1, '┓': 1, '┛': 1, '┑': 1, '┙': 1, '┥': 1, '┩': 1, '┪': 1, '┭': 1, '┯': 1, '┱': 1, '┵': 1, '┷': 1, '┹': 1, '┽': 1, '┿': 1, '╃': 1, '╅': 1, '╇': 1, '╈': 1, '╉': 1, '┅': 1
+    \ '━': 1, '╋': 1, '┫': 1, '┳': 1, '┻': 1, '┓': 1, '┛': 1, '┑': 1, '┙': 1, '┥': 1, '┩': 1, '┪': 1, '┭': 1, '┯': 1, '┱': 1, '┵': 1, '┷': 1, '┹': 1, '┽': 1, '┿': 1, '╃': 1, '╅': 1, '╇': 1, '╈': 1, '╉': 1, '┅': 1, '▶': 1
     \ },
     \ {
-    \ '│': 1, '┼': 1, '┤': 1, '├': 1, '┬': 1, '╭': 1, '╮': 1, '╪': 1, '╤': 1, '╡': 1, '╞': 1, '╕': 1, '╒': 1, '┍': 1, '┑': 1, '┝': 1, '┞': 1, '┡': 1, '┥': 1, '┦': 1, '┩': 1, '┭': 1, '┮': 1, '┯': 1, '┽': 1, '┾': 1, '┿': 1, '╀': 1, '╃': 1, '╄': 1, '╇': 1, '┌': 1, '┐': 1, '┆': 1, ')': 1
+    \ '│': 1, '┼': 1, '┤': 1, '├': 1, '┬': 1, '╭': 1, '╮': 1, '╪': 1, '╤': 1, '╡': 1, '╞': 1, '╕': 1, '╒': 1, '┍': 1, '┑': 1, '┝': 1, '┞': 1, '┡': 1, '┥': 1, '┦': 1, '┩': 1, '┭': 1, '┮': 1, '┯': 1, '┽': 1, '┾': 1, '┿': 1, '╀': 1, '╃': 1, '╄': 1, '╇': 1, '┌': 1, '┐': 1, '┆': 1, ')': 1, '^': 1
     \ },
     \ {
-    \ '║': 1, '╬': 1, '╣': 1, '╠': 1, '╦': 1, '╔': 1, '╗': 1, '╫': 1, '╥': 1, '╢': 1, '╟': 1, '╖': 1, '╓': 1, '⟫': 1
+    \ '║': 1, '╬': 1, '╣': 1, '╠': 1, '╦': 1, '╔': 1, '╗': 1, '╫': 1, '╥': 1, '╢': 1, '╟': 1, '╖': 1, '╓': 1, '⟫': 1, '△': 1
     \ },
     \ {
-    \ '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┳': 1, '┏': 1, '┓': 1, '┎': 1, '┒': 1, '┟': 1, '┠': 1, '┢': 1, '┧': 1, '┨': 1, '┪': 1, '┰': 1, '┱': 1, '┲': 1, '╁': 1, '╂': 1, '╅': 1, '╆': 1, '╈': 1, '╉': 1, '╊': 1, '┇': 1, '❫': 1
+    \ '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┳': 1, '┏': 1, '┓': 1, '┎': 1, '┒': 1, '┟': 1, '┠': 1, '┢': 1, '┧': 1, '┨': 1, '┪': 1, '┰': 1, '┱': 1, '┲': 1, '╁': 1, '╂': 1, '╅': 1, '╆': 1, '╈': 1, '╉': 1, '╊': 1, '┇': 1, '❫': 1, '▲': 1
     \ },
     \ {
-    \ '│': 1, '┼': 1, '┤': 1, '├': 1, '┴': 1, '╯': 1, '╰': 1, '╪': 1, '╧': 1, '╡': 1, '╞': 1, '╛': 1, '╘': 1, '┕': 1, '┙': 1, '┝': 1, '┟': 1, '┢': 1, '┥': 1, '┧': 1, '┪': 1, '┵': 1, '┶': 1, '┷': 1, '┽': 1, '┾': 1, '┿': 1, '╁': 1, '╅': 1, '╆': 1, '╈': 1, '└': 1, '┘': 1, '┆': 1, ')': 1
+    \ '│': 1, '┼': 1, '┤': 1, '├': 1, '┴': 1, '╯': 1, '╰': 1, '╪': 1, '╧': 1, '╡': 1, '╞': 1, '╛': 1, '╘': 1, '┕': 1, '┙': 1, '┝': 1, '┟': 1, '┢': 1, '┥': 1, '┧': 1, '┪': 1, '┵': 1, '┶': 1, '┷': 1, '┽': 1, '┾': 1, '┿': 1, '╁': 1, '╅': 1, '╆': 1, '╈': 1, '└': 1, '┘': 1, '┆': 1, ')': 1, 'v': 1
     \ },
     \ {
-    \ '║': 1, '╬': 1, '╣': 1, '╠': 1, '╩': 1, '╝': 1, '╚': 1, '╫': 1, '╨': 1, '╢': 1, '╟': 1, '╜': 1, '╙': 1, '⟫': 1
+    \ '║': 1, '╬': 1, '╣': 1, '╠': 1, '╩': 1, '╝': 1, '╚': 1, '╫': 1, '╨': 1, '╢': 1, '╟': 1, '╜': 1, '╙': 1, '⟫': 1, '▽': 1
     \ },
     \ {
-    \ '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┻': 1, '┛': 1, '┗': 1, '┖': 1, '┚': 1, '┞': 1, '┠': 1, '┡': 1, '┦': 1, '┨': 1, '┩': 1, '┸': 1, '┹': 1, '┺': 1, '╀': 1, '╂': 1, '╃': 1, '╄': 1, '╇': 1, '╉': 1, '╊': 1, '┇': 1, '❫': 1
+    \ '┃': 1, '╋': 1, '┫': 1, '┣': 1, '┻': 1, '┛': 1, '┗': 1, '┖': 1, '┚': 1, '┞': 1, '┠': 1, '┡': 1, '┦': 1, '┨': 1, '┩': 1, '┸': 1, '┹': 1, '┺': 1, '╀': 1, '╂': 1, '╃': 1, '╄': 1, '╇': 1, '╉': 1, '╊': 1, '┇': 1, '❫': 1, '▼': 1
     \ }
     \ ]
 
@@ -1344,9 +1356,33 @@ function! DrawSmartLineSlash(direction)
     endif
 endfunction
 
+function! SmartDrawLinesRecordPrePosition()
+    if exists("g:current_cursor_pos")
+        let g:prev_cursor_pos = copy(g:current_cursor_pos)
+    endif
+    let g:current_cursor_pos = [line('.'), virtcol('.')]
+endfunction
+
+
+" 记录上一个移动的位置用于判断箭头的方向和类型
+function! DrawSmartLineAutoGroupSet()
+    augroup DrawSmartLineAutoGroup
+        autocmd!
+        autocmd CursorMoved * call SmartDrawLinesRecordPrePosition()
+    augroup END
+endfunction
+
+function! DrawSmartLineAutoGroupClear()
+    augroup DrawSmartLineAutoGroup
+        autocmd!
+    augroup END
+endfunction
+
+
 
 " 绘制线并且决定边界字符
 function! DrawSmartLineLeftRight(direction)
+    call DrawSmartLineAutoGroupSet()
     let row = line('.')
     " :TODO: 不支持阿拉伯语言或者其它语言中的0宽度字符
 
@@ -1459,6 +1495,7 @@ function! DrawSmartLineEraser(direction, ...)
 endfunction
 
 function! DrawSmartLineUpDown(direction)
+    call DrawSmartLineAutoGroupSet()
     let row = line('.')
 
     let [line_byte_len_array, line_phy_len_array, line_chars_array, index] = ProcessLine(row)
@@ -1663,7 +1700,116 @@ function! TraverseRectangle()
         call DrawSmartLineLeftRight('l')
     endif
 endfunction
+                                        
+                                        
+" :TODO: 根据前一个字符和方向返回箭头字符
+function! SmartDrawLinesGetArrowChar(pre_char, direction)
+    let arrow_char_map = {
+                \ 'up': {
+                \ '-': ''  , '|': '^' , '+': '^' , '.': ''  , "'": ''  , '^': '^' , 'v': ''  , '<': ''  , '>': ''  ,
+                \ '─': ''  , '│': '^'  , '┼': '^' , '┤': '^' , '├': '^' , '┬': ''  , '┴': '^' , '╭': ''  , '╮': ''  , '╯': '^' , '╰': '^' ,
+                \ '━': ''  , '┃': '▲' , '╋': '▲' , '┫': '▲' , '┣': '▲' , '┳': ''  , '┻': '▲' , '┏': ''  , '┓': ''  , '┛': '▲' , '┗': '▲' ,
+                \ '═': ''  , '║': '△' , '╬': '△' , '╣': '△' , '╠': '△' , '╦': ''  , '╩': '△' , '╔': ''  , '╗': ''  , '╝': '△' , '╚': '△' ,
+                \ '╫': '△' , '╪': '^' , '╨': '△' , '╧': '^' , '╥': ''  , '╤': ''  , '╢': '△' , '╡': '^' , '╟': '△' , '╞': '^' , '╜': '△' ,
+                \ '╛': '^' , '╙': '△' , '╘': '^' , '╖': ''  , '╕': ''  , '╓': ''  , '╒': ''  ,
+                \ '┍': ''  , '┎': ''  , '┑': ''  , '┒': ''  , '┕': '^' , '┖': '▲' , '┙': '^' , '┚': '▲' ,
+                \ '┝': '^' , '┞': '▲' , '┟': '^' , '┠': '▲' , '┡': '▲' , '┢': '^' ,
+                \ '┥': '^' , '┦': '▲' , '┧': '^' , '┨': '▲' , '┩': '▲' , '┪': '^' ,
+                \ '┭': ''  , '┮': ''  , '┯': ''  , '┰': ''  , '┱': ''  , '┲': ''  ,
+                \ '┵': '^' , '┶': '^' , '┷': '^' , '┸': '▲' , '┹': '▲' , '┺': '▲' ,
+                \ '┽': '^' , '┾': '^' , '┿': '^' , '╀': '▲' , '╁': '^' , '╂': '▲' , '╃': '▲' ,
+                \ '╄': '▲' , '╅': '^' , '╆': '^' , '╇': '▲' , '╈': '^' , '╉': '▲' , '╊': '▲' ,
+                \ '┌': ''  , '┐': ''  , '└': '^' , '┘': '^' , '┅': ''  , '┄': ''  , '┆': '^' , '┇': '▲' , ')': '^' , '❫': '▲' , '⟫': '△'
+                \ },
+                \   'down': {
+                \ '-': '', '|': 'v', '+': 'v', '.': '', "'": '', '^': '', 'v': 'v', '<': '', '>': '',
+                \ '─': '', '│': 'v', '┼': 'v', '┤': 'v', '├': 'v', '┬': 'v', '┴': '', '╭': 'v', '╮': 'v', '╯': '', '╰': '',
+                \ '━': '', '┃': '▼', '╋': '▼', '┫': '▼', '┣': '▼', '┳': '▼', '┻': '', '┏': '▼', '┓': '▼', '┛': '', '┗': '',
+                \ '═': '', '║': '▽', '╬': '▽', '╣': '▽', '╠': '▽', '╦': '▽', '╩': '', '╔': '▽', '╗': '▽', '╝': '', '╚': '',
+                \ '╫': '▽', '╪': 'v', '╨': '', '╧': '', '╥': '▽', '╤': 'v', '╢': '▽', '╡': 'v', '╟': '▽', '╞': 'v', '╜': '',
+                \ '╛': '', '╙': '', '╘': '', '╖': '▽', '╕': 'v', '╓': '▽', '╒': 'v',
+                \ '┍': 'v', '┎': '▼', '┑': 'v', '┒': '▼', '┕': '', '┖': '', '┙': '', '┚': '',
+                \ '┝': 'v', '┞': 'v', '┟': '▼', '┠': '▼', '┡': 'v', '┢': '▼',
+                \ '┥': 'v', '┦': 'v', '┧': '▼', '┨': '▼', '┩': 'v', '┪': '▼',
+                \ '┭': 'v', '┮': 'v', '┯': 'v', '┰': '▼', '┱': '▼', '┲': '▼',
+                \ '┵': '', '┶': '', '┷': '', '┸': '', '┹': '', '┺': '',
+                \ '┽': 'v', '┾': 'v', '┿': 'v', '╀': 'v', '╁': 'v', '╂': '▼', '╃': 'v',
+                \ '╄': 'v', '╅': '▼', '╆': '▼', '╇': 'v', '╈': '▼', '╉': '▼', '╊': '▼',
+                \ '┌': 'v', '┐': 'v', '└': '', '┘': '', '┅': '', '┄': '', '┆': 'v', '┇': '▼', ')': 'v', '❫': '▼', '⟫': '▽'
+                \ }, 
+                \   'left': {
+                \ '-': '<', '|': '', '+': '<', '.': '', "'": '', '^': '', 'v': '', '<': '<', '>': '',
+                \ '─': '<', '│': '', '┼': '<', '┤': '<', '├': '', '┬': '<', '┴': '<', '╭': '', '╮': '<', '╯': '<', '╰': '',
+                \ '━': '◀', '┃': '', '╋': '◀', '┫': '◀', '┣': '', '┳': '◀', '┻': '◀', '┏': '', '┓': '◀', '┛': '◀', '┗': '',
+                \ '═': '◁', '║': '', '╬': '◁', '╣': '◁', '╠': '', '╦': '◁', '╩': '◁', '╔': '', '╗': '◁', '╝': '◁', '╚': '',
+                \ '╫': '<', '╪': '◁', '╨': '<', '╧': '◁', '╥': '<', '╤': '◁', '╢': '<', '╡': '◁', '╟': '', '╞': '', '╜': '<',
+                \ '╛': '◁', '╙': '', '╘': '', '╖': '<', '╕': '◁', '╓': '', '╒': '',
+                \ '┍': '', '┎': '', '┑': '◀', '┒': '<', '┕': '', '┖': '', '┙': '◀', '┚': '<',
+                \ '┝': '', '┞': '', '┟': '', '┠': '', '┡': '', '┢': '',
+                \ '┥': '◀', '┦': '<', '┧': '<', '┨': '<', '┩': '◀', '┪': '◀',
+                \ '┭': '◀', '┮': '<', '┯': '◀', '┰': '<', '┱': '◀', '┲': '<',
+                \ '┵': '◀', '┶': '<', '┷': '◀', '┸': '<', '┹': '◀', '┺': '<',
+                \ '┽': '◀', '┾': '<', '┿': '◀', '╀': '<', '╁': '<', '╂': '<', '╃': '◀',
+                \ '╄': '<', '╅': '◀', '╆': '<', '╇': '◀', '╈': '◀', '╉': '◀', '╊': '<',
+                \ '┌': '', '┐': '<', '└': '', '┘': '<', '┅': '◀', '┄': '<', '┆': '', '┇': '', ')': '', '❫': '', '⟫': ''
+                \ },
+                \   'right': {
+                \ '-': '>', '|': '', '+': '>', '.': '', "'": '', '^': '', 'v': '', '<': '', '>': '>',
+                \ '─': '>', '│': '', '┼': '>', '┤': '', '├': '>', '┬': '>', '┴': '>', '╭': '>', '╮': '', '╯': '', '╰': '>',
+                \ '━': '▶', '┃': '', '╋': '▶', '┫': '', '┣': '▶', '┳': '▶', '┻': '▶', '┏': '▶', '┓': '', '┛': '', '┗': '▶',
+                \ '═': '▷', '║': '', '╬': '▷', '╣': '', '╠': '▷', '╦': '▷', '╩': '▷', '╔': '▷', '╗': '', '╝': '', '╚': '▷',
+                \ '╫': '>', '╪': '▷', '╨': '>', '╧': '▷', '╥': '>', '╤': '▷', '╢': '', '╡': '', '╟': '>', '╞': '▷', '╜': '',
+                \ '╛': '', '╙': '>', '╘': '▷', '╖': '', '╕': '', '╓': '>', '╒': '▷',
+                \ '┍': '▶', '┎': '>', '┑': '', '┒': '', '┕': '▶', '┖': '>', '┙': '', '┚': '',
+                \ '┝': '▶', '┞': '>', '┟': '>', '┠': '>', '┡': '▶', '┢': '▶',
+                \ '┥': '', '┦': '', '┧': '', '┨': '', '┩': '', '┪': '',
+                \ '┭': '>', '┮': '▶', '┯': '▶', '┰': '>', '┱': '>', '┲': '▶',
+                \ '┵': '>', '┶': '▶', '┷': '▶', '┸': '>', '┹': '>', '┺': '▶',
+                \ '┽': '>', '┾': '▶', '┿': '▶', '╀': '>', '╁': '>', '╂': '>', '╃': '>',
+                \ '╄': '▶', '╅': '>', '╆': '▶', '╇': '▶', '╈': '▶', '╉': '>', '╊': '▶',
+                \ '┌': '>', '┐': '', '└': '>', '┘': '', '┅': '▶', '┄': '>', '┆': '', '┇': '', ')': '', '❫': '', '⟫': ''
+                \ }
+                \ }
+    return get(get(arrow_char_map, a:direction, {}), a:pre_char, '')
+endfunction
 
+" 绘图自动增加箭头功能
+function! SmartDrawLinesAutoAddArrow()
+    " 失效位置记录组
+    call DrawSmartLineAutoGroupClear()
+    " 判断移动的方向
+    if !exists("g:prev_cursor_pos")
+        return
+    endif
+
+    let [row, col] = [line('.'), virtcol('.')]
+    let [pre_row, pre_col] = g:prev_cursor_pos
+
+    if pre_row == row && col > pre_col
+        let direction = 'right'
+    elseif pre_row == row && col < pre_col
+        let direction = 'left'
+    elseif pre_col == col && row > pre_row
+        let direction = 'down'
+    elseif pre_col == col && row < pre_row
+        let direction = 'up'
+    else
+        return
+    endif
+
+    " 获取上一个位置的字符
+    let [byte_len_array, dis_len_array, chars_array, index] = ProcessLine(pre_row, pre_col)
+    let pre_char = chars_array[index]
+    let arraw_char = SmartDrawLinesGetArrowChar(pre_char, direction)
+    if empty(arraw_char)
+        return
+    endif
+    let [cur_byte_len_array, cur_dis_len_array, cur_chars_array, cur_index] = ProcessLine(row, col)
+    let cur_chars_array[index] = arraw_char
+    let cur_byte_len_array[index] = len(arraw_char)
+    let jumpcol = SumList(cur_byte_len_array[0:index])
+    call SetLineStr(cur_chars_array, row, row, jumpcol)
+endfunction
 
 
 " There is a space after the mapping below. In visual mode,
@@ -1684,7 +1830,7 @@ vnoremap <silent>sw <Esc>:call TraverseRectangle()<cr>| " 辅助: 矩形绕行
 
 " 切换绘制的线形并且打印出来
 
-nnoremap <silent> sc :call SwitchSmartDrawLine(0)<CR>| " 辅助: 绘图循环改变线形
+nnoremap <silent> sl :call SwitchSmartDrawLine(0)<CR>| " 辅助: 绘图循环改变线形
 nnoremap <silent> ss :call SwitchSmartDrawLine(1)<CR>| " 辅助: 绘图显示当前线形
 nnoremap <silent> su :call SwitchSmartDrawLineFromCharUnderCursor()<CR>| " 辅助: 绘图根据当前光标下字符改变线形
 nnoremap <silent> sy :call CopyCharUnderCursor()<CR>| " 辅助: 绘图复制当前光标下的字符
@@ -1700,8 +1846,8 @@ nnoremap <silent> sg :call SwitchDefineSmartDrawGraphSet(1)<CR>| " 辅助: 切�
 
 nnoremap <silent> sf :call SwitchSmartDrawLev1Index(1)<CR>| " 辅助: 切换保存形状的大类正向
 nnoremap <silent> sb :call SwitchSmartDrawLev1Index(-1)<CR>| " 辅助: 切换保存形状的大类反向
-nnoremap <silent> sms :call VisualBlockMouseMoveStart()<CR>| " 辅助: 绘图鼠标预览模式开启
-nnoremap <silent> smc :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图鼠标预览模式取消
+nnoremap <silent> so :call VisualBlockMouseMoveStart()<CR>| " 辅助: 绘图鼠标预览模式开启
+nnoremap <silent> sq :call VisualBlockMouseMoveCancel()<CR>| " 辅助: 绘图鼠标预览模式取消
 " 鼠标指针不能行到图形上,不然会导致不能响应命令
 nnoremap <silent> <M-ScrollWheelDown> :call SwitchSmartDrawLev2Index(1)<CR>| " 辅助: 切换保存形状的小类正向
 nnoremap <silent> <M-ScrollWheelUp> :call SwitchSmartDrawLev2Index(-1)<CR>| " 辅助: 切换保存形状的小类反向
@@ -1723,12 +1869,13 @@ nnoremap <silent> <M-l> :call DrawSmartLineLeftRight('l')<CR>| " 辅助: 绘图�
 nnoremap <silent> <M-h> :call DrawSmartLineLeftRight('h')<CR>| " 辅助: 绘图左线绘制
 nnoremap <silent> <M-j> :call DrawSmartLineUpDown('j')<CR>| " 辅助: 绘图下线绘制
 nnoremap <silent> <M-k> :call DrawSmartLineUpDown('k')<CR>| " 辅助: 绘图上线绘制
+nnoremap <silent> sa :call SmartDrawLinesAutoAddArrow()<CR>| " 辅助: 绘图智能增加箭头
 
 " 橡皮擦功能
-nnoremap <silent> <M-Right> :call DrawSmartLineEraser('l')<CR>| " 辅助: 绘图右边橡皮擦
-nnoremap <silent> <M-Left> :call DrawSmartLineEraser('h')<CR>| " 辅助: 绘图左边橡皮擦
-nnoremap <silent> <M-Down> :call DrawSmartLineEraser('j')<CR>| " 辅助: 绘图下边橡皮擦
-nnoremap <silent> <M-Up> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上边橡皮擦
+nnoremap <silent> <C-M-l> :call DrawSmartLineEraser('l')<CR>| " 辅助: 绘图右边橡皮擦
+nnoremap <silent> <C-M-h> :call DrawSmartLineEraser('h')<CR>| " 辅助: 绘图左边橡皮擦
+nnoremap <silent> <C-M-j> :call DrawSmartLineEraser('j')<CR>| " 辅助: 绘图下边橡皮擦
+nnoremap <silent> <C-M-k> :call DrawSmartLineEraser('k')<CR>| " 辅助: 绘图上边橡皮擦
 
 nnoremap <silent> <C-M-Space> :call PasteVisualXreg(1)<CR>| " 辅助: 基于绘图的粘贴完全覆盖
 nnoremap <silent> <C-S-Space> :call PasteVisualXreg(0)<CR>| " 辅助: 基于绘图的粘贴但是忽略空格
@@ -1821,6 +1968,7 @@ Plug 'qindapao/vim-repeat'                                                     "
 " Plug 'WolfgangMehner/bash-support'                                           " bash开发支持
 Plug 'qindapao/auto-pairs'                                                     " 插入模式下自动补全括号
 Plug 'qindapao/ale'                                                            " 异步语法检查和自动格式化框架
+" 如果编辑挂载的远程文件,下面这个插件会导致很卡
 Plug 'qindapao/vim-airline'                                                    " 漂亮的状态栏
 Plug 'qindapao/tabular'                                                        " 自动对齐插件
 " 下面两个插件任选其一
@@ -1831,6 +1979,7 @@ Plug 'qindapao/vim-rhubarb'                                                    "
 " 这个插件功能和vim-flog重复,先屏蔽
 " Plug 'junegunn/gv.vim'                                                         " git树显示插件
 Plug 'qindapao/vim-flog'                                                       " 显示漂亮的git praph插件
+" 如果编辑挂载的远程文件,下面这个插件会导致很卡
 Plug 'qindapao/vim-gitgutter'                                                  " git改变显示插件
 Plug 'qindapao/vimcdoc'                                                        " vim的中文文档
 if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md'
@@ -3976,22 +4125,32 @@ function! SwitchSmartDrawLev1Index(direction)
         let g:SmartDrawShapes['set_index'] = (g:SmartDrawShapes['set_index']-1 + len(g:SmartDrawShapes['value'])) % len(g:SmartDrawShapes['value'])
     endif
 
-    " 更新x寄存器内容
-    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
-    let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
-
+    call UpdateSmartDrawLev2Info()
     call UpdateVisualBlockPopup()
 endfunction
 
 function! SwitchSmartDrawLev2Index(direction)
-    let step_index = g:switch_smart_draw_lev2_step_index
-    let step = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['step'][step_index] * a:direction
+    let step = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['step'][g:switch_smart_draw_lev2_step_index] * a:direction
 
-    let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+step) % len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
-    " 更新x寄存器内容
-    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
-    let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
+    " 如果index是数组,那么极限值是数组第一个元素,否则是'value'中的元素个数
+    if type(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']) == type([])
+        let size_count = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'][0]
+        if a:direction == 1
+            let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'][1] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'][1]+step) % size_count
+        elseif a:direction == -1
+            let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'][1] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'][1]+step+size_count) % size_count
 
+        endif
+    else
+        let size_count = len(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'])
+        if a:direction == 1
+            let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+step) % size_count
+        elseif a:direction == -1
+            let g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index'] = (g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']+step+size_count) % size_count
+        endif
+    endif
+
+    call UpdateSmartDrawLev2Info()
     call UpdateVisualBlockPopup()
 endfunction
 
@@ -4004,11 +4163,36 @@ endfunction
 let g:DefineSmartDrawGraphFunctions = {
     \ 'index': 1,
     \ 'value': [
-    \ ['DefineSmartDrawShapesBasic', [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], 0, 'basic.vim'],
+    \ ['DefineSmartDrawShapesBasic', [0, [60, 0], [60, 0], [60, 0], [60, 0], [600, 0], [600, 0], 0, 0, [600, 0], 0, [40, 0]], 0, 'basic.vim'],
     \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim'],
     \ ['DefineSmartDrawShapesFiglet', [0, 0, 0, 0, 0, 0], 0, 'figlet.vim']
     \ ]
     \ }
+
+" 如果lev2_index是一个数组 [300, 124],证明当前图形由函数动态生成,不可直接取数组元素,而是需要调用函数
+" 第一个值是函数生成图形的极限,第二个值是当前的索引
+" 函数的参数逻辑
+" 如果 step为1号元素为1,那么函数只需要一个参数
+"                     2,那么函数需要两个参数(宽和高)
+function! UpdateSmartDrawLev2Info()
+    " 更新x寄存器中的内容
+    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
+    let step_arr = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['step']
+    if type(lev2_index) == type([])
+        let func_name = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value']
+
+        if step_arr[1] == 1
+            let func_param = lev2_index[1]
+            let @+ = join(call(func_name, [func_param]), "\n")
+        else
+            let func_param_row = lev2_index[1] / step_arr[1] + 1
+            let func_param_col = lev2_index[1] % step_arr[1]
+            let @+ = join(call(func_name, [func_param_row, func_param_col]), "\n")
+        endif
+    else
+        let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
+    endif
+endfunction
 
 
 function! LoadAndUseCustomDrawSetFunctions(func_name, indexes, index, file_name)
@@ -4031,7 +4215,7 @@ function! SwitchDefineSmartDrawGraphSet(is_show)
     if exists('g:SmartDrawShapes')
         let old_index = g:DefineSmartDrawGraphFunctions['index']
         for i in range(len(g:DefineSmartDrawGraphFunctions['value'][old_index][1]))
-            let g:DefineSmartDrawGraphFunctions['value'][old_index][1][i] = g:SmartDrawShapes['value'][i]['index']
+            let g:DefineSmartDrawGraphFunctions['value'][old_index][1][i] = copy(g:SmartDrawShapes['value'][i]['index'])
         endfor
         
         " 记录大类的index
@@ -4043,10 +4227,7 @@ function! SwitchDefineSmartDrawGraphSet(is_show)
 
     call LoadAndUseCustomDrawSetFunctions(g:DefineSmartDrawGraphFunctions['value'][index_value][0], g:DefineSmartDrawGraphFunctions['value'][index_value][1], g:DefineSmartDrawGraphFunctions['value'][index_value][2], g:DefineSmartDrawGraphFunctions['value'][index_value][3])
 
-    " 更新x寄存器中的内容
-    let lev2_index = g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['index']
-    let @+ = join(g:SmartDrawShapes['value'][g:SmartDrawShapes['set_index']]['value'][lev2_index], "\n")
-
+    call UpdateSmartDrawLev2Info()
     if a:is_show
         call UpdateVisualBlockPopup()
     endif
@@ -4070,22 +4251,31 @@ let g:multi_cursors = []
 highlight MultiCursor cterm=reverse gui=reverse guibg=Yellow guifg=Black
 
 " 添加光标的函数
-function! AddCursor(direction)
-    let row = line('.')
-    let virtcol = virtcol('.')
+function! AddCursor(direction, ...)
+    let row = get(a:, 1, line('.'))
+    let virtcol = get(a:, 2, virtcol('.'))
     let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
     let col = SumList(byte_len_arr[0:index])
 
     let length = len(chars_arr[index])
+    let dis_length = strdisplaywidth(chars_arr[index])
     if length == 0
         let length = len(chars_arr[index-1])
         let col -= 2
-        call add(g:multi_cursors, [chars_arr[index-1], row, virtcol-1])
+        let add_char = chars_arr[index-1]
+        let add_row = row
+        let add_col = virtcol - 1
     else
-        call add(g:multi_cursors, [chars_arr[index], row, virtcol])
+        if dis_length == 1 && length != 1
+            let col -= 2
+        endif
+        let add_char = chars_arr[index]
+        let add_row = row
+        let add_col = virtcol
     endif
 
-    call matchaddpos('MultiCursor', [[row, col, length]])
+    let match_id = matchaddpos('MultiCursor', [[row, col, length]])
+    call add(g:multi_cursors, [add_char, add_row, add_col, match_id])
 
     if a:direction == 'l'
         normal! l
@@ -4098,13 +4288,130 @@ function! AddCursor(direction)
     endif
 endfunction
 
+function! VisualBlockAddCursor() range
+    let row_left = line("'<")
+    let row_right = line("'>")
+    let col_left= virtcol("'<")
+    let col_right = virtcol("'>")
+
+    for row in range(row_left, row_right)
+        for col in range(col_left, col_right-1)
+            let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
+
+            if strdisplaywidth(chars_arr[index]) != 2
+                call AddCursor('null', row, col)
+            endif
+        endfor
+    endfor
+endfunction
+
+function! VisualBlockRemoveCursor() range
+    let row_left = line("'<")
+    let row_right = line("'>")
+    let col_left= virtcol("'<")
+    let col_right = virtcol("'>")
+
+    for row in range(row_left, row_right)
+        for col in range(col_left, col_right-1)
+            let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
+
+            if strdisplaywidth(chars_arr[index]) != 2
+                call RemoveCursor('null', row, col)
+            endif
+        endfor
+    endfor
+
+endfunction
+
+
+" 移除某个光标的函数
+function! RemoveCursor(direction, ...)
+    let row = get(a:, 1, line('.'))
+    let virtcol = get(a:, 2, virtcol('.'))
+    let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
+
+    let length = len(chars_arr[index])
+    let new_multi_cursors = []
+    for cursor in g:multi_cursors
+        if length == 0
+            if !(cursor[1] == row && cursor[2] == virtcol - 1)
+                call add(new_multi_cursors, cursor)
+            else
+                call matchdelete(cursor[3])
+            endif
+        else
+            if !(cursor[1] == row && cursor[2] == virtcol)
+                call add(new_multi_cursors, cursor)
+            else
+                call matchdelete(cursor[3])
+            endif
+        endif
+    endfor
+    let g:multi_cursors = new_multi_cursors
+
+    if a:direction == 'l'
+        normal! l
+    elseif a:direction == 'h'
+        normal! h
+    elseif a:direction == 'j'
+        normal! j
+    elseif a:direction == 'k'
+        normal! k
+    endif
+endfunction
+
+function! AddCursorMouseMoveStart()
+    augroup RemoveCursorMouseMove
+        autocmd!
+    augroup END
+
+    set mouse=n
+
+    augroup AddCursorMouseMove
+        autocmd!
+        autocmd CursorMoved * call AddCursor('null')
+    augroup END
+endfunction
+
+function! RemoveCursorMouseMoveStart()
+    augroup AddCursorMouseMove
+        autocmd!
+    augroup END
+
+    set mouse=n
+
+    augroup RemoveCursorMouseMove
+        autocmd!
+        autocmd CursorMoved * call RemoveCursor('null')
+    augroup END
+endfunction
+
+function! DisableCursorMouseMove()
+    augroup RemoveCursorMouseMove
+        autocmd!
+    augroup END
+
+    augroup AddCursorMouseMove
+        autocmd!
+    augroup END
+    
+    set mouse=a
+endfunction
+
 " 删除所有光标的函数
 function! ClearCursors()
     let g:multi_cursors = []
     call clearmatches()
+    augroup AddCursorMouseMove
+        autocmd!
+    augroup END
+    augroup RemoveCursorMouseMove
+        autocmd!
+    augroup END
+    set mouse=a
 endfunction
 
-function! CreateRectangleString(data, is_delate_ori_data)
+function! CreateRectangleString(data, is_delate_ori_data, is_keep_highlight)
     " 获取矩形的最小和最大行、列
     let min_row = min(map(copy(a:data), 'v:val[1]'))
     let max_row = max(map(copy(a:data), 'v:val[1]'))
@@ -4115,7 +4422,7 @@ function! CreateRectangleString(data, is_delate_ori_data)
     let rectangle = []
     for i in range(min_row, max_row + 1)
         let row = []
-        for j in range(min_col, max_col + 1)
+        for j in range(min_col, max_col+1)
             call add(row, ' ')
         endfor
         call add(rectangle, row)
@@ -4123,9 +4430,7 @@ function! CreateRectangleString(data, is_delate_ori_data)
 
     " 遍历数据，插入字符到矩形字符串中
     for item in a:data
-        let char = item[0]
-        let row = item[1]
-        let col = item[2]
+        let [char, row, col] = [item[0], item[1], item[2]]
         let rectangle[row - min_row][col - min_col] = char
         " 如果是宽字符那么后面的字符设置为空
         if strdisplaywidth(char) == 2
@@ -4136,21 +4441,44 @@ function! CreateRectangleString(data, is_delate_ori_data)
     " 将二维矩阵转换为字符串
     let result = []
     for row in rectangle
-        call add(result, join(row, ''))
+        let row = join(row, '')
+        " :TODO: 这里有一个问题,就是删除了所有的行尾空格后,可能导致覆盖模式也
+        " 缺少尾部的填充空格。所有这里就删除最后一个空格就好
+        " 具体策略可以根据业务调整
+        " let row = substitute(row, '\s\+$', '', '')
+        let row = substitute(row, '\s$', '', '')
+        call add(result, row)
     endfor
 
     " 放入x寄存器中用于绘图
     let @+ = join(result, "\n")
 
-    " 清空高亮组
-    call ClearCursors()
     " 是否删除原字符
     if a:is_delate_ori_data
         for item in a:data
-            let row = item[1]
-            let col = item[2]
+            let [row, col] = [item[1], item[2]]
             call DrawSmartLineEraser('null', row, col)
         endfor
+    endif
+    " 清空高亮组
+    if a:is_keep_highlight && a:is_delate_ori_data
+        let space_cursors = []
+        for cursor in g:multi_cursors
+            call add(space_cursors, [cursor[1], cursor[2]])
+            if strdisplaywidth(cursor[0]) == 2
+                call add(space_cursors, [cursor[1], cursor[2]+1])
+            endif
+        endfor
+
+        call ClearCursors()
+
+        " :TODO: 这里生成高亮组后如果填充unicode字符会造成混乱,所以如果要填充，从行的后面往前填充
+        " 固定高亮替换字符的功能如果用弹出窗口实现可能更好,不过现在也够用了。
+        for item in space_cursors
+            call AddCursor('null', item[0], item[1])
+        endfor
+    else
+        call ClearCursors()
     endif
 endfunction
 
@@ -4160,10 +4488,17 @@ nnoremap <silent> <C-S-J> :call AddCursor('j')<CR>
 nnoremap <silent> <C-S-K> :call AddCursor('k')<CR>
 nnoremap <silent> <C-S-L> :call AddCursor('l')<CR>
 nnoremap <silent> <C-S-H> :call AddCursor('h')<CR>
+nnoremap <silent> si :call AddCursorMouseMoveStart()<CR>
+nnoremap <silent> sj :call RemoveCursorMouseMoveStart()<CR>
+nnoremap <silent> sd :call DisableCursorMouseMove()<CR>
+vnoremap <silent> si :call VisualBlockAddCursor()<CR>
+vnoremap <silent> sj :call VisualBlockRemoveCursor()<CR>
 
-nnoremap <silent> <C-S-G> :call ClearCursors()<CR>
-nnoremap <silent> <C-x> :call CreateRectangleString(g:multi_cursors, 0)<CR>
-nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1)<CR>
+nnoremap <silent> <C-S-C> :call ClearCursors()<CR>
+nnoremap <silent> <C-x> :call CreateRectangleString(g:multi_cursors, 0, 0)<CR>
+nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1, 0)<CR>
+nnoremap <silent> <C-S-G> :call CreateRectangleString(g:multi_cursors, 1, 1)<CR>
+" <M-S-LeftMouse> 可以让鼠标进入块选择模式,然后可以方便的进行各种操作
 
 
 " 代码笔记跳转功能 {
