@@ -1612,10 +1612,13 @@ function! VisualReplaceChar() range
     " 进入命令模式并执行替换操作
     if strdisplaywidth(char) == 2
         execute "normal! :s/\\%V  /" . char . "/g\<CR>"
+    elseif strdisplaywidth(char) == 1 && len(char) != 1
+        execute "normal! :s/\\%V /" . char . "/g\<CR>"
     else
         execute "normal! :s/\\%V /" . '\' . char . "/g\<CR>"
     endif
-
+    
+    let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
     let col_byte_start = SumList(start_byte_len_arr[0:start_index])
     call cursor(line_start, col_byte_start)
 endfunction
