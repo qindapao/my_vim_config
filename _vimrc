@@ -1705,7 +1705,6 @@ function! TraverseRectangle()
 endfunction
                                         
                                         
-" :TODO: 根据前一个字符和方向返回箭头字符
 function! SmartDrawLinesGetArrowChar(pre_char, direction)
     let arrow_char_map = {
                 \ 'up': {
@@ -1794,8 +1793,12 @@ function! SmartDrawLinesAutoAddArrow()
         let direction = 'left'
     elseif pre_col == col && row > pre_row
         let direction = 'down'
+        " 为了和左右的策略保持一致
+        let row -= 1
     elseif pre_col == col && row < pre_row
+        " 为了和左右的策略保持一致
         let direction = 'up'
+        let row += 1
     else
         return
     endif
