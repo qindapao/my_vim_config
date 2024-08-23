@@ -1288,17 +1288,6 @@ function! SceneApostrophe(up, down, left, right, char_category_indexs)
     return (( a:up == '|' || a:up == ')' ) && a:left == '-' && !(( a:down == '|' || a:down == ')' ) || ( a:right == '|' || a:right == ')' )))
 endfunction
 
-function! SumList(list)
-    let sum = 0
-    for item in a:list
-        let sum += item
-    endfor
-    return sum
-endfunction
-
-
-
-
 function! ProcessLine(row, ...)
     if a:row < 0
         return [[], 0]
