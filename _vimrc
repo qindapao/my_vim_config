@@ -465,7 +465,7 @@ function! PasteVisualXreg(is_space_replace)
     let col = virtcol('.')
     for i in range(len(reg_text))
         let row = start_row + i
-        let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
+        let [byte_len_arr, chars_arr, index] = ProcessLine(row, col)
 
         if i == 0
             " 这里如果发生了空格填充那么需要把光标位置填充正确
@@ -1137,19 +1137,39 @@ function! CopyCharUnderCursor()
     let @+ = current_char
 endfunction
 
-
 function! ReplaceCharUnderCursor(direction)
     " 获取当前行的内容
     let l:line = getline('.')
     let cursor_char = matchstr(l:line, '\%' . col('.') . 'c.')
 
+    let reg_content = getreg('+')
+    let cleaned_reg_content = substitute(reg_content, '\s\+', '', 'g')
+
+    if exists("g:replace_char_under_cursor_chars")
+        " 检查寄存器的内容是否有变更
+        let prev_content = join(g:replace_char_under_cursor_chars['value'], '')
+
+        if cleaned_reg_content != prev_content
+            " 更新保存的内容
+            let g:replace_char_under_cursor_chars['value'] = split(cleaned_reg_content, '\zs')
+            let g:replace_char_under_cursor_chars['index'] = 0
+        else
+            " 更新index
+            let g:replace_char_under_cursor_chars['index'] = (g:replace_char_under_cursor_chars['index']+1) % len(g:replace_char_under_cursor_chars['value'])
+        endif
+    else
+        let g:replace_char_under_cursor_chars = {'index': 0, 'value': []}
+        let g:replace_char_under_cursor_chars['value'] = split(cleaned_reg_content, '\zs')
+    endif
+
+    let now_char_index = g:replace_char_under_cursor_chars['index']
+    let now_char = g:replace_char_under_cursor_chars['value'][now_char_index]
+
     " 替换目标位置的字符
-    execute "normal! r" . @+
-    " 获取替换后的字符
-    let new_char = @+
+    execute "normal! r" . now_char
 
     " 获取替换后字符的宽度
-    let new_char_width = strdisplaywidth(new_char)
+    let new_char_width = strdisplaywidth(now_char)
     let cursor_char_width = strdisplaywidth(cursor_char)
     if cursor_char_width == 0
         let cursor_char_width = 1
@@ -1281,7 +1301,7 @@ endfunction
 
 function! ProcessLine(row, ...)
     if a:row < 0
-        return [[], [], [], 0]
+        return [[], [], 0]
     endif
 
     let line_str = getline(a:row)
@@ -1289,50 +1309,48 @@ function! ProcessLine(row, ...)
     let phy_col = get(a:, 1, virtcol('.'))
 
     let line_byte_len_array = []
-    let line_phy_len_array = []
     let line_chars_array = []
     let index = 0
     let total_phy_len = 0
 
     for char in split(line_str, '\zs')
-        " 累加字符的长度
-        let phy_len = strdisplaywidth(char)
+        " 大部分的字符都是空格,所以空格特殊处理提速
         let total_phy_len += 1
-
-        " 放到两个长度数组中
-        call add(line_byte_len_array, len(char))
-        call add(line_phy_len_array, strdisplaywidth(char))
-        call add(line_chars_array, char)
-
-        if phy_len == 2
-            call add(line_byte_len_array, 0)
-            call add(line_phy_len_array, 0)
-            call add(line_chars_array, '')
-        endif
-
-        " 记录字符数量
         if total_phy_len < phy_col
             let index += 1
         endif
-        if phy_len == 2
-            let total_phy_len += 1
 
-            if total_phy_len < phy_col
-                let index += 1
+        if char == ' '
+            call add(line_byte_len_array, 1)
+            call add(line_chars_array, ' ')
+        else
+            " 累加字符的长度
+            let phy_len = strdisplaywidth(char)
+
+            " 放到两个长度数组中
+            call add(line_byte_len_array, len(char))
+            call add(line_chars_array, char)
+
+            if phy_len == 2
+                call add(line_byte_len_array, 0)
+                call add(line_chars_array, '')
+                let total_phy_len += 1
+
+                if total_phy_len < phy_col
+                    let index += 1
+                endif
             endif
         endif
     endfor
 
     " 如果最后字符的长度小于phy_col,用空格填充
-    let sum_len = SumList(line_phy_len_array)
-    if sum_len < phy_col
-        call extend(line_byte_len_array, repeat([1], phy_col - sum_len))
-        call extend(line_phy_len_array, repeat([1], phy_col - sum_len))
-        call extend(line_chars_array, repeat([' '], phy_col - sum_len))
-        let index = len(line_byte_len_array) - 1
+    if total_phy_len < phy_col
+        call extend(line_byte_len_array, repeat([1], phy_col - total_phy_len))
+        call extend(line_chars_array, repeat([' '], phy_col - total_phy_len))
+        let index = phy_col - 1
     endif
 
-    return [line_byte_len_array, line_phy_len_array, line_chars_array, index]
+    return [line_byte_len_array, line_chars_array, index]
 endfunction
 
 " 绘制斜线(直接简单的实现)
@@ -1382,13 +1400,26 @@ endfunction
 
 " 绘制线并且决定边界字符
 function! DrawSmartLineLeftRight(direction)
+    " let start_time = reltime()
     call DrawSmartLineAutoGroupSet()
     let row = line('.')
     " :TODO: 不支持阿拉伯语言或者其它语言中的0宽度字符
 
-    let [line_byte_len_array, line_phy_len_array, line_chars_array, index] = ProcessLine(row)
-    let [up_line_byte_len_array, up_line_phy_len_array, up_line_chars_array, up_index] = ProcessLine(row-1)
-    let [down_line_byte_len_array, down_line_phy_len_array, down_line_chars_array, down_index] = ProcessLine(row+1)
+    let [line_byte_len_array, line_chars_array, index] = ProcessLine(row)
+
+    if strdisplaywidth(line_chars_array[index]) == 0
+        " 中文先替换成两个空格
+        let line_chars_array[index-1] = ' '
+        let line_chars_array[index] = ' '
+        let line_byte_len_array[index-1] = 1
+        let line_byte_len_array[index] = 1
+        if a:direction == 'l'
+            let index -= 1
+        endif
+    endif
+
+    let [up_line_byte_len_array, up_line_chars_array, up_index] = ProcessLine(row-1)
+    let [down_line_byte_len_array, down_line_chars_array, down_index] = ProcessLine(row+1)
 
     let col = SumList(line_byte_len_array[0:index])
 
@@ -1451,33 +1482,50 @@ function! DrawSmartLineLeftRight(direction)
     let col = SumList(line_byte_len_array[0:index])
 
     call SetLineStr(line_chars_array, row, row, (a:direction=='l')?col+1:col-line_byte_len_array[index])
+    " let elapsed_time = reltimefloat(reltime(start_time))
+    " echo "left right执行时间: " . elapsed_time . " 秒"
 endfunction
 
 function! DrawSmartLineEraser(direction, ...)
 
     let row = get(a:, 1, line('.'))
     let virtcol = get(a:, 2, virtcol('.'))
+    " 默认情况下橡皮擦替换成空格,如果传入一个字符,那么使用传入的字符
+    let replace_char = get(a:, 3, ' ')
 
-    let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row, virtcol)
-    let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
-    let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
+    let [byte_len_arr, line_chars_arr, index] = ProcessLine(row, virtcol)
+    let [up_byte_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
+    let [down_byte_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
 
     let col = SumList(byte_len_arr[0:index])
-    if phy_len_arr[index] == 2
-        let line_chars_arr[index] = '  '
-    elseif phy_len_arr[index] == 1
-        let line_chars_arr[index] = ' '
-    elseif phy_len_arr[index] == 0
-        let line_chars_arr[index-1] = '  '
+    let index_char_phylen = strdisplaywidth(line_chars_arr[index])
+    if index_char_phylen == 2
+        if strdisplaywidth(replace_char) == 2
+            let line_chars_arr[index] = replace_char
+        else
+            let line_chars_arr[index] = repeat(replace_char, 2)
+        endif
+    elseif index_char_phylen == 1
+        if strdisplaywidth(replace_char) == 2
+            let line_chars_arr[index] = replace_char
+            let line_chars_arr[index+1] = ''
+        else
+            let line_chars_arr[index] = replace_char
+        endif
+    elseif index_char_phylen == 0
+        if strdisplaywidth(replace_char) == 2
+            let line_chars_arr[index-1] = replace_char
+        else
+            let line_chars_arr[index-1] = repeat(replace_char, 2)
+        endif
     endif
-
 
     call setline(row, join(line_chars_arr, ''))
 
     if a:direction != 'null'
-        let [byte_len_arr, phy_len_arr, line_chars_arr, index] = ProcessLine(row, virtcol)
-        let [up_byte_len_arr, up_phy_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
-        let [down_byte_len_arr, down_phy_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
+        let [byte_len_arr, line_chars_arr, index] = ProcessLine(row, virtcol)
+        let [up_byte_len_arr, up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
+        let [down_byte_len_arr, down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
         let col = SumList(byte_len_arr[0:index])
 
         if a:direction == 'l'
@@ -1495,14 +1543,35 @@ function! DrawSmartLineEraser(direction, ...)
 endfunction
 
 function! DrawSmartLineUpDown(direction)
+    " let start_time = reltime()
     call DrawSmartLineAutoGroupSet()
     let row = line('.')
 
-    let [line_byte_len_array, line_phy_len_array, line_chars_array, index] = ProcessLine(row)
-    let [up1_line_byte_len_array, up1_line_phy_len_array, up1_line_chars_array, up1_index] = ProcessLine(row-1)
-    let [up2_line_byte_len_array, up2_line_phy_len_array, up2_line_chars_array, up2_index] = ProcessLine(row-2)
-    let [down1_line_byte_len_array, down1_line_phy_len_array, down1_line_chars_array, down1_index] = ProcessLine(row+1)
-    let [down2_line_byte_len_array, down2_line_phy_len_array, down2_line_chars_array, down2_index] = ProcessLine(row+2)
+    let [line_byte_len_array, line_chars_array, index] = ProcessLine(row)
+
+    if strdisplaywidth(line_chars_array[index]) == 0
+        let line_chars_array[index-1] = ' '
+        let line_chars_array[index] = ' '
+        let line_byte_len_array[index-1] = 1
+        let line_byte_len_array[index] = 1
+
+        if exists("g:prev_cursor_pos")
+            let cur_col = virtcol('.')
+            let [prev_row, prev_col] = g:prev_cursor_pos
+            if prev_col != cur_col
+                let index -= 1
+                " 并且修复当前列(这个实现非常的奇怪,所以最好还是手动先删除中文字符)
+                " 这就是为了阻止SmartDrawLinesRecordPrePosition获取current_cursor_pos
+                let g:current_cursor_pos = copy(g:prev_cursor_pos)
+            endif
+        endif
+    endif
+
+
+    let [up1_line_byte_len_array, up1_line_chars_array, up1_index] = ProcessLine(row-1)
+    let [up2_line_byte_len_array, up2_line_chars_array, up2_index] = ProcessLine(row-2)
+    let [down1_line_byte_len_array, down1_line_chars_array, down1_index] = ProcessLine(row+1)
+    let [down2_line_byte_len_array, down2_line_chars_array, down2_index] = ProcessLine(row+2)
 
     let col = SumList(line_byte_len_array[0:index])
 
@@ -1584,13 +1653,14 @@ function! DrawSmartLineUpDown(direction)
 
 
     call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
+    " let elapsed_time = reltimefloat(reltime(start_time))
+    " echo "up down执行时间: " . elapsed_time . " 秒"
 endfunction
 " 进入可视模式前记录光标位置
 augroup VisualModeMappings
     autocmd!
     autocmd ModeChanged *:[vV\x16]* let g:initial_pos_before_enter_visual = [line('.'), virtcol('.')]
 augroup END
-
 
 function! VisualReplaceToSpace()
     " 重新选择可视选框
@@ -1602,7 +1672,7 @@ endfunction
 
 function! VisualReplaceChar() range
     let [line_start, col_start] = [g:initial_pos_before_enter_visual[0], g:initial_pos_before_enter_visual[1]]
-    let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
+    let [start_byte_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
 
     let char = getreg('+')
     let char = empty(char) ? ' ' : strcharpart(char, 0, 1)
@@ -1618,7 +1688,7 @@ function! VisualReplaceChar() range
         execute "normal! :s/\\%V /" . '\' . char . "/g\<CR>"
     endif
     
-    let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
+    let [start_byte_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
     let col_byte_start = SumList(start_byte_len_arr[0:start_index])
     call cursor(line_start, col_byte_start)
 endfunction
@@ -1636,7 +1706,7 @@ function! TraverseRectangle()
     let col_right = virtcol("'>")
     let col_end = (col_left==col_start)?col_right:col_left
 
-    let [start_byte_len_arr, start_phy_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
+    let [start_byte_len_arr, start_chars_arr, start_index] = ProcessLine(line_start, col_start)
     let col_byte_start = SumList(start_byte_len_arr[0:start_index])
     call cursor(line_start, col_byte_start)
 
@@ -1804,13 +1874,13 @@ function! SmartDrawLinesAutoAddArrow()
     endif
 
     " 获取上一个位置的字符
-    let [byte_len_array, dis_len_array, chars_array, index] = ProcessLine(pre_row, pre_col)
+    let [byte_len_array, chars_array, index] = ProcessLine(pre_row, pre_col)
     let pre_char = chars_array[index]
     let arraw_char = SmartDrawLinesGetArrowChar(pre_char, direction)
     if empty(arraw_char)
         return
     endif
-    let [cur_byte_len_array, cur_dis_len_array, cur_chars_array, cur_index] = ProcessLine(row, col)
+    let [cur_byte_len_array, cur_chars_array, cur_index] = ProcessLine(row, col)
     let cur_chars_array[index] = arraw_char
     let cur_byte_len_array[index] = len(arraw_char)
     let jumpcol = SumList(cur_byte_len_array[0:index])
@@ -4260,7 +4330,7 @@ highlight MultiCursor cterm=reverse gui=reverse guibg=Yellow guifg=Black
 function! AddCursor(direction, ...)
     let row = get(a:, 1, line('.'))
     let virtcol = get(a:, 2, virtcol('.'))
-    let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
+    let [byte_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
     let col = SumList(byte_len_arr[0:index])
 
     let length = len(chars_arr[index])
@@ -4302,10 +4372,11 @@ function! VisualBlockAddCursor() range
 
     for row in range(row_left, row_right)
         for col in range(col_left, col_right-1)
-            let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
+            let [byte_len_arr, chars_arr, index] = ProcessLine(row, col)
 
             if strdisplaywidth(chars_arr[index]) != 2
                 call AddCursor('null', row, col)
+                call cursor(row, SumList(byte_len_arr[0:index]))
             endif
         endfor
     endfor
@@ -4319,10 +4390,11 @@ function! VisualBlockRemoveCursor() range
 
     for row in range(row_left, row_right)
         for col in range(col_left, col_right-1)
-            let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, col)
+            let [byte_len_arr, chars_arr, index] = ProcessLine(row, col)
 
             if strdisplaywidth(chars_arr[index]) != 2
                 call RemoveCursor('null', row, col)
+                call cursor(row, SumList(byte_len_arr[0:index]))
             endif
         endfor
     endfor
@@ -4334,7 +4406,7 @@ endfunction
 function! RemoveCursor(direction, ...)
     let row = get(a:, 1, line('.'))
     let virtcol = get(a:, 2, virtcol('.'))
-    let [byte_len_arr, phy_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
+    let [byte_len_arr, chars_arr, index] = ProcessLine(row, virtcol)
 
     let length = len(chars_arr[index])
     let new_multi_cursors = []
@@ -4417,7 +4489,7 @@ function! ClearCursors()
     set mouse=a
 endfunction
 
-function! CreateRectangleString(data, is_delate_ori_data, is_keep_highlight)
+function! CreateRectangleString(data, is_delate_ori_data, replace_char)
     " 获取矩形的最小和最大行、列
     let min_row = min(map(copy(a:data), 'v:val[1]'))
     let max_row = max(map(copy(a:data), 'v:val[1]'))
@@ -4463,30 +4535,21 @@ function! CreateRectangleString(data, is_delate_ori_data, is_keep_highlight)
     if a:is_delate_ori_data
         for item in a:data
             let [row, col] = [item[1], item[2]]
-            call DrawSmartLineEraser('null', row, col)
+            call DrawSmartLineEraser('null', row, col, a:replace_char)
         endfor
     endif
-    " 清空高亮组
-    if a:is_keep_highlight && a:is_delate_ori_data
-        let space_cursors = []
-        for cursor in g:multi_cursors
-            call add(space_cursors, [cursor[1], cursor[2]])
-            if strdisplaywidth(cursor[0]) == 2
-                call add(space_cursors, [cursor[1], cursor[2]+1])
-            endif
-        endfor
 
-        call ClearCursors()
+    call ClearCursors()
 
-        " :TODO: 这里生成高亮组后如果填充unicode字符会造成混乱,所以如果要填充，从行的后面往前填充
-        " 固定高亮替换字符的功能如果用弹出窗口实现可能更好,不过现在也够用了。
-        for item in space_cursors
-            call AddCursor('null', item[0], item[1])
-        endfor
-    else
-        call ClearCursors()
-    endif
 endfunction
+
+" 替换高亮字符组中的字符为+寄存器中的第一个字符(如果寄存器中内容为空替换成空格)
+function! ReplaceHighLightGroupToSystemReg()
+    let char = getreg('+')
+    let char = empty(char) ? ' ' : strcharpart(char, 0, 1)
+    call CreateRectangleString(g:multi_cursors, 1, char)
+endfunction
+
 
 " 绑定快捷键
 nnoremap <silent> <C-S-N> :call AddCursor('null')<CR>
@@ -4501,9 +4564,9 @@ vnoremap <silent> si :call VisualBlockAddCursor()<CR>
 vnoremap <silent> sj :call VisualBlockRemoveCursor()<CR>
 
 nnoremap <silent> <C-S-C> :call ClearCursors()<CR>
-nnoremap <silent> <C-x> :call CreateRectangleString(g:multi_cursors, 0, 0)<CR>
-nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1, 0)<CR>
-nnoremap <silent> <C-S-G> :call CreateRectangleString(g:multi_cursors, 1, 1)<CR>
+nnoremap <silent> <C-x> :call CreateRectangleString(g:multi_cursors, 0, ' ')<CR>
+nnoremap <silent> <C-S-X> :call CreateRectangleString(g:multi_cursors, 1, ' ')<CR>
+nnoremap <silent> <C-S-G> :call ReplaceHighLightGroupToSystemReg()<CR>
 " <M-S-LeftMouse> 可以让鼠标进入块选择模式,然后可以方便的进行各种操作
 
 
