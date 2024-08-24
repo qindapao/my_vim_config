@@ -1288,7 +1288,83 @@ function! SceneApostrophe(up, down, left, right, char_category_indexs)
     return (( a:up == '|' || a:up == ')' ) && a:left == '-' && !(( a:down == '|' || a:down == ')' ) || ( a:right == '|' || a:right == ')' )))
 endfunction
 
+function! GetDoubleWidthCharCols(row, ...)
+    let l:cols = []
+    let l:col = 1
+    let l:line = get(a:, 1, getline(a:row))
+    let l:len = len(l:line)
+
+    " 使用正则表达式匹配宽度为 2 的字符
+    let l:pattern = '[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]'
+
+    while l:col <= l:len
+        " 查找下一个匹配的字符位置
+        let l:pos = matchstrpos(l:line, l:pattern, l:col - 1)
+        if empty(l:pos) || l:pos[1] == -1
+            break
+        endif
+
+        " 这里必须加1才是正式的字节列
+        call add(l:cols, virtcol([a:row, l:pos[1]+1]))
+
+        " :TODO: 这里的3写死了,后面可以改成len(pos[0])
+        " 更新当前列位置，跳过匹配的字符
+        let l:col = l:pos[1] + 3
+    endwhile
+    
+    return l:cols
+endfunction
+
+
+
+" 这个是ProcessLine的低效率版本
+" function! ProcessLine(row, ...)
+"     " vim中virtcol返回的是显示列,考虑制表符和多字节字符的实际显示宽度
+"     " col返回的是基于字节的列
+"     " virtcol2col 虚拟列转换成字节列
+"     if a:row < 0
+"         return [[], 0]
+"     endif
+
+"     let line_str = getline(a:row)
+"     " 获取传入的phy_col参数，如果未传入则使用virtcol('.')
+"     let phy_col = get(a:, 1, virtcol('.'))
+
+"     let line_chars_array = []
+"     let real_phy_width = virtcol([a:row, '$'])-1
+"     " virtcol([a:row, '$']) - 1 和 strdisplaywidth(line_str) 的执行效率谁更高并不一定
+"     " 目前并没有测试
+"     let max_width = max([phy_col, real_phy_width])
+"     call extend(line_chars_array, repeat([' '], max_width))
+"     let char_list = split(line_str, '\zs')
+"     let total_phy_len = 0
+
+"     for char in char_list
+"         " 大部分的字符都是空格,所以空格特殊处理提速
+"         if char == ' '
+"             let total_phy_len += 1
+"         else
+"             " 放到两个长度数组中
+"             let line_chars_array[total_phy_len] = char
+"             let total_phy_len += 1
+
+"             if strdisplaywidth(char) == 2
+"                 let line_chars_array[total_phy_len] = ''
+"                 let total_phy_len += 1
+"             endif
+"         endif
+"     endfor
+
+"     " phy_col 从 1开始 而数组索引从0开始
+"     return [line_chars_array, phy_col - 1]
+" endfunction
+
+
+
 function! ProcessLine(row, ...)
+    " vim中virtcol返回的是显示列,考虑制表符和多字节字符的实际显示宽度
+    " col返回的是基于字节的列
+    " virtcol2col 虚拟列转换成字节列
     if a:row < 0
         return [[], 0]
     endif
@@ -1298,43 +1374,22 @@ function! ProcessLine(row, ...)
     let phy_col = get(a:, 1, virtcol('.'))
 
     let line_chars_array = []
-    let index = 0
-    let total_phy_len = 0
+    " virtcol([a:row, '$']) - 1 和 strdisplaywidth(line_str) 的执行效率谁更高并不一定
+    " 目前并没有测试
+    let real_phy_width = virtcol([a:row, '$'])-1
+    let max_width = max([phy_col, real_phy_width])
+    let double_width_chars_indexs = GetDoubleWidthCharCols(a:row, line_str)
 
-    for char in split(line_str, '\zs')
-        " 大部分的字符都是空格,所以空格特殊处理提速
-        let total_phy_len += 1
-        if total_phy_len < phy_col
-            let index += 1
-        endif
-
-        if char == ' '
-            call add(line_chars_array, ' ')
-        else
-            " 累加字符的长度
-            let phy_len = strdisplaywidth(char)
-
-            " 放到两个长度数组中
-            call add(line_chars_array, char)
-
-            if phy_len == 2
-                call add(line_chars_array, '')
-                let total_phy_len += 1
-
-                if total_phy_len < phy_col
-                    let index += 1
-                endif
-            endif
-        endif
-    endfor
-
-    " 如果最后字符的长度小于phy_col,用空格填充
-    if total_phy_len < phy_col
-        call extend(line_chars_array, repeat([' '], phy_col - total_phy_len))
-        let index = phy_col - 1
+    let line_chars_array = split(line_str, '\zs')
+    if !empty(double_width_chars_indexs)
+        for insert_index in double_width_chars_indexs
+            " 这里必须减1才是真实的数组索引
+            call insert(line_chars_array, '', insert_index-1)
+        endfor
     endif
 
-    return [line_chars_array, index]
+    call extend(line_chars_array, repeat([' '], max_width-len(line_chars_array)))
+    return [line_chars_array, phy_col - 1]
 endfunction
 
 " 绘制斜线(直接简单的实现)
@@ -1462,8 +1517,8 @@ function! DrawSmartLineLeftRight(direction)
     let col = len(join(line_chars_array[0:index], ''))
 
     call SetLineStr(line_chars_array, row, row, (a:direction=='l')?col+1:col-len(line_chars_array[index]))
-    " let elapsed_time = reltimefloat(reltime(start_time))
-    " echo "left right执行时间: " . elapsed_time . " 秒"
+    " let elapsed_time = reltimefloat(reltime(start_time)) * 1000
+    " echo "left right执行时间: " . elapsed_time . " ms"
 endfunction
 
 function! DrawSmartLineEraser(direction, ...)
@@ -1477,7 +1532,6 @@ function! DrawSmartLineEraser(direction, ...)
     let [up_line_chars_arr, up_index] = ProcessLine(row-1, virtcol)
     let [down_line_chars_arr, down_index] = ProcessLine(row+1, virtcol)
 
-    let col = len(join(line_chars_arr[0:index], ''))
     let index_char_phylen = strdisplaywidth(line_chars_arr[index])
     if index_char_phylen == 2
         if strdisplaywidth(replace_char) == 2
@@ -1551,8 +1605,6 @@ function! DrawSmartLineUpDown(direction)
     let [down1_line_chars_array, down1_index] = ProcessLine(row+1)
     let [down2_line_chars_array, down2_index] = ProcessLine(row+2)
 
-    let col = len(join(line_chars_array[0:index], ''))
-
     " 获取前一个字符的上下左右
     if a:direction == 'j'
         let pre_down = g:SmartDrawLines[g:SmartDrawLineIndex][1]
@@ -1625,14 +1677,15 @@ function! DrawSmartLineUpDown(direction)
 
     if a:direction == 'j'
         let next_col = len(join(down1_line_chars_array[0:down1_index], ''))
+        let set_row = row+1
     else
         let next_col = len(join(up1_line_chars_array[0:up1_index], ''))
+        let set_row = row-1
     endif
 
-
-    call SetLineStr(line_chars_array, row, (a:direction=='j')?row+1:row-1,next_col)
-    " let elapsed_time = reltimefloat(reltime(start_time))
-    " echo "up down执行时间: " . elapsed_time . " 秒"
+    call SetLineStr(line_chars_array, row, set_row, next_col)
+    " let elapsed_time = reltimefloat(reltime(start_time)) * 1000
+    " echo "up down执行时间: " . elapsed_time . " ms"
 endfunction
 " 进入可视模式前记录光标位置
 augroup VisualModeMappings
