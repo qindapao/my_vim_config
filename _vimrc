@@ -1373,25 +1373,25 @@ function! ProcessLine(row, ...)
     " 获取传入的phy_col参数，如果未传入则使用virtcol('.')
     let phy_col = get(a:, 1, virtcol('.'))
 
-    let line_chars_array = []
     " virtcol([a:row, '$']) - 1 和 strdisplaywidth(line_str) 的执行效率谁更高并不一定
     " 目前并没有测试
     let real_phy_width = virtcol([a:row, '$'])-1
     let max_width = max([phy_col, real_phy_width])
-    let double_width_chars_indexs = GetDoubleWidthCharCols(a:row, line_str)
 
     let line_chars_array = split(line_str, '\zs')
-    if !empty(double_width_chars_indexs)
-        for insert_index in double_width_chars_indexs
-            " 这里必须减1才是真实的数组索引
-            call insert(line_chars_array, '', insert_index-1)
-        endfor
-    endif
 
-    call extend(line_chars_array, repeat([' '], max_width-len(line_chars_array)))
+    for insert_index in GetDoubleWidthCharCols(a:row, line_str)
+        " 这里必须减1才是真实的数组索引
+        call insert(line_chars_array, '', insert_index-1)
+    endfor
+
+    call extend(line_chars_array, repeat([' '], max_width-real_phy_width))
     return [line_chars_array, phy_col - 1]
 endfunction
 
+" :TODO: 如果以后发现除 . '  以外的比较适合的连接字符，可以根据最近的三个坐标的
+" 方位来确定斜线和直线或者斜线和斜线的交叉字符，就像自动箭头的实现原理一样
+" 不过可能过于复杂，当时不以实现
 " 绘制斜线(直接简单的实现)
 function! DrawSmartLineSlash(direction)
     if a:direction == 'u'
