@@ -4849,7 +4849,7 @@ function! SlideCursorZero ()
     call cursor(1, 1)
 endfunction
 
-function! NextSlide()
+function! NextSlide(timer)
     if g:current_slide < g:total_slides
         call LoadSlide(g:current_slide + 1)
     else
@@ -4887,12 +4887,30 @@ function! StartSlideshow()
     call SlideCursorZero()
 endfunction
 
+function! StartAutoSlideshow(interval)
+    if exists("g:slideshow_timer") && g:slideshow_timer != 0
+        call StopAutoSlideshow()
+    endif
+    let g:slideshow_timer = timer_start(a:interval, 'NextSlide', {'repeat': -1})
+    echo "Auto slideshow started with interval: " . a:interval . " ms"
+endfunction
+
+function! StopAutoSlideshow()
+    if exists("g:slideshow_timer") && g:slideshow_timer != 0
+        call timer_stop(g:slideshow_timer)
+        let g:slideshow_timer = 0
+        echo "Auto slideshow stopped"
+    endif
+endfunction
+
 " :TODO: 可以增加定时打开下一张幻灯片的功能
 command! DetectSlides call DetectSlides()
-command! NextSlide call NextSlide()
+command! NextSlide call NextSlide(0)
 command! PrevSlide call PrevSlide()
 command! SlideInfo call ShowSlideInfo()
 command! StartSlideshow call StartSlideshow()
+command! -nargs=1 StartAutoSlideshow call StartAutoSlideshow(<args>)
+command! StopAutoSlideshow call StopAutoSlideshow()
 
 if has('gui_running')
     " menu SlideShow.SlideShow\ Menu.Next :PrevSlide<CR>
@@ -4906,14 +4924,18 @@ if has('gui_running')
     " D:\programes\Vim\vim91\bitmaps
     " :TODO: 现在的情况是图标无法显示出来,默认的图标和固定路径的图标都不行
     amenu icon=New ToolBar.StartSlideshow :call StartSlideshow()<CR>
-    amenu icon=Open ToolBar.NextSlide :call NextSlide()<CR>
-    amenu icon=Save ToolBar.PrevSlide :call PrevSlide()<CR>
-    amenu icon=Help ToolBar.SlideInfo :call SlideInfo()<CR>
+    amenu icon=Open ToolBar.NextSlide :NextSlide<CR>
+    amenu icon=Save ToolBar.PrevSlide :PrevSlide<CR>
+    amenu icon=Help ToolBar.SlideInfo :SlideInfo<CR>
+    amenu icon=New ToolBar.StartAutoSlideshow :StartAutoSlideshow 1000<CR>
+    amenu icon=Open ToolBar.StopAutoSlideshow :StopAutoSlideshow<CR>
 
     tmenu ToolBar.StartSlideshow start slide show
     tmenu ToolBar.NextSlide next slide
     tmenu ToolBar.PrevSlide prev slid
     tmenu ToolBar.SlideInfo slide info
+    tmenu ToolBar.StartAutoSlideshow start auto slide show
+    tmenu ToolBar.StopAutoSlideshow stop auto slide show
 
     set guioptions+=T
     " set guioptions+=m
