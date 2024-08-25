@@ -4270,7 +4270,7 @@ endfunction
 let g:DefineSmartDrawGraphFunctions = {
     \ 'index': 1,
     \ 'value': [
-    \ ['DefineSmartDrawShapesBasic', [0, [60, 0], [60, 0], [60, 0], [60, 0], [600, 0], [600, 0], 0, 0, [600, 0], 0, [40, 0]], 0, 'basic.vim'],
+    \ ['DefineSmartDrawShapesBasic', [0, [60, 0], [60, 0], [60, 0], [60, 0], [600, 0], [600, 0], 0, 0, [600, 0], 0, [40, 0], 0, 0], 0, 'basic.vim'],
     \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim'],
     \ ['DefineSmartDrawShapesFiglet', [0, 0, 0, 0, 0, 0], 0, 'figlet.vim']
     \ ]
