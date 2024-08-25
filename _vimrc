@@ -4838,15 +4838,16 @@ let g:slide_files = []
 function! LoadSlide(slide)
     if a:slide > 0 && a:slide <= len(g:slide_files)
         let l:filename = g:slide_files[a:slide - 1]
-        execute 'edit' l:filename
+        silent execute 'edit' l:filename
         let g:current_slide = a:slide
     else
         echo "Slide " . a:slide . " does not exist."
     endif
 endfunction
 
-
-
+function! SlideCursorZero ()
+    call cursor(1, 1)
+endfunction
 
 function! NextSlide()
     if g:current_slide < g:total_slides
@@ -4854,6 +4855,8 @@ function! NextSlide()
     else
         call LoadSlide(1)
     endif
+    call ShowSlideInfo()
+    call SlideCursorZero()
 endfunction
 
 function! PrevSlide()
@@ -4862,6 +4865,8 @@ function! PrevSlide()
     else
         call LoadSlide(g:total_slides)
     endif
+    call ShowSlideInfo()
+    call SlideCursorZero()
 endfunction
 
 function! ShowSlideInfo()
@@ -4873,15 +4878,16 @@ function! DetectSlides()
     " 使用自定义的按照数字排序
     let g:slide_files = sort(g:slide_files, {a, b -> str2nr(matchstr(a, '\d\+')) - str2nr(matchstr(b, '\d\+'))})
     let g:total_slides = len(g:slide_files)
-    echo "Total slides detected: " . g:total_slides
 endfunction
 
 function! StartSlideshow()
     call DetectSlides()
     call LoadSlide(1)
-    echo "Slideshow mode started."
+    echo "Total slides detected: " . g:total_slides
+    call SlideCursorZero()
 endfunction
 
+" :TODO: 可以增加定时打开下一张幻灯片的功能
 command! DetectSlides call DetectSlides()
 command! NextSlide call NextSlide()
 command! PrevSlide call PrevSlide()
@@ -4894,11 +4900,28 @@ nnoremap smi :SlideInfo<CR>
 nnoremap sms :StartSlideshow<CR>
 
 if has('gui_running')
-    amenu ToolBar.SlideShow.Start :StartSlideshow<CR>
-    amenu ToolBar.SlideShow.Next :NextSlide<CR>
-    amenu ToolBar.SlideShow.Prev :PrevSlide<CR>
-    amenu ToolBar.SlideShow.Info :SlideInfo<CR>
+    " menu SlideShow.SlideShow\ Menu.Next :PrevSlide<CR>
+    " menu SlideShow.Start :StartSlideshow<CR>
+    " menu SlideShow.Next :NextSlide<CR>
+    " menu SlideShow.Prev :PrevSlide<CR>
+    " menu SlideShow.Info :SlideInfo<CR>
+
+    " https://yyq123.github.io/learn-vim/learn-vi-39-ToolBar.html
+    set toolbar=icons,text,tooltips
+    " D:\programes\Vim\vim91\bitmaps
+    " :TODO: 现在的情况是图标无法显示出来,默认的图标和固定路径的图标都不行
+    amenu icon=New ToolBar.StartSlideshow :call StartSlideshow()<CR>
+    amenu icon=Open ToolBar.NextSlide :call NextSlide()<CR>
+    amenu icon=Save ToolBar.PrevSlide :call PrevSlide()<CR>
+    amenu icon=Help ToolBar.SlideInfo :call SlideInfo()<CR>
+
+    tmenu ToolBar.StartSlideshow start slide show
+    tmenu ToolBar.NextSlide next slide
+    tmenu ToolBar.PrevSlide prev slid
+    tmenu ToolBar.SlideInfo slide info
+
     set guioptions+=T
+    " set guioptions+=m
 endif
 
 
