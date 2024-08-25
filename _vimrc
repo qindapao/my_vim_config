@@ -4894,11 +4894,6 @@ command! PrevSlide call PrevSlide()
 command! SlideInfo call ShowSlideInfo()
 command! StartSlideshow call StartSlideshow()
 
-nnoremap smn :NextSlide<CR>
-nnoremap smp :PrevSlide<CR>
-nnoremap smi :SlideInfo<CR>
-nnoremap sms :StartSlideshow<CR>
-
 if has('gui_running')
     " menu SlideShow.SlideShow\ Menu.Next :PrevSlide<CR>
     " menu SlideShow.Start :StartSlideshow<CR>
