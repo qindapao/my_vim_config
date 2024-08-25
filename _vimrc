@@ -1438,6 +1438,7 @@ endfunction
 
 
 " 绘制线并且决定边界字符
+" :TODO: 绘画模式无法处理有制表符的情况,如果文本中有需要先删除
 function! DrawSmartLineLeftRight(direction)
     " let start_time = reltime()
     call DrawSmartLineAutoGroupSet()
@@ -4823,4 +4824,83 @@ nnoremap <silent> <leader>jh :call JumpToHunkPoint()<CR>
 
 " 代码笔记跳转功能 }
 
+" 文本幻灯片功能 {
+" xx_1.txt
+" xx_2.txt
+" xx_3.txt
+
+
+
+let g:current_slide = 1
+let g:total_slides = 0
+let g:slide_files = []
+
+function! LoadSlide(slide)
+    if a:slide > 0 && a:slide <= len(g:slide_files)
+        let l:filename = g:slide_files[a:slide - 1]
+        execute 'edit' l:filename
+        let g:current_slide = a:slide
+    else
+        echo "Slide " . a:slide . " does not exist."
+    endif
+endfunction
+
+
+
+
+function! NextSlide()
+    if g:current_slide < g:total_slides
+        call LoadSlide(g:current_slide + 1)
+    else
+        call LoadSlide(1)
+    endif
+endfunction
+
+function! PrevSlide()
+    if g:current_slide > 1
+        call LoadSlide(g:current_slide - 1)
+    else
+        call LoadSlide(g:total_slides)
+    endif
+endfunction
+
+function! ShowSlideInfo()
+    echo "Slide " . g:current_slide . " of " . g:total_slides
+endfunction
+
+function! DetectSlides()
+    let g:slide_files = glob('*.txt', 0, 1)
+    " 使用自定义的按照数字排序
+    let g:slide_files = sort(g:slide_files, {a, b -> str2nr(matchstr(a, '\d\+')) - str2nr(matchstr(b, '\d\+'))})
+    let g:total_slides = len(g:slide_files)
+    echo "Total slides detected: " . g:total_slides
+endfunction
+
+function! StartSlideshow()
+    call DetectSlides()
+    call LoadSlide(1)
+    echo "Slideshow mode started."
+endfunction
+
+command! DetectSlides call DetectSlides()
+command! NextSlide call NextSlide()
+command! PrevSlide call PrevSlide()
+command! SlideInfo call ShowSlideInfo()
+command! StartSlideshow call StartSlideshow()
+
+nnoremap smn :NextSlide<CR>
+nnoremap smp :PrevSlide<CR>
+nnoremap smi :SlideInfo<CR>
+nnoremap sms :StartSlideshow<CR>
+
+if has('gui_running')
+    amenu ToolBar.SlideShow.Start :StartSlideshow<CR>
+    amenu ToolBar.SlideShow.Next :NextSlide<CR>
+    amenu ToolBar.SlideShow.Prev :PrevSlide<CR>
+    amenu ToolBar.SlideShow.Info :SlideInfo<CR>
+    set guioptions+=T
+endif
+
+
+" 文本幻灯片功能 }
 
