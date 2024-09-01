@@ -4374,6 +4374,7 @@ function! SwitchDefineSmartDrawGraphSet(is_show)
     " echo "Execution time: " . l:elapsed_time
 endfunction
 
+" :TODO: 这里会破坏系统剪切板中的内容,是否需要改善
 call SwitchDefineSmartDrawGraphSet(0)
 
 
