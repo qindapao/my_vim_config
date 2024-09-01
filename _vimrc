@@ -365,6 +365,14 @@ function! GetRegContent(reg_name)
 endfunction
 
 function! UpdateVisualBlockPopup()
+
+    " 检查高亮组是否存在并且未被清除
+    let l:highlight_info = execute('highlight MyVirtualText')
+    if l:highlight_info =~ 'xxx cleared'
+        " 重新定义高亮组
+        highlight MyVirtualText ctermfg=LightGray guifg=#D3D3D3 ctermbg=NONE guibg=NONE
+    endif
+
     " 获取寄存器内容和类型
     " 由于当前使用的是系统剪切板会比较慢,所以增加一个延时让弹窗稳定
     " 使用系统寄存器虽然可能慢,但是可以跨vim实体复制粘贴非常方便
@@ -1294,7 +1302,25 @@ function! GetDoubleWidthCharCols(row, ...)
     let l:line = get(a:, 1, getline(a:row))
     let l:len = len(l:line)
 
+    " \u1100-\u115F: 韩文字母
+    " \u2E80-\u2EFF: CJK部首补充；
+    " \u2F00-\u2FDF: 康熙部首；
+    " \u3000-\u303F: CJK标点符号；
+    " \u31C0-\u31EF: CJK笔划；
+    " \u3200-\u32FF: CJK字母及月份；
+    " \u3300-\u33FF: CJK特殊符号（日期合并）
+    " \u3400-\u4DBF: CJK统一汉字扩展-A
+    " \u4DC0-\u4DFF: 易经六十四卦象
+    " \u4E00-\u9FBF: CJK(中日韩)统一表意字符
+    " \uAC00-\uD7A3: 韩文拼音
+    " \uF900-\uFAFF: CJK 兼容象形文字
+    " \uFE30-\uFE4F: CJK兼容符号（竖排变体、下划线、顿号）；
+    " \uFF00-\uFFEF: 全角ASCII、全角中英文标点、半宽片假名、半宽平假名、半宽韩文字母；
+    " \uFFE0-\uFFE6: 全角符号（如全角货币符号）
+
     " 使用正则表达式匹配宽度为 2 的字符
+    " let l:pattern = '[\u1100-\u115F\u2E80-\u2EFF\u2F00-\u2FDF\u3000-\u303F\u31C0-\u31EF\u3200-\u32FF\u3300-\u33FF\u3400-\u4DBF\u4DC0-\u4DFF\u4E00-\u9FFF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]'
+    " 下面这个虽然不严谨但是速度快,涵盖了大部分情况
     let l:pattern = '[\u1100-\u115F\u2E80-\uA4CF\uAC00-\uD7A3\uF900-\uFAFF\uFE30-\uFE4F\uFF00-\uFF60\uFFE0-\uFFE6]'
 
     while l:col <= l:len
@@ -1805,8 +1831,7 @@ function! TraverseRectangle()
         call DrawSmartLineLeftRight('l')
     endif
 endfunction
-                                        
-                                        
+
 function! SmartDrawLinesGetArrowChar(pre_char, direction)
     let arrow_char_map = {
                 \ 'up': {
@@ -4270,7 +4295,7 @@ endfunction
 let g:DefineSmartDrawGraphFunctions = {
     \ 'index': 1,
     \ 'value': [
-    \ ['DefineSmartDrawShapesBasic', [0, [60, 0], [60, 0], [60, 0], [60, 0], [600, 0], [600, 0], 0, 0, [600, 0], 0, [40, 0], 0, 0], 0, 'basic.vim'],
+    \ ['DefineSmartDrawShapesBasic', [0, [60, 0], [60, 0], [60, 0], [60, 0], [600, 0], [600, 0], 0, 0, [600, 0], 0, [40, 0], 0, 0, 0], 0, 'basic.vim'],
     \ ['DefineSmartDrawShapesLed', [0], 0, 'led.vim'],
     \ ['DefineSmartDrawShapesFiglet', [0, 0, 0, 0, 0, 0], 0, 'figlet.vim']
     \ ]
@@ -4379,6 +4404,13 @@ function! AddCursor(direction, ...)
         let add_char = chars_arr[index]
         let add_row = row
         let add_col = virtcol
+    endif
+
+    " 检查高亮组是否存在并且未被清除
+    let l:highlight_info = execute('highlight MultiCursor')
+    if l:highlight_info =~ 'xxx cleared'
+        " 重新定义高亮组
+        highlight MultiCursor cterm=reverse gui=reverse guibg=Yellow guifg=Black
     endif
 
     let match_id = matchaddpos('MultiCursor', [[row, col, length]])
@@ -4601,37 +4633,22 @@ nnoremap <silent> <C-S-G> :call ReplaceHighLightGroupToSystemReg()<CR>
 " <M-S-LeftMouse> 可以让鼠标进入块选择模式,然后可以方便的进行各种操作
 
 
+
 " 代码笔记跳转功能 {
 function! JumpToCode()
-    " " 获取根目录
-    " " #[:meta:root:/project/root/path]
-    " let l:root_line = getline('$')
-    " if l:root_line =~ '[:meta:root:'
-    "     let l:root_path = substitute(l:root_line, '\[:meta:root:\(.*\)\]', '\1', '')
-    " else
-    "     echo "未找到根目录标记"
-    "     return
-    " endif
-    " 查找项目根目录
-    let l:root_path = FindRootDir()
-    if l:root_path == ''
-        echo "未找到项目根目录"
-        return
-    endif
-
     " 获取当前光标下的行和列
     let l:line = getline('.')
     let l:col = col('.')
 
     " 查找所有匹配的路径和行号
-    " [os/os_uname_a.sh:12]
+    " [{[os/os_uname_a.sh:12]}]
     let l:start = 0
     let l:is_find_position = 0
     let l:match = []
     while l:start >= 0
-        let l:start = match(l:line, '\v\[\[([^\[\]]+):(\d+)\]\]', l:start)
+        let l:start = match(l:line, '\v\[\{\[([^\[\]\{\};]*);(\d+)\]\}\]', l:start)
         if l:start >= 0
-            let match_str = matchstr(l:line, '\v\[\[([^\[\]]+):(\d+)\]\]', l:start)
+            let match_str = matchstr(l:line, '\v\[\{\[([^\[\]\{\};]*);(\d+)\]\}\]', l:start)
             let l:end = l:start + strlen(match_str)
             if l:col > l:start && l:col <= l:end
                 let l:match = [l:start, l:end, match_str]
@@ -4646,11 +4663,30 @@ function! JumpToCode()
         return
     endif
 
-    let l:matches_list = matchlist(match_str, '\v\[\[([^\[\]]+):(\d+)\]\]')
+    let l:matches_list = matchlist(match_str, '\v\[\{\[([^\[\]\{\};]*);(\d+)\]\}\]')
     let [ l:relative_path, l:line_number ] = [ l:matches_list[1], l:matches_list[2] ]
 
-    " 拼接完整路径
-    let l:full_path = l:root_path . '/' . l:relative_path
+    " 获取到的链接有几种情况
+    " 1. l:relative_path 为空
+    "   表示锚点在当前文件内
+    " 2. l:relative_path 为+xx/yy/zz.txt
+    "   表示锚点在当前目录的子目录中
+    " 3. l:relative_path 为xx/yy/zz.txt
+    "   表示锚点和当前连接拥有相同的父目录xx,找到当前连接路径中的xx,然后解析出锚点链接
+    if empty(l:relative_path)
+        let l:full_path = GetCurrentFileAndPath()
+    elseif strpart(l:relative_path, 0, 1) == '+'
+        let l:full_path = GetCurrentPath() . '/' . strpart(l:relative_path, 1)
+    else
+        " 得到获取路径的顶级路径
+        let father_dir_name = split(l:relative_path, '/')[0]
+        let father_path = FindCustomDir(father_dir_name)
+        if father_path == ''
+            echo "get father path is null"
+            return
+        endif
+        let full_path = father_path . '/' . l:relative_path
+    endif
 
     " 检查当前窗口布局并决定如何分屏
     if winnr('$') == 1
@@ -4659,11 +4695,28 @@ function! JumpToCode()
     else
         " 多个窗口，先切换到左边窗口
         execute 'wincmd h'
+        " 切换到最上面的窗口
+        execute 'wincmd t'
         " 在左边窗口中水平分屏
         execute 'split ' . l:full_path
     endif
 
     execute l:line_number
+endfunction
+
+function! GetCurrentFileAndPath()
+    " 获取当前文件的绝对路径和行号
+    let l:absolute_path = expand('%:p')
+    let l:absolute_path = substitute(l:absolute_path, '\\', '/', 'g')
+    return l:absolute_path
+endfunction
+
+function! GetCurrentPath()
+    " 获取当前文件的绝对路径
+    let l:absolute_path = expand('%:p')
+    let l:absolute_path = substitute(l:absolute_path, '\\', '/', 'g')
+    let l:path_only = fnamemodify(l:absolute_path, ':h')
+    return l:path_only
 endfunction
 
 function! GetRelationPath()
@@ -4685,17 +4738,18 @@ endfunction
 
 
 " 把当前的相对路径和行号信息保存到系统剪切板中
-" [os/os_uname_a.sh:12]
+" [{[os/os_uname_a.sh:12]}]
 function! RecordCodePathAndLineToSystemReg()
     " 计算相对路径
-    let l:relative_path = GetRelationPath()
-    if empty(l:relative_path)
+    let l:full_path = GetCurrentFileAndPath()
+    if empty(l:full_path)
         return
     endif
+
     let l:line_number = line('.')
 
     " 生成路径和行号字符串
-    let l:result = '[[' . l:relative_path . ':' . l:line_number . ']]'
+    let l:result = '[{[' . l:full_path . ';' . l:line_number . ']}]'
     let @+ = l:result
 endfunction
 
@@ -4704,7 +4758,7 @@ function! FindRootDir()
     let l:current_dir = expand('%:p:h')
     let l:current_dir = substitute(l:current_dir, '\\', '/', 'g')
 
-    while l:current_dir != '/'
+    while l:current_dir != '/' && l:current_dir !~ '^[A-Za-z]:/$'
         if isdirectory(l:current_dir . '/.git') || filereadable(l:current_dir . '/.root')
             return l:current_dir
         endif
@@ -4713,10 +4767,50 @@ function! FindRootDir()
     return ''
 endfunction
 
+"function! FindCustomDir(target_dir)
+"    let l:current_dir = expand('%:p:h')
+"    let l:current_dir = substitute(l:current_dir, '\\', '/', 'g')
+
+"    while l:current_dir != '/' && l:current_dir !~ '^[A-Za-z]:/$'
+"        " 这个原始的实现有一个BUG
+"        " strip\strip1\strip2
+"        "     strip1.txt {[{id:能连接到我吗}]}
+"        "     strip2\
+"        "     stripx\
+"        "         strip1.txt [{[strip2/strip1.txt;#能连接到我吗]}]
+"        " 
+"        " 按照当前的逻辑 strip2 和 strip\strip1\strip2 拼接的目录是存在的,所以最终组合成的完成路径是:
+"        "     strip\strip1\strip2\strip2\strip1.txt 显然我们的锚点不在这里，我们的锚点在
+"        "     strip\strip1\strip2\strip1.txt
+"        " 有一种改进的方法是同时验证下文件是否存在,如果不存在就继续查找
+"        if isdirectory(l:current_dir . '/' . a:target_dir)
+"            return l:current_dir
+"        endif
+"        let l:current_dir = fnamemodify(l:current_dir, ':h')
+"    endwhile
+"    return ''
+"endfunction
+
+" :TODO: 其实这个也有缺陷,无法处理目录名和文件名都重复的情况
+function! FindCustomDir(target_path)
+    let l:current_dir = expand('%:p:h')
+    let l:current_dir = substitute(l:current_dir, '\\', '/', 'g')
+
+    while l:current_dir != '/' && l:current_dir !~ '^[A-Za-z]:/$'
+        let l:full_path = l:current_dir . '/' . a:target_path
+        if filereadable(l:full_path)
+            return l:current_dir
+        endif
+        let l:current_dir = fnamemodify(l:current_dir, ':h')
+    endwhile
+    return ''
+endfunction
+
+
 " 锚点的格式
-" {{id:这是一个锚点}}
+" {[{id:这是一个锚点}]}
 " 定义快捷方式在锚点上生成指向锚点的链接并保存到系统剪切板中
-" [[src/os/os_uname_a.sh:#这是一个锚点]]
+" [{[src/os/os_uname_a.sh:#这是一个锚点]}]
 function! RecordHunkToSystemReg()
     let l:line = getline('.')
     let l:col = col('.')
@@ -4724,9 +4818,9 @@ function! RecordHunkToSystemReg()
     let l:is_find_position = 0
     let l:match = []
     while l:start >= 0
-        let l:start = match(l:line, '\v\{\{id:([^\{\}]+)\}\}', l:start)
+        let l:start = match(l:line, '\v\{\[\{id:([^\{\}\[\]]+)\}\]\}', l:start)
         if l:start >= 0
-            let match_str = matchstr(l:line, '\v\{\{id:([^\{\}]+)\}\}', l:start)
+            let match_str = matchstr(l:line, '\v\{\[\{id:([^\{\}\[\]]+)\}\]\}', l:start)
             let l:end = l:start + strlen(match_str)
             if l:col > l:start && l:col <= l:end
                 let l:match = [l:start, l:end, match_str]
@@ -4741,25 +4835,18 @@ function! RecordHunkToSystemReg()
         return
     endif
 
-    let l:relative_path = GetRelationPath()
-    if empty(l:relative_path)
+    let l:full_path = GetCurrentFileAndPath()
+    if empty(l:full_path)
         return
     endif
 
-    let l:matches_list = matchlist(match_str, '\v\{\{id:([^\{\}]+)\}\}')
-    let l:hunk_str = '[[' . l:relative_path . ':#' . l:matches_list[1] . ']]'
+    let l:matches_list = matchlist(match_str, '\v\{\[\{id:([^\{\}\[\]]+)\}\]\}')
+    let l:hunk_str = '[{[' . l:full_path . ';#' . l:matches_list[1] . ']}]'
     let @+ = l:hunk_str
 endfunction
 
 " 通过锚点链接跳转到锚点
 function! JumpToHunkPoint()
-    " 查找项目根目录
-    let l:root_path = FindRootDir()
-    if l:root_path == ''
-        echo "未找到项目根目录"
-        return
-    endif
-
     " 获取当前光标下的行和列
     let l:line = getline('.')
     let l:col = col('.')
@@ -4770,9 +4857,9 @@ function! JumpToHunkPoint()
     let l:is_find_position = 0
     let l:match = []
     while l:start >= 0
-        let l:start = match(l:line, '\v\[\[([^\[\]]+):#([^\[\]]+)\]\]', l:start)
+        let l:start = match(l:line, '\v\[\{\[([^\[\]\{\};#]*);#([^\[\]\{\};#]+)\]\}\]', l:start)
         if l:start >= 0
-            let match_str = matchstr(l:line, '\v\[\[([^\[\]]+):#([^\[\]]+)\]\]', l:start)
+            let match_str = matchstr(l:line, '\v\[\{\[([^\[\]\{\};#]*);#([^\[\]\{\};#]+)\]\}\]', l:start)
             let l:end = l:start + strlen(match_str)
             if l:col > l:start && l:col <= l:end
                 let l:match = [l:start, l:end, match_str]
@@ -4787,18 +4874,31 @@ function! JumpToHunkPoint()
         return
     endif
 
-    let l:matches_list = matchlist(match_str, '\v\[\[([^\[\]]+):#([^\[\]]+)\]\]')
-    let [ l:relative_path, l:hunk_str ] = [ l:matches_list[1], '{{id:' . l:matches_list[2] . '}}' ]
+    let l:matches_list = matchlist(match_str, '\v\[\{\[([^\[\]\{\};#]*);#([^\[\]\{\};#]+)\]\}\]')
+    let [ l:relative_path, l:hunk_str ] = [ l:matches_list[1], '{[{id:' . l:matches_list[2] . '}]}' ]
 
     " 拼接完整路径
-    let l:full_path = l:root_path . '/' . l:relative_path
-    " echo "full_path:" . l:full_path . ';' . 'hunk_str:' . l:hunk_str . ';'
+    if empty(l:relative_path)
+        let l:full_path = GetCurrentFileAndPath()
+    elseif strpart(l:relative_path, 0, 1) == '+'
+        let l:full_path = GetCurrentPath() . '/' . strpart(l:relative_path, 1)
+    else
+        " 得到获取路径的顶级路径
+        let father_dir_name = split(l:relative_path, '/')[0]
+        let father_path = FindCustomDir(l:relative_path)
+        if father_path == ''
+            echo "get father path is null"
+            return
+        endif
+        let full_path = father_path . '/' . l:relative_path
+    endif
 
     let cur_path = expand('%:p')
     let cur_path = substitute(cur_path, '\\', '/', 'g')
 
     " 先在文件中找到锚点字符串的行列值
     try
+        let hunk_str = escape(hunk_str, '\\[\\]')
         " 搜索的时候就跳转到文件了,不需要单独打开文件
         if cur_path == l:full_path
             " 这里使用%的作用是防止重新打开文件
@@ -4815,12 +4915,140 @@ function! JumpToHunkPoint()
     call cursor(result.lnum, result.col)
 endfunction
 
+" 在当前位置插入一个hunk
+function! CreateNewHunkToSystemReg()
+    let user_input = ''
+    while 1
+        let user_input = input('请输入设置勾子文本: ', user_input)
+        let formatted_input = '{[{id:' . user_input . '}]}'
+
+        " 完全按照字符串的字面意义进行解释
+        let check_repeat = search('\V' . formatted_input, 'nw')
+
+        if check_repeat > 0
+            " 提示用户输入的内容重复
+            echo ' 勾子重复，请重新输入。'
+        else
+            " 将格式化后的内容放入系统剪切板
+            let @+ = formatted_input
+            break
+        endif
+    endwhile
+endfunction
+
+" 在当前位置插入代码链接
+function! InsertCodePath()
+    " 获取默认截切板寄存器中的内容
+    let system_reg_str = getreg('+')
+    let system_reg_list = matchlist(system_reg_str, '\v\[\{\[([^\[\]\{\};]+);(\d+)\]\}\]')
+    " echo "system_reg_str:" . system_reg_str . ';' . "system_reg_list:" . string(system_reg_list) . ';'
+    let [full_path_file, line_num] = [system_reg_list[1], system_reg_list[2]]
+    let record_file = fnamemodify(full_path_file, ':t')
+    let record_path = fnamemodify(full_path_file, ':h')
+
+    let cur_path_file = GetCurrentFileAndPath()
+
+    let cur_file = fnamemodify(cur_path_file, ':t')
+    let cur_path = fnamemodify(cur_path_file, ':h')
+
+    " 如果文件路径相同,那么是当前文件
+    " echo "full_path_file:" . full_path_file . ';' . 'cur_path_file:' . cur_path_file . ';'
+
+
+    if full_path_file == cur_path_file
+        let @+ = '[{[' . ';' . line_num . ']}]'
+    " 如果链接路径是以当前路径开头的,那么链接路径是当前路径的子路径
+    elseif strpart(record_path, 0, len(cur_path)) == cur_path
+        let @+ = '[{[+' . strpart(full_path_file, len(cur_path)+1) . ';' . line_num . ']}]'
+    else
+        " 最复杂的情况
+        " 比如这是需要链接到的目标地址: [{[D:/zim_book/项目管理/北辰项目/点灯.txt;18]}]
+        " 我们当前所处的目录的完整地址: [{[D:/zim_book/项目管理/北辰项目/项目进度整理/重点工作/5902.txt;78]}]
+        " 需要生成的链接为: [{[北辰项目/点灯.txt;18]}]
+        let relative_path = ''
+        let current_dir = cur_path
+
+        while l:current_dir != '/' && l:current_dir !~ '^[A-Za-z]:/$'
+            let rest_path = strpart(record_path, 0, len(current_dir))
+            if rest_path == current_dir
+                let rest_path_up = fnamemodify(rest_path, ':h')
+                let relative_path = record_path[len(rest_path_up)+1:]
+                break
+            endif
+            let current_dir = fnamemodify(current_dir, ':h')
+        endwhile
+
+        if l:relative_path == ''
+            let l:relative_path = record_path
+        endif
+
+        let @+ = '[{[' . l:relative_path . '/' . record_file . ';' . line_num . ']}]'
+    endif
+endfunction
+
+
+" 在当前位置插入hunk链接
+function! InsertHunkPath()
+    " 获取默认截切板寄存器中的内容
+    let system_reg_str = getreg('+')
+    let system_reg_list = matchlist(system_reg_str, '\v\[\{\[([^\[\]\{\};#]*);#([^\[\]\{\};#]+)\]\}\]')
+
+    let [full_path_file, hunk_str] = [system_reg_list[1], system_reg_list[2]]
+    let record_file = fnamemodify(full_path_file, ':t')
+    let record_path = fnamemodify(full_path_file, ':h')
+
+    let cur_path_file = GetCurrentFileAndPath()
+
+    let cur_file = fnamemodify(cur_path_file, ':t')
+    let cur_path = fnamemodify(cur_path_file, ':h')
+
+    " 如果文件路径相同,那么是当前文件
+    " echo "full_path_file:" . full_path_file . ';' . 'cur_path_file:' . cur_path_file . ';'
+
+
+    if full_path_file == cur_path_file
+        let @+ = '[{[' . ';#' . hunk_str . ']}]'
+    " 如果链接路径是以当前路径开头的,那么链接路径是当前路径的子路径
+    elseif strpart(record_path, 0, len(cur_path)) == cur_path
+        let @+ = '[{[+' . strpart(full_path_file, len(cur_path)+1) . ';#' . hunk_str . ']}]'
+    else
+        " 最复杂的情况
+        " 比如这是需要链接到的目标地址: [{[D:/zim_book/项目管理/北辰项目/点灯.txt;#hunk_str]}]
+        " 我们当前所处的目录的完整地址: [{[D:/zim_book/项目管理/北辰项目/项目进度整理/重点工作/5902.txt;#hunk_str]}]
+        " 需要生成的链接为: [{[北辰项目/点灯.txt;#hunk_str]}]
+        let relative_path = ''
+        let current_dir = cur_path
+
+        while l:current_dir != '/' && l:current_dir !~ '^[A-Za-z]:/$'
+            let rest_path = strpart(record_path, 0, len(current_dir))
+            if rest_path == current_dir
+                let rest_path_up = fnamemodify(rest_path, ':h')
+                let relative_path = record_path[len(rest_path_up)+1:]
+                break
+            endif
+            let current_dir = fnamemodify(current_dir, ':h')
+        endwhile
+
+        if l:relative_path == ''
+            let l:relative_path = record_path
+        endif
+
+        let @+ = '[{[' . l:relative_path . '/' . record_file . ';#' . hunk_str . ']}]'
+    endif
+endfunction
+
+
 
 " :TODO: 后续如果中括号和冒号不够防呆,可以使用另外的特殊的unicode字符替代,或者使用更多的边界字符防呆,不过目前这样就够
 nnoremap <silent> <leader>jj :call JumpToCode()<CR>
 nnoremap <silent> <leader>jl :call RecordCodePathAndLineToSystemReg()<CR>
 nnoremap <silent> <leader>jr :call RecordHunkToSystemReg()<CR>
 nnoremap <silent> <leader>jh :call JumpToHunkPoint()<CR>
+nnoremap <silent> <leader>jn :call CreateNewHunkToSystemReg()<CR>
+nnoremap <silent> <leader>jc :call InsertCodePath()<CR>
+nnoremap <silent> <leader>jk :call InsertHunkPath()<CR>
+" 插入代码链接
+" 插入锚点链接
 
 " 代码笔记跳转功能 }
 
@@ -4903,7 +5131,6 @@ function! StopAutoSlideshow()
     endif
 endfunction
 
-" :TODO: 可以增加定时打开下一张幻灯片的功能
 command! DetectSlides call DetectSlides()
 command! NextSlide call NextSlide(0)
 command! PrevSlide call PrevSlide()
@@ -4920,22 +5147,32 @@ if has('gui_running')
     " menu SlideShow.Info :SlideInfo<CR>
 
     " https://yyq123.github.io/learn-vim/learn-vi-39-ToolBar.html
+    " http://www.ub-filosofie.ro/~solcan/wt/gnu/v/vim-toolbar-icon.html
+    " :TODO: 这行配置好像并没有起作用
     set toolbar=icons,text,tooltips
-    " D:\programes\Vim\vim91\bitmaps
-    " :TODO: 现在的情况是图标无法显示出来,默认的图标和固定路径的图标都不行
-    amenu icon=New ToolBar.StartSlideshow :call StartSlideshow()<CR>
-    amenu icon=Open ToolBar.NextSlide :NextSlide<CR>
-    amenu icon=Save ToolBar.PrevSlide :PrevSlide<CR>
-    amenu icon=Help ToolBar.SlideInfo :SlideInfo<CR>
-    amenu icon=New ToolBar.StartAutoSlideshow :StartAutoSlideshow 1000<CR>
-    amenu icon=Open ToolBar.StopAutoSlideshow :StopAutoSlideshow<CR>
+    " 为当前工具栏组增加两个不同的分隔符
+    amenu ToolBar.-sep8- <Nop>
+    amenu ToolBar.-sep9- <Nop>
+    " :TODO: 如果使用同一个内建图标挂载到不同的功能上?自定义的图标是很好实现的。
+    " :TODO: 目前工具栏的图标只能显示一行，如果图标多了，后面的图标看不见，如何显示多行？
+    " :TODO: 如果无法实现多行显示可以考虑用一个快捷键来切换工具栏(定义不同的工具栏组)
+    " :aunmenu ToolBar 移除工具栏上所有按钮
+    " :aunmenu ToolBar.BuiltIn4 移除工具栏上的某个按钮
+    " 在工具栏图标的提示字符中可以提示快捷按键的值,后面查找TAG啊生成TAG啊
+    " 之类的快捷键都可以用这种方式实现
+    amenu ToolBar.BuiltIn18 :StartSlideshow<CR>
+    amenu ToolBar.BuiltIn23 :NextSlide<CR>
+    amenu ToolBar.BuiltIn22 :PrevSlide<CR>
+    amenu ToolBar.BuiltIn24 :SlideInfo<CR>
+    amenu ToolBar.BuiltIn4 :StartAutoSlideshow 1000<CR>
+    amenu ToolBar.BuiltIn17 :StopAutoSlideshow<CR>
 
-    tmenu ToolBar.StartSlideshow start slide show
-    tmenu ToolBar.NextSlide next slide
-    tmenu ToolBar.PrevSlide prev slid
-    tmenu ToolBar.SlideInfo slide info
-    tmenu ToolBar.StartAutoSlideshow start auto slide show
-    tmenu ToolBar.StopAutoSlideshow stop auto slide show
+    tmenu ToolBar.BuiltIn18 start slide show
+    tmenu ToolBar.BuiltIn23 next slide
+    tmenu ToolBar.BuiltIn22 prev slid
+    tmenu ToolBar.BuiltIn24 slide info
+    tmenu ToolBar.BuiltIn4 start auto slide show
+    tmenu ToolBar.BuiltIn17 stop auto slide show
 
     set guioptions+=T
     " set guioptions+=m
@@ -4943,4 +5180,118 @@ endif
 
 
 " 文本幻灯片功能 }
+
+" 智能绘图的zim markup模式
+" {
+" ▫gge▫ 这个代表行内代码 ''行内代码''
+" ▪gge▪ 这个代表高亮 **加粗**
+" ◖gge◗ 这个代表高亮 __高亮__
+" ◤gge◥ 这个代表斜体 //斜体//
+" ◢gge◣ 这个代表删除线 ~~删除线~~
+
+" :TODO: 文本中的zim链接和锚点(非自定义链接和锚点)
+" 用一组特殊的符号和文本来表示
+" 符号和对应的文本记录上每个链接对应的值,用于替换符号组的时候还原
+" 这里要特别小心，怎么才能防止链接丢失？
+" :TODO: 需要5个增加markup的快捷方式
+" 需要一个增加链接的快捷方式(在底部的输入位置输入链接和现实的字符，生成符号组,如果符号超过限制)
+" :TODO: zim内部锚点如何处理?vim中很好处理，但是在zim中那个锚点的贴图无法对齐。
+
+let g:zim_inner_links = {}
+" zim软件中锚点的文件是 zim\share\zim\pixmaps\pilcrow.png 这是一个png的图像,大小是固定的
+" 但是代码中会缩放它，所以直接替换它是没有意义的
+" 但是在 D:\programs\config\zim\style.conf中可以配置图标的大小
+" [TextView]
+" bullet_icon_size=GTK_ICON_SIZE_LARGE_TOOLBAR
+" indent=30
+" tabs=None
+" ... ...
+"
+" 图标的大小可以配置的值有下面这些
+" GTK_ICON_SIZE_MENU：适用于菜单中的图标，大小为 16 像素。
+" GTK_ICON_SIZE_SMALL_TOOLBAR：适用于小工具栏的图标，大小为 16 像素。
+" GTK_ICON_SIZE_LARGE_TOOLBAR：适用于大工具栏的图标，大小为 24 像素。
+" GTK_ICON_SIZE_BUTTON：适用于按钮的图标，大小为 16 像素。
+" GTK_ICON_SIZE_DND：适用于拖放操作的图标，大小为 32 像素。
+" GTK_ICON_SIZE_DIALOG：适用于对话框的图标，大小为 48 像素。
+"
+"
+" 然后我发现一个有趣的事情，当把图标的大小设置为GTK_ICON_SIZE_LARGE_TOOLBAR的时候，
+" 字体为 MSYH ProgmataPro Mono Normal 9号的时候，正好图标占据4个字符的位置，可以完美对齐。
+" 但是有锚点的列就会比别的列要高，显得有点奇怪
+"
+" 或者把图标的大小设置为GTK_ICON_SIZE_BUTTON,这个时候需要把MSYH ProgmataPro Mono Normal
+" 字体设置为12号字体，这样锚点图标刚才占据了两个字符的空间。这或许更好。
+" 如果把字体调整为6号，那么锚点占据4个字符
+"
+" zim的锚点导出还有问题，导出后的文本无法链接,所以干脆全部用我自己定义锚点更好。
+" :TODO:还是应该把emacs的锚点导航两个功能实现
+" 还有一个办法，如果要导出到html,可以用vim先处理下当前文件中的锚点。然后再显示或者打印
+" 如果不想显示又可以用vim方便还原。
+"
+
+function! DeleteAndReplaceZimMarkupCharsForBuffer()
+    " 获取当前缓冲区的所有行数
+    let total_lines = line("$")
+
+    for line_num in range(1, total_lines)
+        let line_content = getline(line_num)
+        " 不知道为什么 vim不支持正则表达式中使用+,所以这里用了[^'][^']*
+        let line_content = substitute(line_content, " ''\\([^'][^']*\\)'' ", '▫\1▫', "g")
+        let line_content = substitute(line_content, ' __\([^_][^_]*\)__ ', '◖\1◗', "g")
+        let line_content = substitute(line_content, ' \*\*\([^*][^*]*\)\*\* ', '▪\1▪', "g")
+        let line_content = substitute(line_content, ' //\([^/][^/]*\)// ', '◤\1◥', "g")
+        let line_content = substitute(line_content, ' \~\~\([^~][^~]*\)\~\~ ', '◢\1◣', "g")
+
+        " " 先不考虑链接的情况
+        " " 替换两对中括号中间的连接和竖线
+        " let line_content = substitute(line_content, "\\[\\[[^|]+|\\([^]]+\\)\\]\\]", "\\1", "g")
+        
+        " 将替换后的内容设置回当前行
+        call setline(line_num, line_content)    
+    endfor
+endfunction
+
+function! RecoverZimMarkupCharsForBuffer()
+    " 获取当前缓冲区的所有行数
+    let total_lines = line("$")
+
+    for line_num in range(1, total_lines)
+        let line_content = getline(line_num)
+        let line_content = substitute(line_content, '▫\([^▫][^▫]*\)▫', " ''\\1'' ", "g")
+        let line_content = substitute(line_content, '◖\([^◖◗][^◖◗]*\)◗', ' __\1__ ', "g")
+        let line_content = substitute(line_content, '▪\([^▪][^▪]*\)▪', ' \*\*\1\*\* ', "g")
+        let line_content = substitute(line_content, '◤\([^◤◥][^◤◥]*\)◥', ' //\1// ', "g")
+        let line_content = substitute(line_content, '◢\([^◢◣][^◢◣]*\)◣', ' \~\~\1\~\~ ', "g")
+
+        " 将替换后的内容设置回当前行
+        call setline(line_num, line_content)    
+    endfor
+endfunction
+
+" :TODO: 增加插入5种符号和链接的快捷键(可视插入,不影响当前列的物理位置排列)
+
+" 设置快捷键 F12 来交替调用两个函数
+nnoremap <silent> sh :call ToggleZimMarkupChars()<CR>
+
+function! ToggleZimMarkupChars()
+    if exists('g:zim_markup_chars_enabled') && g:zim_markup_chars_enabled
+        " 如果已启用，执行恢复函数
+        call RecoverZimMarkupCharsForBuffer()
+        let g:zim_markup_chars_enabled = 0
+        echo "已切换到恢复模式"
+    else
+        " 如果未启用，执行删除和替换函数
+        call DeleteAndReplaceZimMarkupCharsForBuffer()
+        let g:zim_markup_chars_enabled = 1
+        echo "已切换到删除和替换模式"
+    endif
+endfunction
+
+
+
+amenu ToolBar.BuiltIn19 :call DeleteAndRecordMarkupChars()<CR>
+tmenu ToolBar.BuiltIn19 delete zim markup chars
+
+" }
 
