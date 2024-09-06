@@ -223,9 +223,10 @@ function! GenSectionNum(file_type)
         " we should generate section numbers begin with the first heading level 2
         if len(lvl) == 0
             if heading_lvl != 2 " count from level 2
-                echohl Error
-                echo "subsection must have parent section, ignore illegal heading line at line " . i
-                echohl None
+                " :TODO: 目前不知道为啥这些错误信息都会打印出来
+                " echohl Error
+                " echo "subsection must have parent section, ignore illegal heading line at line " . i
+                " echohl None
                 continue
             endif
             call add(sect, 1)
@@ -241,9 +242,10 @@ function! GenSectionNum(file_type)
                 let sect[-1] = sect[-1] + 1
             elseif lvl[-1] < heading_lvl
                 if heading_lvl - lvl[-1] != 1
-                    echohl Error
-                    echo "subsection must have parent section, ignore illegal heading line at line " . i
-                    echohl None
+                    " :TODO: 目前不知道为啥这些错误信息都会打印出来
+                    " echohl Error
+                    " echo "subsection must have parent section, ignore illegal heading line at line " . i
+                    " echohl None
                     continue
                 endif
                 call add(sect, 1)
@@ -2777,6 +2779,10 @@ let g:tagbar_type_txt = {
 " 0:不要按照tag名排序,而是按照tag出现的顺序排序
 " 1:按照tag名排序
 let g:tagbar_sort = 0
+
+" 这是为了占用更少的空间
+let g:tagbar_position = 'rightbelow'
+
 " tagbar 配置 }
 
 " auto-pairs 配置 {
@@ -4241,6 +4247,18 @@ vnoremap <silent> S) :call SurroundWith('()', visualmode(), '')<CR>| " 编辑: �
 " 创建新的命令，$}，来调用这个函数
 vnoremap <silent> S} :call SurroundWith('{}', visualmode(), '')<CR>| " 编辑: 大括号包围无空格
 
+" (加粗)zim语法创建新的命令，$*，来调用这个函数
+vnoremap <silent> S* :call SurroundWith(['**', '**'], visualmode(), '')<CR>| " 编辑: 双*包围无空格(加粗)
+" (删除)zim语法创建新的命令，$~，来调用这个函数
+vnoremap <silent> S~ :call SurroundWith(['~~', '~~'], visualmode(), '')<CR>| " 编辑: 双~包围无空格(删除)
+" (高亮)zim语法创建新的命令，$_，来调用这个函数
+vnoremap <silent> S_ :call SurroundWith(['__', '__'], visualmode(), '')<CR>| " 编辑: 双_包围无空格(高亮)
+" (斜体)zim语法创建新的命令，$/，来调用这个函数
+vnoremap <silent> S/ :call SurroundWith(['//', '//'], visualmode(), '')<CR>| " 编辑: 双/包围无空格(斜体)
+" (内联代码)zim语法创建新的命令，$''，来调用这个函数
+vnoremap <silent> S'' :call SurroundWith(["''", "''"], visualmode(), '')<CR>| " 编辑: 双'包围无空格(内联代码)
+
+
 " 增加映射手动重置当前的viminfo
 nnoremap <leader>svm :call SaveGlobalMarkComments()<cr> \| :call SetProjectViminfo()<cr>| " 辅助: 重置当前环境的viminfo(切换新项目时)
 
@@ -5271,6 +5289,7 @@ function! RecoverZimMarkupCharsForBuffer()
 endfunction
 
 " :TODO: 增加插入5种符号和链接的快捷键(可视插入,不影响当前列的物理位置排列)
+" 算了,不做实现,直接简单的添加到智能图形图中即可
 
 " 设置快捷键 F12 来交替调用两个函数
 nnoremap <silent> sh :call ToggleZimMarkupChars()<CR>
@@ -5295,4 +5314,54 @@ amenu ToolBar.BuiltIn19 :call DeleteAndRecordMarkupChars()<CR>
 tmenu ToolBar.BuiltIn19 delete zim markup chars
 
 " }
+" 函数的实现方案如下:
+" 如果有锚点,那么连续两次就可以跳转过去
+" 使用vim在当前的位置生成一个随机锚点,然后跳转过去
+" 锚点的名字可以用当前的时间,这行避免冲突的可能
+" 跳转完成后再让vim删除添加的这个临时锚点
+" 然后执行zim的刷新功能更新页面,然后往右移动一下光标(:TODO:这里暂时不做自动化,自己按一下ctrl+r刷新下页面)
+" :TODO:可以执行一个zim的插件,插件执行刷新当前页面并且把光标往右移动一位的操作
+" zim --gui zim_book "项目管理:北辰项目:项目进度整理:5902参数"
+" zim --gui zim_book "项目管理:北辰项目:项目进度整理:5902参数#不上次"
+function! JumpToZimPagePosition()
+    " 生成当前的时间戳
+    let timestamp = strftime("%Y%m%d%H%M%S")
+    " 当前位置插入临时锚点
+    let id_string = "{{id: " . timestamp . "}}"
+    execute "normal! i" . id_string    
+    " 保存当前文件
+    write
+    " 获取当前zim日记本的名字(根目录下有.git文件夹或者.root文件,通过这个识别)
+    let root_dir = FindRootDir()
+    let notebook_name = fnamemodify(root_dir, ':t')
+    " 获取笔记本的相对索引
+    let relative_path = GetRelationPath()
+    " 去掉扩展名.txt
+    let relative_path = fnamemodify(relative_path, ':r')
+    " /替换成冒号:
+    let relative_path = substitute(relative_path, '/', ':', 'g')
+    " 通过系统命令打开笔记本实例(多次打开也会在一个实例)
+    " zim.exe的路径需要被添加到环境变量中
+    let command_str = 'zim --gui ' . notebook_name . ' ' . relative_path . '#' . timestamp
+    " vim实例不能关闭,如果关闭了zim也会一起被关闭
+    " 这里使用参数就可以保证在一个实例中打开zim(只要保证所有打开实例的根目录相同即可)
+    let job_opts = {'cwd': root_dir}
+    call job_start(command_str, job_opts)
+    sleep 1
+    call job_start(command_str, job_opts)
+    " 这里靠延时还有有一定的缺陷,因为如果GUI界面还没来得及跳转到锚点,vim就删除锚点,会导致跳转失败
+    sleep 3
+    " 最后一个步骤,删除添加的临时锚点并保存文件
+    let lnum = line('.')
+    let current_line = getline(lnum)
+    let modified_line = substitute(current_line, '{{id: ' . timestamp . '}}', '', 'g')
+    call setline(lnum, modified_line)
+    write
+    " :TODO: 下面这里似乎无法正常调用,现在并不知道插件调用方法
+    " let command_str = 'zim --plugin refresh_and_move --action refresh_and_move'
+    " call job_start(command_str, job_opts)
+endfunction
+
+" 跳转到zim的文件和位置
+nnoremap <silent> s; :call JumpToZimPagePosition()<CR>
 
