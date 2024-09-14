@@ -2081,6 +2081,11 @@ set updatetime=100
 " 自动创建注释
 set formatoptions+=ro
 
+" 安静保存
+nnoremap <silent> <C-s> :silent w<CR>
+inoremap <silent> <C-s> <Esc>:silent w<CR>a
+vnoremap <silent> <C-s> <Esc>:silent w<CR>gv
+
 
 " 基本设置区域 }
 
@@ -2214,7 +2219,7 @@ Plug 'qindapao/winresizer'                                                     "
 " Plug 'cormacrelf/vim-colors-github'                                            " github 主题
 " Plug 'jsit/toast.vim'                                                          " toast 主题
 " Plug 'rakr/vim-one'                                                            " vim-one主题
-Plug 'qindapao/vim', { 'as': 'catppuccin' }                                    " catppuccin 主题
+Plug 'qindapao/vim', { 'as': 'catppuccin', 'branch': 'qq_modify' }               " catppuccin 主题
 " Plug 'muellan/am-colors'                                                       " 主题插件
 " Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
 " Plug 'scwood/vim-hybrid'                                                       " 主题插件
@@ -2425,7 +2430,6 @@ vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 标签导航:guten
 " 扩展选择 }
 
 " NERDTree {
-nnoremap <leader><leader><F8> :NERDTreeToggle<CR>| " 目录树: 切换目录树打开关闭
 " 刷新NERDTree的状态
 nnoremap <leader>r :NERDTreeFocus<cr>:NERDTreeRefreshRoot<cr><c-w>p| " 目录树: 刷新目录树状态
 nnoremap <leader>ntf :NERDTreeFind<cr>:NERDTreeRefreshRoot<cr><c-w>p| " 目录树: 进入当前文件对应的目录树并且刷新目录树状态
@@ -2590,12 +2594,19 @@ let g:rainbow_active = 1                                                        
 
 " photon.vim 主题 {
 " " Dark theme
-" colorscheme photon
+colorscheme photon
+" 如果是暗色主题使用下面两种颜色
+autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=#2E2E2E ctermbg=15
+autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#3C3C3C ctermbg=15
+
 " Light theme
 " colorscheme antiphoton
 " photon.vim 主题 }
 " " Lightning 主题 {
-colorscheme Lightning
+" colorscheme Lightning
+" " 如果是亮色主题使用下面两种颜色
+" autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=#F0F0F0 ctermbg=15
+" autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#F5F5F5 ctermbg=15
 " " Lightning 主题 }
 " colorscheme Atom
 " colorscheme github
@@ -2699,6 +2710,8 @@ let g:Lf_RootMarkers = ['.git', '.svn', '.hg', '.project', '.root']             
 let g:Lf_MruFileExclude = ['*.tmp', '*.swp']
 let g:Lf_MruMaxFiles = 2000
 
+" let g:Lf_ShowRelativePath = 1
+
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜 索. -F 搜 索字符串而不是正则表达式. -w 搜 索只匹配有边界的词.)
 nmap <leader>fr <Plug>LeaderfRgPrompt| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
@@ -2726,15 +2739,15 @@ noremap <leader>frr :LeaderfRgRecall<cr>| " 搜索:Leaderf 搜索重新打开上
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 " 这个不开启二次过滤
-" 这里要注意下不能l键映射到最前面，不然会导致可视模式下自动往后多选择一个字符
-xnoremap gfl :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>| " 搜索:Leaderf 不开启二次过滤的保留搜索列表(跳转后)
+" 这里要注意下不能l键映射到最前面，不然会导致可视模式下自动往后多选择一个字符, --context 5 显示上下文5行, r替换
+xnoremap gfl :<C-U><C-R>=printf("Leaderf! rg -F --stayOpen --context 5 -e %s ", leaderf#Rg#visual())<CR>| " 搜索:Leaderf 不开启二次过滤的保留搜索列表(跳转后)
 " 这个开启二次过滤
-xnoremap gnfl :<C-U><C-R>=printf("Leaderf rg -F --stayOpen -e %s ", leaderf#Rg#visual())<CR>| " 搜索:Leaderf 开启二次过滤的保留搜索列表(跳转后)
+xnoremap gnfl :<C-U><C-R>=printf("Leaderf rg -F --stayOpen --context 5 -e %s ", leaderf#Rg#visual())<CR>| " 搜索:Leaderf 开启二次过滤的保留搜索列表(跳转后)
 
 " 保持文件搜 索窗口不关闭
 nnoremap <leader><C-P> :Leaderf file --stayOpen<CR>| " 搜索:Leaderf 文件搜索但是保持搜索窗口不关闭
 " 保持当前文件行搜 索窗口不关闭
-nnoremap <leader><leader>fl :Leaderf line --stayOpen<CR>| " 搜索:Leaderf 搜索文件行但是保持搜索窗口不关闭
+nnoremap <leader><leader>fl :Leaderf line --stayOpen --context 3<CR>| " 搜索:Leaderf 搜索文件行但是保持搜索窗口不关闭
 
 
 " 关闭leaderf的预览窗口,不然会影响-stayOpen模式,预览窗口无法关闭,也无法编辑新的文件
@@ -2763,7 +2776,6 @@ noremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR
 
 " LeaderF 配置 }
 " tagbar 配置 {
-map <leader><F4> :TagbarToggle<CR>| " 标签导航:Tagbar 切换打开和关闭Tagbar
 let g:tagbar_type_zim = {
     \ 'ctagstype' : 'zim',
     \ 'kinds' : [
@@ -2904,8 +2916,7 @@ let g:indent_guides_guide_size = 1
 autocmd filetype zim,markdown silent set conceallevel=2
 autocmd FileType * if &ft != 'zim' && &ft != 'markdown' | set conceallevel=0 | endif
 let g:indent_guides_auto_colors = 0
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=#F0F0F0 ctermbg=15
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#F5F5F5 ctermbg=15
+" 具體的顔色配置和主題綁定
 
 " vim-indent-guides }
 
@@ -3052,7 +3063,12 @@ noremap <silent> <leader><leader><leader>s :call completor#do('hover')<CR>| " �
 
 " vimspector 调试插件配置 {
 let g:vimspector_install_gadgets = [ 'debugpy', 'vscode-cpptools']
-let g:vimspector_enable_mappings = 'HUMAN'
+
+
+" 如果设置上这个会导致vimspector的按键被自动映射,当前我不需要,已经使用工具栏实现
+" 把F键释放给最常用的操作
+" let g:vimspector_enable_mappings = 'HUMAN'
+
 
 " 这是调试C语言默认的按键，其它的防止和它冲突
 " F5	<Plug>VimspectorContinue	When debugging, continue. Otherwise start debugging.
@@ -3072,11 +3088,15 @@ let g:vimspector_enable_mappings = 'HUMAN'
 
 " 插件的根目录(一般不用设置)
 " let g:vimspector_base_dir='C:\Users\pc\.vim\plugged\vimspector'
-nnoremap <leader>db <Plug>VimspectorBreakpoints| " 调试: 设置断点
+" 后面使用工具栏来定义调试按钮,释放出来的F1~F12绑定到最常用的操作
+nnoremap <silent> <F8> :NERDTreeToggle<CR>| " 目录树: 切换目录树打开关闭
+nnoremap <silent> <F4> :TagbarToggle<CR>| " 标签导航:Tagbar 切换打开和关闭Tagbar
 
 " vimspector 调试插件配置 }
 
 " ctrlsf 插件配置 {
+
+
 " 有个小tips: 我们在搜 索结果页中我们可以使用zM折叠所有的搜 索结果(类似于vscode的效果)
 " :TODO: 目前发现全词匹配-W不能和-I一起使用
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
@@ -3097,10 +3117,15 @@ nnoremap <leader>cfif :CtrlSF -I <C-r><C-w> %<cr>|           "     搜索:ctrlsf
 nnoremap <leader>cfsf :CtrlSF -S <C-r><C-w> %<cr>|           "     搜索:ctrlsf:当前文件 敏感,非全词
 nnoremap <leader>cfwf :CtrlSF -S -W <C-r><C-w> %<cr>|           "  搜索:ctrlsf:当前文件 敏感,全词
 
-nnoremap <leader>cfmp :Rooter<cr> :CtrlSF -I | "                   搜索:ctrlsf:项目级 手动搜索
-nnoremap <leader>cfmc :CtrlSF -I | "                               搜索:ctrlsf:当前目录递归 手动搜索
-nnoremap <leader>cfmd :CtrlSF -I  ./|          "                   搜索:ctrlsf:仅限当前目录 手动搜索
-nnoremap <leader>cfmf :CtrlSF -I  %|           "                   搜索:ctrlsf:当前文件 手动搜索
+nnoremap <leader>cfmip :Rooter<cr> :CtrlSF -I | "                   搜索:ctrlsf:项目级 手动搜索,大小写不敏感
+nnoremap <leader>cfmic :CtrlSF -I | "                               搜索:ctrlsf:当前目录递归 手动搜索,大小写不敏感
+nnoremap <leader>cfmid :CtrlSF -I  ./|          "                   搜索:ctrlsf:仅限当前目录 手动搜索,大小写不敏感
+nnoremap <leader>cfmif :CtrlSF -I  %|           "                   搜索:ctrlsf:当前文件 手动搜索,大小写不敏感
+
+nnoremap <leader>cfmsp :Rooter<cr> :CtrlSF -S | "                   搜索:ctrlsf:项目级 手动搜索,大小写敏感
+nnoremap <leader>cfmsc :CtrlSF -S | "                               搜索:ctrlsf:当前目录递归 手动搜索,大小写敏感
+nnoremap <leader>cfmsd :CtrlSF -S  ./|          "                   搜索:ctrlsf:仅限当前目录 手动搜索,大小写敏感
+nnoremap <leader>cfmsf :CtrlSF -S  %|           "                   搜索:ctrlsf:当前文件 手动搜索,大小写敏感
 
 vnoremap <leader>cfip y:Rooter<cr> :CtrlSF -I <C-r>"<cr>| "        搜索:ctrlsf:项目级 不敏感,非全词
 vnoremap <leader>cfsp y:Rooter<cr> :CtrlSF -S <C-r>"<cr>| "        搜索:ctrlsf:项目级 敏感,非全词
@@ -3236,7 +3261,10 @@ let g:ctrlsf_search_mode = 'async'
 let g:ctrlsf_winsize = '30%'
 " 默认按照字面意思搜 索
 let g:ctrlsf_regex_pattern = 0
-
+" :TODO: 直接在ctrlsf的搜索界面不要做替换,有一个风险是前面几行无法对齐,如果遇到
+" 这种情况要么手动调整前面几行的对齐和下面的一致,或者是定位到真正的文本后再做替换
+let g:ctrlsf_indent = 2
+" let g:ctrlsf_default_view_mode = 'compact'
 " ctrlsf 插件配置 }
 
 " vim-terminal-help 插件配置 {
@@ -5158,45 +5186,6 @@ command! StartSlideshow call StartSlideshow()
 command! -nargs=1 StartAutoSlideshow call StartAutoSlideshow(<args>)
 command! StopAutoSlideshow call StopAutoSlideshow()
 
-if has('gui_running')
-    " menu SlideShow.SlideShow\ Menu.Next :PrevSlide<CR>
-    " menu SlideShow.Start :StartSlideshow<CR>
-    " menu SlideShow.Next :NextSlide<CR>
-    " menu SlideShow.Prev :PrevSlide<CR>
-    " menu SlideShow.Info :SlideInfo<CR>
-
-    " https://yyq123.github.io/learn-vim/learn-vi-39-ToolBar.html
-    " http://www.ub-filosofie.ro/~solcan/wt/gnu/v/vim-toolbar-icon.html
-    " :TODO: 这行配置好像并没有起作用
-    set toolbar=icons,text,tooltips
-    " 为当前工具栏组增加两个不同的分隔符
-    amenu ToolBar.-sep8- <Nop>
-    amenu ToolBar.-sep9- <Nop>
-    " :TODO: 如果使用同一个内建图标挂载到不同的功能上?自定义的图标是很好实现的。
-    " :TODO: 目前工具栏的图标只能显示一行，如果图标多了，后面的图标看不见，如何显示多行？
-    " :TODO: 如果无法实现多行显示可以考虑用一个快捷键来切换工具栏(定义不同的工具栏组)
-    " :aunmenu ToolBar 移除工具栏上所有按钮
-    " :aunmenu ToolBar.BuiltIn4 移除工具栏上的某个按钮
-    " 在工具栏图标的提示字符中可以提示快捷按键的值,后面查找TAG啊生成TAG啊
-    " 之类的快捷键都可以用这种方式实现
-    amenu ToolBar.BuiltIn18 :StartSlideshow<CR>
-    amenu ToolBar.BuiltIn23 :NextSlide<CR>
-    amenu ToolBar.BuiltIn22 :PrevSlide<CR>
-    amenu ToolBar.BuiltIn24 :SlideInfo<CR>
-    amenu ToolBar.BuiltIn4 :StartAutoSlideshow 1000<CR>
-    amenu ToolBar.BuiltIn17 :StopAutoSlideshow<CR>
-
-    tmenu ToolBar.BuiltIn18 start slide show
-    tmenu ToolBar.BuiltIn23 next slide
-    tmenu ToolBar.BuiltIn22 prev slid
-    tmenu ToolBar.BuiltIn24 slide info
-    tmenu ToolBar.BuiltIn4 start auto slide show
-    tmenu ToolBar.BuiltIn17 stop auto slide show
-
-    set guioptions+=T
-    " set guioptions+=m
-endif
-
 
 " 文本幻灯片功能 }
 
@@ -5308,12 +5297,9 @@ function! ToggleZimMarkupChars()
     endif
 endfunction
 
-
-
-amenu ToolBar.BuiltIn19 :call DeleteAndRecordMarkupChars()<CR>
-tmenu ToolBar.BuiltIn19 delete zim markup chars
-
 " }
+
+
 " 函数的实现方案如下:
 " 如果有锚点,那么连续两次就可以跳转过去
 " 使用vim在当前的位置生成一个随机锚点,然后跳转过去
@@ -5364,4 +5350,124 @@ endfunction
 
 " 跳转到zim的文件和位置
 nnoremap <silent> s; :call JumpToZimPagePosition()<CR>
+
+
+" 工具栏的配置放到最后
+set guioptions+=T
+" set guioptions+=m
+
+function! ToolBarGroup1()
+    aunmenu ToolBar
+    " menu SlideShow.SlideShow\ Menu.Next :PrevSlide<CR>
+    " menu SlideShow.Start :StartSlideshow<CR>
+    " menu SlideShow.Next :NextSlide<CR>
+    " menu SlideShow.Prev :PrevSlide<CR>
+    " menu SlideShow.Info :SlideInfo<CR>
+
+    " https://yyq123.github.io/learn-vim/learn-vi-39-ToolBar.html
+    " http://www.ub-filosofie.ro/~solcan/wt/gnu/v/vim-toolbar-icon.html
+    " :TODO: 这行配置好像并没有起作用
+    set toolbar=icons,text,tooltips
+    " 为当前工具栏组增加两个不同的分隔符
+    amenu ToolBar.-sep8- <Nop>
+    amenu ToolBar.-sep9- <Nop>
+    " :TODO: 如果使用同一个内建图标挂载到不同的功能上?自定义的图标是很好实现的。
+    " :TODO: 目前工具栏的图标只能显示一行，如果图标多了，后面的图标看不见，如何显示多行？
+    " :TODO: 如果无法实现多行显示可以考虑用一个快捷键来切换工具栏(定义不同的工具栏组)
+    " :aunmenu ToolBar 移除工具栏上所有按钮
+    " :aunmenu ToolBar.BuiltIn4 移除工具栏上的某个按钮
+    " 在工具栏图标的提示字符中可以提示快捷按键的值,后面查找TAG啊生成TAG啊
+    " 之类的快捷键都可以用这种方式实现
+    amenu ToolBar.BuiltIn18 :StartSlideshow<CR>
+    amenu ToolBar.BuiltIn23 :NextSlide<CR>
+    amenu ToolBar.BuiltIn22 :PrevSlide<CR>
+    amenu ToolBar.BuiltIn24 :SlideInfo<CR>
+    amenu ToolBar.BuiltIn4 :StartAutoSlideshow 1000<CR>
+    amenu ToolBar.BuiltIn17 :StopAutoSlideshow<CR>
+
+
+    tmenu ToolBar.BuiltIn18 start slide show
+    tmenu ToolBar.BuiltIn23 next slide
+    tmenu ToolBar.BuiltIn22 prev slid
+    tmenu ToolBar.BuiltIn24 slide info
+    tmenu ToolBar.BuiltIn4 start auto slide show
+    tmenu ToolBar.BuiltIn17 stop auto slide show
+
+    " 这里的目的是用工具栏来定制调试按钮，释放出F1~F12
+    amenu ToolBar.BuiltIn19 :call DeleteAndRecordMarkupChars()<CR>
+    tmenu ToolBar.BuiltIn19 delete zim markup chars
+endfunction
+
+function! ToolBarGroup2()
+    aunmenu ToolBar
+    " vimspector 调试插件配置2 {
+    " :TODO: 很多图标是不匹配的,后面需要自己做一些图标
+    amenu ToolBar.-sep10- <Nop>
+    amenu ToolBar.-sep11- <Nop>
+
+    amenu ToolBar.BuiltIn0 <Plug>VimspectorBreakpoints| " 调试: 设置断点
+    tmenu ToolBar.BuiltIn0 set breakpoints
+
+    amenu ToolBar.BuiltIn15 <Plug>VimspectorContinue| " 调试: 继续执行或者开启调试
+    tmenu ToolBar.BuiltIn15 continue
+
+    amenu ToolBar.BuiltIn17 <Plug>VimspectorStop| " 调试: 停止调试
+    tmenu ToolBar.BuiltIn17 stop
+
+    amenu ToolBar.BuiltIn3 <Plug>VimspectorRestart| " 调试: 重启调试
+    tmenu ToolBar.BuiltIn3 restart
+
+    amenu ToolBar.BuiltIn30 <Plug>VimspectorPause| " 调试: 暂停调试
+    tmenu ToolBar.BuiltIn30 pause
+
+    amenu ToolBar.BuiltIn13 <Plug>VimspectorToggleBreakpoint| " 调试: 当前行打开和关闭断点
+    tmenu ToolBar.BuiltIn13 toggle line breakpoint on the current line
+
+    amenu ToolBar.BuiltIn9 <Plug>VimspectorToggleConditionalBreakpoint| " 调试: 当前行切换条件断点或者日志断点
+    tmenu ToolBar.BuiltIn9 toggle conditional line breakpoint or logpoint on the current line
+
+    amenu ToolBar.BuiltIn8 <Plug>VimspectorAddFunctionBreakpoint| " 调试: 为光标下的表达式添加函数断点
+    tmenu ToolBar.BuiltIn8 add a function breakpoint for the expression under cursor
+
+    amenu ToolBar.BuiltIn19 <Plug>VimspectorRunToCursor| " 调试: 一直执行到光标位置
+    tmenu ToolBar.BuiltIn19 run to Cursor
+
+    amenu ToolBar.BuiltIn22 <Plug>VimspectorStepOver| " 调试: 单步调试不进入函数
+    tmenu ToolBar.BuiltIn22 step over
+
+    amenu ToolBar.BuiltIn23 <Plug>VimspectorStepInto| " 调试: 单步调试进入函数
+    tmenu ToolBar.BuiltIn23 step into
+
+    amenu ToolBar.BuiltIn4 <Plug>VimspectorStepOut| " 调试: 跳出当前函数的作用域
+    tmenu ToolBar.BuiltIn4 step out of current function scope
+
+    amenu ToolBar.BuiltIn29 <Plug>VimspectorBalloonEval| " 调试: 悬停查看变量或者表达式
+    tmenu ToolBar.BuiltIn29 hover to view variables or expressions
+
+    amenu ToolBar.BuiltIn14 <Plug>VimspectorUpFrame| " 调试: 堆栈导航往上
+    tmenu ToolBar.BuiltIn14 up frame
+
+    amenu ToolBar.BuiltIn12 <Plug>VimspectorDownFrame| " 调试: 堆栈导航往下
+    tmenu ToolBar.BuiltIn12 down frame
+
+    amenu ToolBar.BuiltIn16 <Plug>VimspectorBreakpoints| " 调试: 切换断点窗口的显示与隐藏
+    tmenu ToolBar.BuiltIn16 show or hide break points window
+
+    amenu ToolBar.BuiltIn25 <Plug>VimspectorDisassemble| " 调试: 反汇编
+    tmenu ToolBar.BuiltIn25 disassembly 
+    " }
+endfunction
+
+let g:toolbar_config = {
+    \ 'current': 1,
+    \ 'groups': ['ToolBarGroup1', 'ToolBarGroup2']
+    \ }
+
+function! ToggleToolBarGroup()
+    let next_index = (g:toolbar_config['current'] + 1) % len(g:toolbar_config['groups'])
+    let g:toolbar_config['current'] = next_index
+    execute 'call ' . g:toolbar_config['groups'][g:toolbar_config['current']] . '()'
+endfunction
+
+nnoremap <silent> s, :call ToggleToolBarGroup()<CR>
 
