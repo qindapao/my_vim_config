@@ -2592,26 +2592,55 @@ let g:rainbow_active = 1                                                        
 " set background=light
 " " Mitgorakh/snow 主题 {
 
-" photon.vim 主题 {
-" " Dark theme
-colorscheme photon
-" 如果是暗色主题使用下面两种颜色
-autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=#2E2E2E ctermbg=15
-autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#3C3C3C ctermbg=15
-
 " Light theme
 " colorscheme antiphoton
 " photon.vim 主题 }
-" " Lightning 主题 {
-" colorscheme Lightning
-" " 如果是亮色主题使用下面两种颜色
-" autocmd VimEnter,Colorscheme * :hi IndentGuidesOdd  guibg=#F0F0F0 ctermbg=15
-" autocmd VimEnter,Colorscheme * :hi IndentGuidesEven guibg=#F5F5F5 ctermbg=15
-" " Lightning 主题 }
 " colorscheme Atom
 " colorscheme github
 " set background=light
 " colorscheme sunbather
+
+
+" 主题和颜色设置 {
+" 定义辅助函数来设置主题和颜色
+function! SetTheme(theme, odd_bg, even_bg)
+    execute 'colorscheme ' . a:theme
+    execute 'hi IndentGuidesOdd guibg=' . a:odd_bg . ' ctermbg=15'
+    execute 'hi IndentGuidesEven guibg=' . a:even_bg . ' ctermbg=15'
+    let g:colors_name = a:theme
+    " 保存当前主题状态到文件
+    call writefile([g:colors_name], expand('~/.vim_theme'))
+endfunction
+
+" 定义切换主题的函数
+function! ToggleMyOwnTheme()
+    if g:colors_name == 'photon'
+        call ApplyTheme('Lightning')
+    else
+        call ApplyTheme('photon')
+    endif
+endfunction
+
+" 定义应用主题的函数
+function! ApplyTheme(theme)
+    if a:theme == 'photon'
+        call SetTheme('photon', '#2E2E2E', '#3C3C3C')
+    else
+        call SetTheme('Lightning', '#F0F0F0', '#F5F5F5')
+    endif
+endfunction
+
+
+" 在 Vim 启动时读取主题状态并应用
+if filereadable(expand('~/.vim_theme'))
+    let g:colors_name = readfile(expand('~/.vim_theme'))[0]
+else
+    let g:colors_name = 'Lightning'
+endif
+
+call ApplyTheme(g:colors_name)
+nnoremap <silent><F5> :call ToggleMyOwnTheme()<CR>
+" 主题和颜色设置 }
 
 
 " set t_Co=256
