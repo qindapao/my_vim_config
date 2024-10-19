@@ -3121,6 +3121,9 @@ let g:vimspector_install_gadgets = [ 'debugpy', 'vscode-cpptools']
 nnoremap <silent> <F8> :NERDTreeToggle<CR>| " 目录树: 切换目录树打开关闭
 nnoremap <silent> <F4> :TagbarToggle<CR>| " 标签导航:Tagbar 切换打开和关闭Tagbar
 
+" 打开vim自带的文件管理器
+nnoremap <silent> <F3> :Explore<CR>| " 目录树: 打开vim自带的文件管理器
+
 " vimspector 调试插件配置 }
 
 " ctrlsf 插件配置 {
