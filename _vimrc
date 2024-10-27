@@ -5181,7 +5181,7 @@ function! ShowSlideInfo()
 endfunction
 
 function! DetectSlides()
-    let g:slide_files = glob('*.txt', 0, 1)
+    let g:slide_files = glob('*.*', 0, 1)
     " 使用自定义的按照数字排序
     let g:slide_files = sort(g:slide_files, {a, b -> str2nr(matchstr(a, '\d\+')) - str2nr(matchstr(b, '\d\+'))})
     let g:total_slides = len(g:slide_files)
