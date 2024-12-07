@@ -2615,6 +2615,8 @@ endfunction
 " 定义切换主题的函数
 function! ToggleMyOwnTheme()
     if g:colors_name == 'photon'
+        call ApplyTheme('peachpuff')
+    elseif g:colors_name == 'peachpuff'
         call ApplyTheme('Lightning')
     else
         call ApplyTheme('photon')
@@ -2625,6 +2627,8 @@ endfunction
 function! ApplyTheme(theme)
     if a:theme == 'photon'
         call SetTheme('photon', '#2E2E2E', '#3C3C3C')
+    elseif a:theme == 'peachpuff'
+        call SetTheme('peachpuff', '#F0F0F0', '#F5F5F5')
     else
         call SetTheme('Lightning', '#F0F0F0', '#F5F5F5')
     endif
