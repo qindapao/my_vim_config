@@ -3358,9 +3358,10 @@ nnoremap <silent> <leader>gbfxr :let branchline=expand("<cfile>") \| let branchn
 
 " 查看所有的远程分支
 nnoremap <silent> <leader>gbr :execute 'Git remote prune origin' \| execute 'Git branch -r'<CR>| " git:branch 查看所有在远程分支
-" 拉取一个远程分支并在本地跟踪它(复制远程分支名然后检出到本地)
+" 拉取一个远程分支并在本地跟踪它(复制远程分支名然后检出到本地然后建立两者的跟踪关系)
 " git fetch origin <远程分支名>:<本地分支名>
-nnoremap <silent> <leader>gbfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch origin ' . branchname . ':' . branchname<CR>| " git:branch 检出一个远程分支到本地
+" git branch --set-upstream-to=origin/<远程分支名> <本地分支名>
+nnoremap <silent> <leader>gbfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch origin ' . branchname . ':' . branchname \| execute 'Git branch --set-upstream-to=origin/' . branchname . ' ' . branchname<CR>| " git:branch 检出一个远程分支到本地
 
 " 拉取最新变更
 nnoremap <silent> <leader>gpl :execute 'Git pull'<CR>| " git: 拉取最新的变更
