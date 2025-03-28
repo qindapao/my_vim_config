@@ -5508,3 +5508,40 @@ endfunction
 
 nnoremap <silent> s, :call ToggleToolBarGroup()<CR>
 
+" 自动翻译相关的配置 {
+" 首先需要使用 alt+= 打开默认终端，并且按 ESC 让终端处于普通模式下。
+" 然后再进行下面的所有操作
+
+" 下面的两个代理一般情况下不需要，如果说需要代理才能访问那么可以考虑加上
+" let $http_proxy = 'xx:8080'
+" let $https_proxy = 'yy:8080'
+vnoremap <leader>t y:call TransToTerminal()<CR>
+nnoremap <leader>p :call PasteTerminalToBuffer()<CR>
+
+function! TransToTerminal()
+    let @+ = substitute(@", "'", "\\\\'", "g")
+    execute "wincmd j"
+    sleep 200m
+    " 下面这个命令的前面加入这么多空格的原始是防止命令丢失字符
+    let cmd = "         trans :en '" . @+ . "'"
+    call feedkeys("i" . cmd . "\<CR>", 'n')
+    call feedkeys("\<ESC>", 'n')
+endfunction
+
+function! PasteTerminalToBuffer()
+    let l:prompt_str = 'DESKTOP-0MVRMOU'
+    execute "normal! ?" . l:prompt_str . "\<CR>"
+    execute "normal! n"
+    execute "normal! /^\s*$\<CR>"
+    " 在终端上Vi}可能失效，具体原因未知，可以换下面一种也能达到目的
+    " execute "normal! jVi}"
+    execute "normal! jV}k"
+    normal! "+y
+    execute "wincmd k"
+    normal! gv
+    normal! p
+endfunction
+
+
+" 自动翻译相关的配置 }
+
