@@ -5509,37 +5509,70 @@ endfunction
 nnoremap <silent> s, :call ToggleToolBarGroup()<CR>
 
 " 自动翻译相关的配置 {
-" 首先需要使用 alt+= 打开默认终端，并且按 ESC 让终端处于普通模式下。
+" 首先需要使用 alt+= 打开默认终端
 " 然后再进行下面的所有操作
 
 " 下面的两个代理一般情况下不需要，如果说需要代理才能访问那么可以考虑加上
 " let $http_proxy = 'xx:8080'
 " let $https_proxy = 'yy:8080'
-vnoremap <leader>t y:call TransToTerminal()<CR>
-nnoremap <leader>p :call PasteTerminalToBuffer()<CR>
 
-function! TransToTerminal()
-    let @+ = substitute(@", "'", "\\\\'", "g")
+" 简短的翻译(中->英)
+vnoremap <leader>t y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(1, 'en')<CR>
+" 完整的翻译(中->英)
+vnoremap <leader><S-T> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(0, 'en')<CR>
+
+" 简短的翻译(英->中)
+vnoremap <C-t> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(1, 'zh')<CR>
+" 完整的翻译(英->中)
+vnoremap <C-S-T> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(0, 'zh')<CR>
+
+" 简短情况进行替换
+nnoremap <leader>p :call PasteTerminalToBuffer(1, g:TRANSLATE_SELECTION_MODE)<CR>
+" 简短情况进行替换
+nnoremap <leader><S-P> :call PasteTerminalToBuffer(0, g:TRANSLATE_SELECTION_MODE)<CR>
+
+function! TransToTerminal(isBrief, language)
+    let @+ = substitute(@", "'", "\\'", "g")
     execute "wincmd j"
-    sleep 200m
-    " 下面这个命令的前面加入这么多空格的原始是防止命令丢失字符
-    let cmd = "         trans :en '" . @+ . "'"
-    call feedkeys("i" . cmd . "\<CR>", 'n')
-    call feedkeys("\<ESC>", 'n')
+    sleep 100m
+    
+    " cygwin环境下可能需要把trans(本身是一个shell脚本)里面的头部shebang可能需要改成
+    " #!/usr/bin/bash 才能正常运行，原因未知
+    let cmd = 'clear;echo "----------------------";echo "";trans :' . a:language . (a:isBrief ? " --brief " : " ") . "'" . @+ . "'" . ";echo ''"
+
+    if mode() !~# 't'
+        call feedkeys("i", 'n')
+    endif
+
+    let term_bufnr = bufnr('%')
+    call term_sendkeys(term_bufnr, cmd . "\n")
+    " call feedkeys(cmd . "\<CR>", 'n')
 endfunction
 
-function! PasteTerminalToBuffer()
-    let l:prompt_str = 'DESKTOP-0MVRMOU'
-    execute "normal! ?" . l:prompt_str . "\<CR>"
-    execute "normal! n"
-    execute "normal! /^\s*$\<CR>"
+function! PasteTerminalToBuffer(isBrief, selection_mode)
+    execute "normal! G"
+    " 往前找到最近的分隔符
+    execute "normal! ?" . "----------------------" . "\<CR>"
+    execute "normal! jj"
+
+    if ! a:isBrief
+        execute "normal! }j"
+    endif
+
     " 在终端上Vi}可能失效，具体原因未知，可以换下面一种也能达到目的
-    " execute "normal! jVi}"
-    execute "normal! jV}k"
+    " execute "normal! Vi}"
+
+    if a:selection_mode ==# 'v'
+        execute "normal! 0"
+        execute "normal! v}k$"
+    elseif a:selection_mode ==# 'V'
+        execute "normal! V}k"
+    endif
+
     normal! "+y
     execute "wincmd k"
     normal! gv
-    normal! p
+    normal p
 endfunction
 
 
