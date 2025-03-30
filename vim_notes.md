@@ -39,6 +39,7 @@
         + [9.3.4 coc框架下的代码补全](#934-coc框架下的代码补全)
     - [9.4 ale代码检查](#94-ale代码检查)
         + [9.4.1 java语言](#941-java语言)
+    - [9.5 markdown 预览](#95-markdown-预览)
 * [10 git](#10-git)
     - [10.1 配置终端中使用的git工具](#101-配置终端中使用的git工具)
     - [10.2 使用浏览器打开当前文件的远程文件](#102-使用浏览器打开当前文件的远程文件)
@@ -596,6 +597,21 @@ JAVA_TOOL_OPTIONS -Dfile.encoding=UTF-8
 如果是`windows`操作系统，直接加到用户环境变量或者系统环境变量中即可，这个参数影响所有的`java`二进制工具的默认编码格式。注意下这个环境变量修改后需要重新启动`OS`才能生效。
 
 如果设置了上面这个还是出现乱码，可能是因为`javac`的版本和当前使用的`jdk`的版本不配套导致的，处理方式是正确指定`javac`可执行文件的路径。具体的配置方法在`_vimrc`中有说明。
+
+### 9.5 markdown 预览
+
+markdown-preview.nvim不能用的时候在插件目录的app目录中运行
+
+```bash
+cd C:\Users\pc\.vim\plugged\markdown-preview.nvim\app\
+npm install
+```
+
+用系统默认的命令行执行。如果说无法运行，可能需要先清理缓存。
+
+```bash
+npm cache clean --force
+```
 
 
 ## 10 git
