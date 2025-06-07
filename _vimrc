@@ -2231,6 +2231,14 @@ Plug 'qindapao/vim', { 'as': 'catppuccin', 'branch': 'qq_modify' }              
 Plug 'qindapao/photon.vim'                                                       " 一个极简的漂亮主题
 Plug 'qindapao/Lightning', {'branch': 'qq_modify'}
 
+Plug 'qindapao/vim-go'
+
+" vim-go 插件的配置 {
+" 修改 GOPATH 目录(目前导致了一些问题先不改)
+" let g:go_bin_path = '~\.vim\go\bin' 
+" ctrl + x + ctrl + o 触发 Go 语言的全功能补全
+" vim-go 插件的配置 }
+
 call plug#end()
 " 插件 }
 
