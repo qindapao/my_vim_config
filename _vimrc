@@ -5589,4 +5589,10 @@ endfunction
 " 让鼠标可以进入可视选择模式(因为可能被其它的设置覆盖,所以只能放最后)
 nnoremap <M-LeftMouse> <C-S-V>
 
+" 复制系统消息到剪切板
+command! CopyMessages execute('redir @+ | silent messages | redir END') | echo "已复制 :messages 到系统剪贴板"
+
+" 清空 messages 历史
+command! ClearMessages silent! messages clear | echo "消息历史已清空"
+
 
