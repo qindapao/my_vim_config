@@ -856,6 +856,7 @@ Plug 'qindapao/photon.vim'                                                      
 Plug 'qindapao/Lightning', {'branch': 'qq_modify'}
 
 Plug 'qindapao/vim-go'
+Plug 'qindapao/vimio'
 
 " vim-go 插件的配置 {
 " 修改 GOPATH 目录(目前导致了一些问题先不改)
