@@ -856,7 +856,7 @@ Plug 'qindapao/photon.vim'                                                      
 Plug 'qindapao/Lightning', {'branch': 'qq_modify'}
 
 Plug 'qindapao/vim-go'
-Plug 'qindapao/vimio'
+Plug 'qindapao/vimio', { 'branch': 'Shadow_check_double_cols' }
 
 " vim-go 插件的配置 {
 " 修改 GOPATH 目录(目前导致了一些问题先不改)
@@ -2118,6 +2118,16 @@ nnoremap <M-CR> <Cmd>Hi}<CR>| " 高亮: 所有高亮的下一个
 nnoremap <M-S-CR> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
 
 " vim-highlighter 配置 }
+
+
+" vimio 的配置{
+let g:vimio_custom_shapes_dir = expand('~/.vim/vimio_custom_shapes')
+let g:vimio_user_shapes_define_graph_functions = [
+      \ ['Vimio__DefineSmartDrawShapesanimal', [0], 0, 'animal1.vim'],
+      \ ['Vimio__DefineSmartDrawShapesanimal', [0], 0, 'animal2.vim'],
+      \ ]
+
+" vimio 的配置}
 
 " 插件配置 }
 
@@ -3873,4 +3883,22 @@ command! CopyMessages execute('redir @+ | silent messages | redir END') | echo "
 " 清空 messages 历史
 command! ClearMessages silent! messages clear | echo "消息历史已清空"
 
+" 映射插入模式下和全局替换模式(R/gR)下的快速移动，不能映射 <C-h> 会发生删除
+inoremap <C-S-J> <Down>
+inoremap <C-S-H> <Left>
+inoremap <C-S-L> <Right>
+inoremap <C-S-K> <Up>
+
+" 普通模式下的 gg=G 自动缩进，选择范围后按 = 缩进
+autocmd FileType vim
+      \ setlocal expandtab   " 用空格替代 Tab
+      \ shiftwidth=4        " 每次缩进宽度为 4
+      \ softtabstop=4       " 插入空格时用 4 个空格
+      \ autoindent          " 继承上一行缩进
+      \ smartindent         " 智能缩进
+
+" 设置vim打开的时候的窗口宽度（单位为字符）
+set columns=280
+" 设置vim打开的时候窗口高度（单位为行）
+set lines=80
 
