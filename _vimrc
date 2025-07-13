@@ -3916,6 +3916,7 @@ nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
 nnoremap s <Nop>
 nnoremap <silent> s :<c-u>WhichKey 's'<CR>
 nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
+vnoremap <silent> <leader> :<c-u>WhichKeyVisual '<Space>'<CR>
 
 let g:which_key_map = {}
 let g:which_key_map_visual = {}
@@ -3959,15 +3960,31 @@ let g:which_key_map_s = { ' ': 'vimio',
             \ }
 
 
+let g:which_key_map_visual.g = { 'name': 'global搜索' }
+let g:which_key_map_visual.g.w = { 
+            \   'name': "gtags" ,
+            \   's': '查找符号',
+            \   'g': '查找定义',
+            \   'c': '调用此函数的函数',
+            \   't': '查找字符串',
+            \   'e': '查找查找正则表达式',
+            \   'f': '查找文件名',
+            \   'i': '查找包含当前头文件的文件',
+            \   'd': '查找此函数调用的函数',
+            \   'a': '查找赋值位置',
+            \   'z': '在ctags数据库中查找当前单词',
+            \}
+
 
 " 这里是把注册的前缀直接绑定到对应的全局字典
 " 建议放到最后
 call which_key#register('<Space>', "g:which_key_map", 'n')
-call which_key#register(',', "g:which_key_map_visual", 'v')
+call which_key#register('<Space>', "g:which_key_map_visual", 'v')
 call which_key#register('s', "g:which_key_map_s", 'n')
 
 
 " 终端模式下的提示配置方法
+" 后面是数组的情况下可以直接配置映射，但是因为限制过多，还是直接映射比较好
 " let g:which_key_map_terminal = {
 "       \ 'r': [":call RestartService()<CR>", '重启服务'],
 "       \ 'c': [":call ClearConsole()<CR>", '清理终端输出'],
