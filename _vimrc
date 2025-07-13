@@ -175,6 +175,9 @@ endfunction
 autocmd VimEnter * call SetProjectViminfo()
 
 
+" 这个一定要放到最前面，放后面可能不会生效
+let mapleader="\<Space>"
+
 " 以下函数的来源 https://github.com/youngyangyang04/PowerVim/blob/master/.vimrc
 " usage :call GenMarkdownSectionNum    给markdown/zimwiki 文件生成目录编号
 " 如果要在某些脚本代码中写注释,那么使用#----这种格式来过滤
@@ -471,7 +474,6 @@ let g:terminal_shell = 'bash'
 
 filetype plugin indent on                                                        " 打开文件类型检测
 set history=1000
-let mapleader="\\"
 " txt文本不允许vim自动换行 https://superuser.com/questions/905012/stop-vim-from-automatically-tw-78-line-break-wrapping-text-files
 au! vimrcEx filetype text
 
@@ -501,22 +503,22 @@ autocmd filetype markdown set wrap
 " 设置标签页的显示格式
 set guitablabel=%N%M%t
 " 切换标签页快捷方式
-noremap <silent> tn :tabnew<CR>| " 多标签: 创建新标签页
-noremap <silent> tc :tabclose<CR>| " 多标签: 关闭当前标签页
-noremap <silent> tC :q!<CR> " 多标签: 强制关闭当前标签页
-noremap <silent> to :tabonly<CR>| " 多标签: 只保留当前标签页
+nnoremap <silent> tn :tabnew<CR>| " 多标签: 创建新标签页
+nnoremap <silent> tc :tabclose<CR>| " 多标签: 关闭当前标签页
+nnoremap <silent> tC :q!<CR> " 多标签: 强制关闭当前标签页
+nnoremap <silent> to :tabonly<CR>| " 多标签: 只保留当前标签页
 nnoremap <Tab> gt<cr>| " 多标签: 向前切换标签页
 nnoremap <S-Tab> gT<cr>| " 多标签: 向后切换标签页
-:nn <M-1> 1gt| " 多标签: 切换到第1个标签页
-:nn <M-2> 2gt| " 多标签: 切换到第2个标签页
-:nn <M-3> 3gt| " 多标签: 切换到第3个标签页
-:nn <M-4> 4gt| " 多标签: 切换到第4个标签页
-:nn <M-5> 5gt| " 多标签: 切换到第5个标签页
-:nn <M-6> 6gt| " 多标签: 切换到第6个标签页
-:nn <M-7> 7gt| " 多标签: 切换到第7个标签页
-:nn <M-8> 8gt| " 多标签: 切换到第8个标签页
-:nn <M-9> 9gt| " 多标签: 切换到第9个标签页
-:nn <M-0> :tablast<CR>| " 多标签: 切换到最后一个标签页
+nnoremap <M-1> 1gt| " 多标签: 切换到第1个标签页
+nnoremap <M-2> 2gt| " 多标签: 切换到第2个标签页
+nnoremap <M-3> 3gt| " 多标签: 切换到第3个标签页
+nnoremap <M-4> 4gt| " 多标签: 切换到第4个标签页
+nnoremap <M-5> 5gt| " 多标签: 切换到第5个标签页
+nnoremap <M-6> 6gt| " 多标签: 切换到第6个标签页
+nnoremap <M-7> 7gt| " 多标签: 切换到第7个标签页
+nnoremap <M-8> 8gt| " 多标签: 切换到第8个标签页
+nnoremap <M-9> 9gt| " 多标签: 切换到第9个标签页
+nnoremap <M-0> :tablast<CR>| " 多标签: 切换到最后一个标签页
 
 nnoremap <silent> <leader>new :new<cr>| " 文件: 创建一个新文件
 nnoremap <silent> <leader>enew :enew<cr>| " 文件: 创建一个新文件并编辑
@@ -529,8 +531,8 @@ set scrolloff=3
 
 " search highlight
 set hlsearch| " 高亮: 设置搜索高亮
-noremap <silent> <leader>noh :nohlsearch<CR>| " 高亮: 取消搜索高亮
-noremap <silent> # :nohlsearch<CR>| " 高亮: 取消搜索高亮
+nnoremap <silent> <leader>noh :nohlsearch<CR>| " 高亮: 取消搜索高亮
+nnoremap <silent> # :nohlsearch<CR>| " 高亮: 取消搜索高亮
 
 
 set tabstop=4
@@ -856,7 +858,8 @@ Plug 'qindapao/photon.vim'                                                      
 Plug 'qindapao/Lightning', {'branch': 'qq_modify'}
 
 Plug 'qindapao/vim-go'
-Plug 'qindapao/vimio', { 'branch': 'Shadow_check_double_cols' }
+Plug 'qindapao/vimio'
+Plug 'qindapao/vim-which-key'
 
 " vim-go 插件的配置 {
 " 修改 GOPATH 目录(目前导致了一些问题先不改)
@@ -881,7 +884,7 @@ vnoremap <M-o> <Plug>(expand_region_shrink)| " 编辑: 可视模式下缩小选�
 " vim-expand-region }
 
 " table-mode {
-noremap <leader>tm :TableModeToggle<CR>| " 辅助: 表格编辑模式
+nnoremap <leader>tm :TableModeToggle<CR>| " 辅助: 表格编辑模式
 let g:table_mode_corner='|'
 
 " table-mode }
@@ -1388,28 +1391,28 @@ let g:Lf_MruMaxFiles = 2000
 
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜 索. -F 搜 索字符串而不是正则表达式. -w 搜 索只匹配有边界的词.)
-nmap <leader>fr <Plug>LeaderfRgPrompt| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
-nmap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary| " 搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
-nmap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
-nmap <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
-nmap <leader>frew <Plug>LeaderfRgCwordRegexBoundary| "    搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
-vmap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary| "搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
-vmap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
-vmap <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
-vmap <leader>frew <Plug>LeaderfRgVisualRegexBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
+nnoremap <leader>fr <Plug>LeaderfRgPrompt| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
+nnoremap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary| " 搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
+nnoremap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
+nnoremap <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
+nnoremap <leader>frew <Plug>LeaderfRgCwordRegexBoundary| "    搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
+vnoremap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary| "搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
+vnoremap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
+vnoremap <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
+vnoremap <leader>frew <Plug>LeaderfRgVisualRegexBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
 
-noremap ]n :Leaderf rg --next<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的下一个结果
-noremap ]p :Leaderf rg --previous<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的上一个结果
+nnoremap ]n :Leaderf rg --next<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的下一个结果
+nnoremap ]p :Leaderf rg --previous<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的上一个结果
 
 
-noremap <leader>f :LeaderfSelf<cr>| " 搜索:Leaderf 搜索leaderf自己
-noremap <leader>fm :LeaderfMru<cr>| " 搜索:Leaderf 搜索leaderf最近打开文件列表
-noremap <leader>ff :LeaderfFunction<cr>| " 搜索:Leaderf 搜索函数
-noremap <leader>fb :LeaderfBuffer<cr>| " 搜索:Leaderf 搜索buffer
-noremap <leader>ft :LeaderfBufTag<cr>| " 搜索:Leaderf 搜索标签文件
-noremap <leader>fl :LeaderfLine<cr>| " 搜索:Leaderf 搜索当前文件的所有行
-noremap <leader>fw :LeaderfWindow<cr>| " 搜索:Leaderf 搜索打开的窗口
-noremap <leader>frr :LeaderfRgRecall<cr>| " 搜索:Leaderf 搜索重新打开上一次的rg搜索
+nnoremap <leader>f :LeaderfSelf<cr>| " 搜索:Leaderf 搜索leaderf自己
+nnoremap <leader>fm :LeaderfMru<cr>| " 搜索:Leaderf 搜索leaderf最近打开文件列表
+nnoremap <leader>ff :LeaderfFunction<cr>| " 搜索:Leaderf 搜索函数
+nnoremap <leader>fb :LeaderfBuffer<cr>| " 搜索:Leaderf 搜索buffer
+nnoremap <leader>ft :LeaderfBufTag<cr>| " 搜索:Leaderf 搜索标签文件
+nnoremap <leader>fl :LeaderfLine<cr>| " 搜索:Leaderf 搜索当前文件的所有行
+nnoremap <leader>fw :LeaderfWindow<cr>| " 搜索:Leaderf 搜索打开的窗口
+nnoremap <leader>frr :LeaderfRgRecall<cr>| " 搜索:Leaderf 搜索重新打开上一次的rg搜索
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 " 这个不开启二次过滤
@@ -1431,23 +1434,23 @@ let g:Lf_PreviewInPopup = 0
 " leaderf不要自动生成标签,用gentags插件生成
 " unique的意思是vim是否检查映射已经存在,如果存在会报错,当前暂时不需要这个功能
 " nmap <unique> <leader>fgd <Plug>LeaderfGtagsDefinition
-nmap <leader>fgd <Plug>LeaderfGtagsDefinition| " 标签导航:Leaderf 跳转到定义
-nmap <C-LeftMouse> <Plug>LeaderfGtagsDefinition| " 标签导航:Leaderf 跳转到定义
-nmap <leader>fgr <Plug>LeaderfGtagsReference| " 标签导航:Leaderf 跳转到引用
-nmap <S-LeftMouse> <Plug>LeaderfGtagsReference| " 标签导航:Leaderf 跳转到引用
-nmap <leader>fgs <Plug>LeaderfGtagsSymbol| " 标签导航:Leaderf 跳转到符号
-nmap <A-LeftMouse> <Plug>LeaderfGtagsSymbol| " 标签导航:Leaderf 跳转到符号
-nmap <leader>fgg <Plug>LeaderfGtagsGrep| " 标签导航:Leaderf 跳转到字符串(启动搜索功能)
-nmap <C-A-LeftMouse> <Plug>LeaderfGtagsGrep| " 标签导航:Leaderf 跳转到字符串(启动搜索功能)
+nnoremap <leader>fgd <Plug>LeaderfGtagsDefinition| " 标签导航:Leaderf 跳转到定义
+nnoremap <C-LeftMouse> <Plug>LeaderfGtagsDefinition| " 标签导航:Leaderf 跳转到定义
+nnoremap <leader>fgr <Plug>LeaderfGtagsReference| " 标签导航:Leaderf 跳转到引用
+nnoremap <S-LeftMouse> <Plug>LeaderfGtagsReference| " 标签导航:Leaderf 跳转到引用
+nnoremap <leader>fgs <Plug>LeaderfGtagsSymbol| " 标签导航:Leaderf 跳转到符号
+nnoremap <A-LeftMouse> <Plug>LeaderfGtagsSymbol| " 标签导航:Leaderf 跳转到符号
+nnoremap <leader>fgg <Plug>LeaderfGtagsGrep| " 标签导航:Leaderf 跳转到字符串(启动搜索功能)
+nnoremap <C-A-LeftMouse> <Plug>LeaderfGtagsGrep| " 标签导航:Leaderf 跳转到字符串(启动搜索功能)
 
-vmap <leader>fgd <Plug>LeaderfGtagsDefinition| " 标签导航:Leaderf 跳转到定义
-vmap <leader>fgr <Plug>LeaderfGtagsReference| " 标签导航:Leaderf 跳转到引用
-vmap <leader>fgs <Plug>LeaderfGtagsSymbol| " 标签导航:Leaderf 跳转到符号
-vmap <leader>fgg <Plug>LeaderfGtagsGrep| " 标签导航:Leaderf 跳转到字符串(启动搜索功能)
+vnoremap <leader>fgd <Plug>LeaderfGtagsDefinition| " 标签导航:Leaderf 跳转到定义
+vnoremap <leader>fgr <Plug>LeaderfGtagsReference| " 标签导航:Leaderf 跳转到引用
+vnoremap <leader>fgs <Plug>LeaderfGtagsSymbol| " 标签导航:Leaderf 跳转到符号
+vnoremap <leader>fgg <Plug>LeaderfGtagsGrep| " 标签导航:Leaderf 跳转到字符串(启动搜索功能)
 
-noremap <leader>fgo :<C-U><C-R>=printf("Leaderf! gtags --recall %s", "")<CR><CR>| " 标签导航:Leaderf 重新打开最近的跳转命令
-noremap <leader>fgn :<C-U><C-R>=printf("Leaderf gtags --next %s", "")<CR><CR>| " 标签导航:Leaderf 结果列表的下一个元素
-noremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR>| " 标签导航:Leaderf 结果列表的上一个元素
+nnoremap <leader>fgo :<C-U><C-R>=printf("Leaderf! gtags --recall %s", "")<CR><CR>| " 标签导航:Leaderf 重新打开最近的跳转命令
+nnoremap <leader>fgn :<C-U><C-R>=printf("Leaderf gtags --next %s", "")<CR><CR>| " 标签导航:Leaderf 结果列表的下一个元素
+nnoremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><CR>| " 标签导航:Leaderf 结果列表的上一个元素
 
 " LeaderF 配置 }
 " tagbar 配置 {
@@ -1553,18 +1556,18 @@ let g:bookmark_auto_save = 1
 
 " 不要使用默认的按键映射
 let g:bookmark_no_default_key_mappings = 1
-nmap <Leader><Leader>bt <Plug>BookmarkToggle| " 书签: 切换书签打开与关闭
-nmap <Leader><Leader>bi <Plug>BookmarkAnnotate| " 书签: 创建一个注释书签
-nmap <Leader><Leader>ba <Plug>BookmarkShowAll| " 书签: 显示所有的书签
-nmap <Leader><Leader>bj <Plug>BookmarkNext| " 书签: 跳转到下一个书签
-nmap <Leader><Leader>bk <Plug>BookmarkPrev| " 书签: 跳转到上一个书签
-nmap <Leader><Leader>bc <Plug>BookmarkClear| " 书签: 删除当前书签
-nmap <Leader><Leader>bx <Plug>BookmarkClearAll| " 书签: 删除所有书签
+nnoremap <Leader><Leader>bt <Plug>BookmarkToggle| " 书签: 切换书签打开与关闭
+nnoremap <Leader><Leader>bi <Plug>BookmarkAnnotate| " 书签: 创建一个注释书签
+nnoremap <Leader><Leader>ba <Plug>BookmarkShowAll| " 书签: 显示所有的书签
+nnoremap <Leader><Leader>bj <Plug>BookmarkNext| " 书签: 跳转到下一个书签
+nnoremap <Leader><Leader>bk <Plug>BookmarkPrev| " 书签: 跳转到上一个书签
+nnoremap <Leader><Leader>bc <Plug>BookmarkClear| " 书签: 删除当前书签
+nnoremap <Leader><Leader>bx <Plug>BookmarkClearAll| " 书签: 删除所有书签
 
 " these will also work with a [count] prefix
-nmap <Leader>kk <Plug>BookmarkMoveUp| " 书签: 当前书签行上移
-nmap <Leader>jj <Plug>BookmarkMoveDown| " 书签: 当前书签行下移
-nmap <Leader>gl <Plug>BookmarkMoveToLine| " 书签: 书签移动到某一行
+nnoremap <Leader>kk <Plug>BookmarkMoveUp| " 书签: 当前书签行上移
+nnoremap <Leader>jj <Plug>BookmarkMoveDown| " 书签: 当前书签行下移
+nnoremap <Leader>gl <Plug>BookmarkMoveToLine| " 书签: 书签移动到某一行
 
 
 " vim-bookmarks 书签插件配置 }
@@ -1728,10 +1731,10 @@ let g:completor_complete_options = 'menuone,noselect'
 " let g:completor_python_binary = 'D:/code/tu_refactor_learn/TU_Refactory/.venv/Scripts/python.exe'
 let g:completor_python_binary = 'D:/python/python.exe'
 
-noremap <silent> <leader><leader><leader>d :call completor#do('definition')<CR>| " 补全:completor 显示定义
-noremap <silent> <leader><leader><leader>c :call completor#do('doc')<CR>| " 补全:completor 显示文档
-noremap <silent> <leader><leader><leader>f :call completor#do('format')<CR>| " 补全:completor 格式化
-noremap <silent> <leader><leader><leader>s :call completor#do('hover')<CR>| " 补全:completor ?
+nnoremap <silent> <leader><leader><leader>d :call completor#do('definition')<CR>| " 补全:completor 显示定义
+nnoremap <silent> <leader><leader><leader>c :call completor#do('doc')<CR>| " 补全:completor 显示文档
+nnoremap <silent> <leader><leader><leader>f :call completor#do('format')<CR>| " 补全:completor 格式化
+nnoremap <silent> <leader><leader><leader>s :call completor#do('hover')<CR>| " 补全:completor ?
 " vim_completor.git }
 
 " completor 插件配置 {
@@ -3901,4 +3904,78 @@ autocmd FileType vim
 set columns=280
 " 设置vim打开的时候窗口高度（单位为行）
 set lines=80
+
+
+" vim-which-key 插件配置 {
+
+" 不要把按键延迟的值设置得太小
+set timeoutlen=300
+" 这里是注册前缀
+nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
+" 先取消 s 的特殊功能
+nnoremap s <Nop>
+nnoremap <silent> s :<c-u>WhichKey 's'<CR>
+nnoremap <silent> <localleader> :<c-u>WhichKey  ','<CR>
+
+let g:which_key_map = {}
+let g:which_key_map_visual = {}
+let g:which_key_map_s = {}
+
+" 直接注册的方式有坑，很多限制
+" let g:which_key_map.c = { 'name' : "xx" }
+" let g:which_key_map.c.f = {
+"             \  'name': 'ctrls搜索', 
+"             \ 'i': {
+"             \   'name': '忽略大小写',
+"             \   'p': [':Rooter<cr><bar>:CtrlSF -I <C-r><C-w><cr>', '全项目'],
+"             \   }
+"             \ }
+
+let g:which_key_map.c = { 'name' : "搜索" }
+let g:which_key_map.c.f = {
+            \  'name': 'ctrls搜索', 
+            \ 'i': {
+            \   'name': '忽略大小写',
+            \   'p': '全项目',
+            \   'c': '目录递归',
+            \   'd': '目录不递归',
+            \   'f': '当前文件',
+            \   },
+            \ 's': {
+            \   'name': '不忽略大小写',
+            \   'p': '全项目'
+            \   }
+            \ }
+
+let g:which_key_map.d = { 'name': '终端操作' }
+let g:which_key_map.d.b = { 
+            \   'name': "buffer" ,
+            \   't': '删除',
+            \}
+
+
+let g:which_key_map_s = { ' ': 'vimio',
+            \ 'y': 'vimio-拷贝单个字符',
+            \ }
+
+
+
+" 这里是把注册的前缀直接绑定到对应的全局字典
+" 建议放到最后
+call which_key#register('<Space>', "g:which_key_map", 'n')
+call which_key#register(',', "g:which_key_map_visual", 'v')
+call which_key#register('s', "g:which_key_map_s", 'n')
+
+
+" 终端模式下的提示配置方法
+" let g:which_key_map_terminal = {
+"       \ 'r': [":call RestartService()<CR>", '重启服务'],
+"       \ 'c': [":call ClearConsole()<CR>", '清理终端输出'],
+"       \ 'q': [":bd!<CR>", '关闭终端 buffer'],
+"       \ }
+" call which_key#register('<leader>t', 'g:which_key_map_terminal', 't')
+" tnoremap <leader>t <C-\><C-n>:WhichKey '<leader>t'<CR>
+
+
+" vim-which-key 插件配置 }
 
