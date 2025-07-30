@@ -430,13 +430,82 @@ endfunction
 " endfunction
 
 
+" =========================== 关闭当前分组的其它窗口 ==========================
+" 找到最内层包含当前窗口的分组
+function! FindLeafGroup(node, target_winid) abort
+    if type(a:node) == type([])
+        if a:node[0] ==# 'row' || a:node[0] ==# 'col'
+            " 遍历子节点
+            for child in a:node[1]
+                let result = FindLeafGroup(child, a:target_winid)
+                if !empty(result)
+                    return result
+                endif
+            endfor
+        elseif a:node[0] ==# 'leaf' && a:node[1] == a:target_winid
+            " 找到了当前窗口，返回它所在的最内层父分组
+            return a:node
+        endif
+    elseif type(a:node) == type(0) && a:node == a:target_winid
+        " 有些版本直接是数字窗口 ID
+        return a:node
+    endif
+    return []
+endfunction
+
+" 关闭同组兄弟窗口，只保留当前窗口
+function! CollapseLeafGroup() abort
+    let cur_winid = win_getid()
+    let layout = winlayout()
+
+    " 先找到当前窗口所在的分组路径
+    function! s:find_parent_group(node, target, parent) abort
+        if type(a:node) == type([])
+            if a:node[0] ==# 'row' || a:node[0] ==# 'col'
+                for child in a:node[1]
+                    let result = s:find_parent_group(child, a:target, a:node)
+                    if !empty(result)
+                        return result
+                    endif
+                endfor
+            elseif a:node[0] ==# 'leaf' && a:node[1] == a:target
+                return a:parent
+            endif
+        elseif type(a:node) == type(0) && a:node == a:target
+            return a:parent
+        endif
+        return []
+    endfunction
+
+    let group = s:find_parent_group(layout, cur_winid, [])
+    if empty(group)
+        echohl WarningMsg | echo "未找到当前窗口的所属分组。" | echohl None
+        return
+    endif
+
+    for sibling in group[1]
+        if type(sibling) == type([]) && sibling[0] ==# 'leaf'
+            let sid = sibling[1]
+            if sid != cur_winid
+                execute win_id2win(sid) . "close"
+            endif
+        elseif type(sibling) == type(0) && sibling != cur_winid
+            execute win_id2win(sibling) . "close"
+        endif
+    endfor
+endfunction
+
+command! CollapseFinalGroup call CollapseLeafGroup()
+nnoremap <silent> sc :CollapseFinalGroup<cr>
+
+
 " below are my personal settings
 " 基本设置区域 {
 
 " 交换文件放置到固定的目录中去
 set directory^=$HOME/.vim/swap//
 
-nnoremap <leader>dbt :call DeleteTerminalBuffers()<cr>| " 终端: 删除所有的终端buffer
+nnoremap <leader>tbd :call DeleteTerminalBuffers()<cr>| " 终端: 删除所有的终端buffer
 
 nnoremap <leader>pwd :pwd<cr>| " 目录树: 显示当前目录
 
@@ -534,7 +603,6 @@ set hlsearch| " 高亮: 设置搜索高亮
 nnoremap <silent> <leader>noh :nohlsearch<CR>| " 高亮: 取消搜索高亮
 nnoremap <silent> # :nohlsearch<CR>| " 高亮: 取消搜索高亮
 
-
 set tabstop=4
 set softtabstop=4
 set shiftwidth=4
@@ -553,8 +621,8 @@ xnoremap <silent> * y:let @/='\V'.escape(@", '/\')<CR>:let old_pos = getpos(".")
 
 set cursorline                                                                   " highlight current line
 
-nnoremap <silent> <leader>scsc :set cursorcolumn<cr>| " 辅助: 高亮当前列
-nnoremap <silent> <leader>sncsc :set nocursorcolumn<cr>| " 辅助: 取消高亮当前列
+nnoremap <silent> <leader>scc :set cursorcolumn<cr>| " 辅助: 高亮当前列
+nnoremap <silent> <leader>scn :set nocursorcolumn<cr>| " 辅助: 取消高亮当前列
 
 " cursor not blinking
 set guicursor+=a:blinkon0
@@ -603,9 +671,6 @@ autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tm
 
 " 编辑vim配置文件
 nnoremap <Leader>ver :e $MYVIMRC<CR>| " 辅助: 编辑当前的vim配置文件
-nnoremap <Leader>veon :set ve=all<CR>| " 辅助: 打开虚拟文本编辑模式
-nnoremap <Leader>veof :set ve=<CR>| " 辅助: 关闭虚拟文本编辑模式
-
 
 nnoremap <Leader>vr :source $MYVIMRC<CR>| " 辅助: 重新加载vim配置文件
 
@@ -897,9 +962,9 @@ let g:table_mode_corner='|'
 " 保存的时候不要自动检查
 let g:ale_lint_on_save = 0
 " 手动关闭ale(大部分的卡顿都是这里造成的,包括打开md文件)
-nnoremap <leader>aleof :ALEDisable<cr>| " lint: 关闭ale的语法检查
+nnoremap <leader>af :ALEDisable<cr>| " lint: 关闭ale的语法检查
 " 手动打开ale
-nnoremap <leader>aleon :ALEEnable<cr>| " lint: 打开ale的语法检查
+nnoremap <leader>ao :ALEEnable<cr>| " lint: 打开ale的语法检查
 " }
 
 " 注意coc.nvim插件也有语法检查功能(某些情况下也需要关闭,比如调试)
@@ -1391,28 +1456,28 @@ let g:Lf_MruMaxFiles = 2000
 
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜 索. -F 搜 索字符串而不是正则表达式. -w 搜 索只匹配有边界的词.)
-nnoremap <leader>fr <Plug>LeaderfRgPrompt| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
+nnoremap <leader>frm <Plug>LeaderfRgPrompt| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
 nnoremap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary| " 搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
 nnoremap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
-nnoremap <leader>fre <Plug>LeaderfRgCwordRegexNoBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
+nnoremap <leader>fren <Plug>LeaderfRgCwordRegexNoBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
 nnoremap <leader>frew <Plug>LeaderfRgCwordRegexBoundary| "    搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
 vnoremap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary| "搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
 vnoremap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
-vnoremap <leader>fre <Plug>LeaderfRgVisualRegexNoBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
+vnoremap <leader>fren <Plug>LeaderfRgVisualRegexNoBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
 vnoremap <leader>frew <Plug>LeaderfRgVisualRegexBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
+nnoremap <leader>frr :LeaderfRgRecall<cr>| " 搜索:Leaderf 搜索重新打开上一次的rg搜索
 
 nnoremap ]n :Leaderf rg --next<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的下一个结果
 nnoremap ]p :Leaderf rg --previous<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的上一个结果
 
 
-nnoremap <leader>f :LeaderfSelf<cr>| " 搜索:Leaderf 搜索leaderf自己
+nnoremap <leader>f1 :LeaderfSelf<cr>| " 搜索:Leaderf 搜索leaderf自己
 nnoremap <leader>fm :LeaderfMru<cr>| " 搜索:Leaderf 搜索leaderf最近打开文件列表
 nnoremap <leader>ff :LeaderfFunction<cr>| " 搜索:Leaderf 搜索函数
 nnoremap <leader>fb :LeaderfBuffer<cr>| " 搜索:Leaderf 搜索buffer
 nnoremap <leader>ft :LeaderfBufTag<cr>| " 搜索:Leaderf 搜索标签文件
-nnoremap <leader>fl :LeaderfLine<cr>| " 搜索:Leaderf 搜索当前文件的所有行
+nnoremap <leader>fll :LeaderfLine<cr>| " 搜索:Leaderf 搜索当前文件的所有行
 nnoremap <leader>fw :LeaderfWindow<cr>| " 搜索:Leaderf 搜索打开的窗口
-nnoremap <leader>frr :LeaderfRgRecall<cr>| " 搜索:Leaderf 搜索重新打开上一次的rg搜索
 
 " search visually selected text literally, don't quit LeaderF after accepting an entry
 " 这个不开启二次过滤
@@ -1424,7 +1489,7 @@ xnoremap gnfl :<C-U><C-R>=printf("Leaderf rg -F --stayOpen --context 5 -e %s ", 
 " 保持文件搜 索窗口不关闭
 nnoremap <leader><C-P> :Leaderf file --stayOpen<CR>| " 搜索:Leaderf 文件搜索但是保持搜索窗口不关闭
 " 保持当前文件行搜 索窗口不关闭
-nnoremap <leader><leader>fl :Leaderf line --stayOpen --context 3<CR>| " 搜索:Leaderf 搜索文件行但是保持搜索窗口不关闭
+nnoremap <leader>flk :Leaderf line --stayOpen<CR>| " 搜索:Leaderf 搜索文件行但是保持搜索窗口不关闭
 
 
 " 关闭leaderf的预览窗口,不然会影响-stayOpen模式,预览窗口无法关闭,也无法编辑新的文件
@@ -2101,7 +2166,7 @@ nnoremap <silent> <leader>gtxr :execute 'Git push origin :' . GetLineContentLast
 
 " tabular 对齐插件配置区域 {
 vnoremap <silent> <leader>tb<Space> :Tabularize / \+<cr>
-vnoremap <silent> <leader>tb= :Tabularize /=<cr>
+vnoremap <silent> <leader>tb=<Space> :Tabularize /=<cr>
 vnoremap <silent> <leader>tb: :Tabularize /:<cr>
 vnoremap <silent> <leader>tb-> :Tabularize /-><cr>
 vnoremap <silent> <leader>tb=> :Tabularize /=><cr>
@@ -2127,14 +2192,13 @@ nnoremap <M-S-CR> <Cmd>Hi{<CR>| " 高亮: 所有高亮的上一个
 " vim-highlighter 配置 }
 
 
-" vimio 的配置{
-let g:vimio_custom_shapes_dir = expand('~/.vim/vimio_custom_shapes')
-let g:vimio_user_shapes_define_graph_functions = [
-      \ ['Vimio__DefineSmartDrawShapesanimal', [0], 0, 'animal1.vim'],
-      \ ['Vimio__DefineSmartDrawShapesanimal', [0], 0, 'animal2.vim'],
-      \ ]
-
-" vimio 的配置}
+" " vimio 的配置{
+" let g:vimio_custom_shapes_dir = expand('~/.vim/vimio_custom_shapes')
+" let g:vimio_user_shapes_define_graph_functions = [
+"       \ ['Vimio__DefineSmartDrawShapesanimal', [0], 0, 'my_animal1.vim'],
+"       \ ['Vimio__DefineSmartDrawShapesanimal', [0], 0, 'my_animal2.vim'],
+"       \ ]
+" " vimio 的配置}
 
 " 插件配置 }
 
@@ -2803,7 +2867,7 @@ function! DeleteMarks(marks)
 endfunction
 
 " 手动删除某个(某些)标记
-nnoremap <silent> <leader>sdm :call DeleteMarks(input('Enter marks to delete (space-separated): '))<CR>| " 辅助: 手动删除一个标记列表
+nnoremap <silent> <leader>smm :call DeleteMarks(input('Enter marks to delete (space-separated): '))<CR>| " 辅助: 手动删除一个标记列表
 
 
 
@@ -2921,7 +2985,7 @@ nnoremap <silent> <leader>amx :call DeleteMarkComment(input('Mark: '))<CR>| " �
 
 
 " show marks
-nnoremap <silent> <leader><leader>sm :call PopupMenuShowKeyBindings('and', 'auto', ':SortMarks')<cr>| " 辅助: 静态显示当前文件所有marks标记
+nnoremap <silent> <leader>sms :call PopupMenuShowKeyBindings('and', 'auto', ':SortMarks')<cr>| " 辅助: 静态显示当前文件所有marks标记
 
 " 利用弹出窗口自己设计的标记系统 }
 " :TODO: 下面这个通过emacs打开后继承的环境变量有点问题,导致ggtags相关的路径错乱,可能是因为两个程序都定义了gtags相关的东西
@@ -3907,7 +3971,7 @@ set lines=80
 " vim-which-key 插件配置 {
 
 " 不要把按键延迟的值设置得太小
-set timeoutlen=300
+set timeoutlen=400
 " 这里是注册前缀
 nnoremap <silent> <leader>      :<c-u>WhichKey '<Space>'<CR>
 " 先取消 s 的特殊功能
@@ -3930,21 +3994,261 @@ let g:which_key_map_s = {}
 "             \   }
 "             \ }
 
-let g:which_key_map.c = { 'name' : "搜索" }
-let g:which_key_map.c.f = {
-            \  'name': 'ctrls搜索', 
-            \ 'i': {
-            \   'name': '忽略大小写',
-            \   'p': '全项目',
-            \   'c': '目录递归',
-            \   'd': '目录不递归',
-            \   'f': '当前文件',
+let g:which_key_map.t = {
+            \ 'name': "terminal, table mode, vimio",
+            \ 't': "table mode 根据当前选择范围自动创建表格",
+            \ '4': "4向纯文本选择(vimio)",
+            \ '8': "8向纯文本选择(vimio)",
+            \ 'b' : { 
+            \   'name': "buffer",
+            \   'd': "删除所有的终端buffer",
             \   },
-            \ 's': {
-            \   'name': '不忽略大小写',
-            \   'p': '全项目'
+            \ 'm': "表格编辑模式切换",
+            \ }
+
+let g:which_key_map_visual.t = {
+            \ 'name': "table mode, translate",
+            \ 't': "table mode 根据当前选择范围自动创建表格",
+            \ 'e': "简短的翻译(中->英)",
+            \ 'b' : { 
+            \   'name': "table mode",
+            \   ' ': "空格对齐",
+            \   '=': { 
+            \     "name": "等号对齐",
+            \     ' ': "=对齐",
+            \     '>': "=>对齐",
+            \     },
+            \   ':': ":对齐",
+            \   '-': { 
+            \     "name": "对齐",
+            \     ">": "->对齐",
+            \     },
+            \   },
+            \ }
+" --------------------显示相关-------------------------------------------------
+
+" --------------------ale, 标记, vimio-----------------------------------------
+let g:which_key_map.a = {
+            \ 'name': "ale, vimio选择",
+            \ 'f': "关闭ale语法检查",
+            \ 'o': "打开ale语法检查",
+            \ 'm': { 
+            \   "name": "标记注释",
+            \   'a': "添加某一个标记注释",
+            \   'x': "删除某一个标记注释",
+            \   '4': "vimio 4向选择大盒子内部",
+            \   '8': "vimio 8向选择大盒子内部",
+            \   },
+            \ '4': "vimio 4向选择小盒子内部",
+            \ '8': "vimio 8向选择小盒子内部",
+            \ }
+
+" -------------------切换相关 vimio选择相关 标记操作---------------------------
+let g:which_key_map.s = { 
+            \ "name": "切换相关",
+            \ 's': "纵向分屏",
+            \ '4': "flood选择4向",
+            \ '8': "flood选择8向",
+            \ 'r': "形状resize start(vimio)",
+            \ 'e': "形状resize end(vimio)",
+            \ 'c': { 
+            \   "name": "形状(vimio)",
+            \   't': "改变形状类型",
+            \   'c': "高亮当前列",
+            \   'n': "取消高亮当前列",
+            \   },
+            \ 'm': { 
+            \   "name": "标记操作",
+            \   'm': "手动删除某个标记",
+            \   's': "显示当前文件所有标记",
+            \   't': "显示当前文件所有marks标记",
+            \   'x': "关闭显示当前文件所有marks标记",
+            \   'u': "更新显示当前文件所有marks标记",
+            \   'd': "删除当前文件所有的小写字母标记",
+            \   'D': "删除当前文件所有的大写字母标记",
+            \   'n': "添加下一个小写字母标记",
+            \   'N': "添加下一个大写字母标记",
+            \   },
+            \ 'o': { 
+            \   "name": "语法高亮",
+            \   "n": "语法高亮打开",
+            \   'f': "语法高亮关闭",
+            \   'd': "放射线选择8向(vimio)",
+            \   's': "放射线选择4向(vimio)",
+            \   },
+            \ 'v': { 
+            \   "name": "viminfo",
+            \   "m": "手动重置当前的viminfo",
+            \   },
+            \ 'w': { 
+            \   "name": "vim简单搜索",
+            \   "a": "搜索当前光标下的单词全词自动搜索",
+            \   "m": "当前文件全词手动搜索",
+            \   },
+            \ }
+" ------------------ vim 配置文件相关 替换 横向分屏-----------------------------
+let g:which_key_map.v = { 
+            \ "name": "编辑器配置文件",
+            \ 'r': "重载vim配置文件",
+            \ 's': "vim内置替换功能",
+            \ 'v': "窗口横向分屏",
+            \ 'e': { 
+            \   "name": "虚拟文本",
+            \   'a': "设置虚拟文本",
+            \   'n': "关闭虚拟文本",
+            \   'r': "重载vim的配置文件",
+            \   },
+            \ 'g' : { 
+            \   "name": "vimgrep",
+            \   "i": { 
+            \     "name": "ignorecase",
+            \     "p": "项目搜索",
+            \     "c": "当前目录递归",
+            \     "d": "仅限当前目录",
+            \     "f": "仅限当前文件",
+            \     'w': { 
+            \       "name": "全词匹配",
+            \       "p": "项目搜索",
+            \       "c": "当前目录递归",
+            \       "d": "仅限当前目录",
+            \       "f": "仅限当前文件",
+            \       },
+            \     },
+            \   "s": { 
+            \     "name": "大小写敏感",
+            \     "p": "项目搜索",
+            \     "c": "当前目录递归",
+            \     "d": "仅限当前目录",
+            \     "f": "仅限当前文件",
+            \     },
+            \   "w": { 
+            \     "name": "大小写敏感,全词匹配",
+            \     "p": "项目搜索",
+            \     "c": "当前目录递归",
+            \     "d": "仅限当前目录",
+            \     "f": "仅限当前文件",
+            \     },
             \   }
             \ }
+
+let g:which_key_map_visual.v = { 
+            \ "name": "vimgrep",
+            \ 'g' : { 
+            \   "name": "vimgrep",
+            \   "i": { 
+            \     "name": "ignorecase",
+            \     "p": "项目搜索",
+            \     "c": "当前目录递归",
+            \     "d": "仅限当前目录",
+            \     "f": "仅限当前文件",
+            \     'w': { 
+            \       "name": "全词匹配",
+            \       "p": "项目搜索",
+            \       "c": "当前目录递归",
+            \       "d": "仅限当前目录",
+            \       "f": "仅限当前文件",
+            \       },
+            \     },
+            \   "s": { 
+            \     "name": "大小写敏感",
+            \     "p": "项目搜索",
+            \     "c": "当前目录递归",
+            \     "d": "仅限当前目录",
+            \     "f": "仅限当前文件",
+            \     },
+            \   "w": { 
+            \     "name": "大小写敏感,全词匹配",
+            \     "p": "项目搜索",
+            \     "c": "当前目录递归",
+            \     "d": "仅限当前目录",
+            \     "f": "仅限当前文件",
+            \     },
+            \   },
+            \ }
+
+" ------------------------ctrlsf 收缩------------------------------------------
+
+let g:which_key_map.c = { 
+            \ "name": "搜索",
+            \ "c": { 
+            \   "name": "收缩级别设置",
+            \   "0": "conceallevel 级别 0",
+            \   "2": "conceallevel 级别 2",
+            \   },
+            \ "f" : {
+            \   'name': 'ctrls搜索', 
+            \   'i': {
+            \     'name': '不敏感',
+            \     'p': '全项目',
+            \     'c': '目录递归',
+            \     'd': '目录不递归',
+            \     'f': '当前文件',
+            \     },
+            \   's': {
+            \     'name': '敏感',
+            \     'p': '全项目',
+            \     'c': '目录递归',
+            \     'd': '目录不递归',
+            \     'f': '当前文件',
+            \     },
+            \   'w': {
+            \     'name': '敏感,全词',
+            \     'p': '全项目',
+            \     'c': '目录递归',
+            \     'd': '目录不递归',
+            \     'f': '当前文件',
+            \     },
+            \   'm': { 
+            \     "name": "手动",
+            \     'i': { 
+            \       "name": "不敏感",
+            \       'p': '全项目',
+            \       'c': '目录递归',
+            \       'd': '目录不递归',
+            \       'f': '当前文件',
+            \       },
+            \     's': { 
+            \       "name": "敏感",
+            \       'p': '全项目',
+            \       'c': '目录递归',
+            \       'd': '目录不递归',
+            \       'f': '当前文件',
+            \       },
+            \     },
+            \   },
+            \ }
+
+let g:which_key_map_visual.c = { 
+            \ "name": "搜索",
+            \ "f" : {
+            \   'name': 'ctrls搜索', 
+            \   'i': {
+            \     'name': '不敏感',
+            \     'p': '全项目',
+            \     'c': '目录递归',
+            \     'd': '目录不递归',
+            \     'f': '当前文件',
+            \     },
+            \   's': {
+            \     'name': '敏感',
+            \     'p': '全项目',
+            \     'c': '目录递归',
+            \     'd': '目录不递归',
+            \     'f': '当前文件',
+            \     },
+            \   'w': {
+            \     'name': '敏感,全词',
+            \     'p': '全项目',
+            \     'c': '目录递归',
+            \     'd': '目录不递归',
+            \     'f': '当前文件',
+            \     },
+            \   },
+            \ }
+
+
+" ------------------ 终端操作 -------------------------------------------------
+
 
 let g:which_key_map.d = { 'name': '终端操作' }
 let g:which_key_map.d.b = { 
@@ -3952,15 +4256,92 @@ let g:which_key_map.d.b = {
             \   't': '删除',
             \}
 
+" --------------------本地列表操作---------------------------------------------
+let g:which_key_map.l = { 
+            \ "name": "locallist 操作",
+            \ "v": "locallist 中显示搜索结果", 
+            \ "o": "打开 locallist", 
+            \ "c": "关闭 locallist", 
+            \ "n": "跳转到 locallist 的下一个项目", 
+            \ "p": "跳转到 locallist 的上一个项目", 
+            \ }
+
+" --------------------quickfix 列表操作---------------------------------------------
+let g:which_key_map.q = { 
+            \ "name": "quickfix 操作",
+            \ "o": "打开 quickfix", 
+            \ "c": "关闭 quickfix", 
+            \ "n": "跳转到 quickfix 的下一个项目", 
+            \ "p": "跳转到 quickfix 的上一个项目", 
+            \ }
+
+" ------------------- leaderf 配置区域 ----------------------------------------
+let g:which_key_map.f = { 
+            \ 'name': "leaderf搜索",
+            \ '1': "搜索自己",
+            \ 'o': {
+            \   "name": "目录切换", 
+            \   "o": "把当前工作目录切换到项目根目录",
+            \   },
+            \ 'm': "搜索最近打开文件列表",
+            \ 'f': "搜索函数",
+            \ 'b': "搜索buffer",
+            \ 't': "搜索标签文件(tags)",
+            \ 'l': { 
+            \   'name': "搜索当前文件",
+            \   'l': "搜索当前文件行，搜索窗口不保持",
+            \   'k': "搜索当前文件行,搜索窗口保持",
+            \   },
+            \ 'w': "搜索打开的窗口",
+            \ 'r': { 
+            \   'name': 'rg搜索',
+            \   'm': "手动输入正则式",
+            \   'b': "当前光标下的词(not -w)",
+            \   'w': "当前光标下的词(-w)",
+            \   'e': { 
+            \     'name': "正则",
+            \     'n': "(not -w)",
+            \     'w': "(-w)",
+            \     },
+            \   'r': "打开上一次搜索",
+            \   },
+            \  'g': {
+            \    'name': "gtags标签",
+            \    'd': "跳转到定义",
+            \    'r': "跳转到引用",
+            \    's': "跳转到符号",
+            \    'g': "跳转到字符串",
+            \    'o': "重新打开最近的跳转命令",
+            \    'n': "结果列表的下一个元素",
+            \    'p': "结果列表的上一个元素",
+            \    }
+            \ }
+
+let g:which_key_map_visual.f = { 
+            \ 'name': "leaderf搜索",
+            \ 'r': { 
+            \   'name': "rg搜索",
+            \   'b': "当前光标下的词(not -w)",
+            \   'w': "当前光标下的词(-w)",
+            \   'e': { 
+            \     'name' : "正则表达式",
+            \     'n': "(not -w)",
+            \     'w': "(-w)",
+            \     },
+            \   },
+            \ }
 
 let g:which_key_map_s = { ' ': 'vimio',
             \ 'y': 'vimio-拷贝单个字符',
+            \ 'c': '收缩当前窗口最底层分组只保留一个窗口',
             \ }
 
+" -------------------- global 搜索---------------------------------------------
 
-let g:which_key_map_visual.g = { 'name': 'global搜索' }
-let g:which_key_map_visual.g.w = { 
-            \   'name': "gtags" ,
+let g:which_key_map.g = { 
+            \ 'name': 'global搜索',
+            \ 'w': {
+            \   'name': "分屏显示搜索结果",
             \   's': '查找符号',
             \   'g': '查找定义',
             \   'c': '调用此函数的函数',
@@ -3971,7 +4352,45 @@ let g:which_key_map_visual.g.w = {
             \   'd': '查找此函数调用的函数',
             \   'a': '查找赋值位置',
             \   'z': '在ctags数据库中查找当前单词',
-            \}
+            \   },
+            \ 's': '查找符号',
+            \ 'g': '查找定义',
+            \ 'c': '调用此函数的函数',
+            \ 't': '查找字符串',
+            \ 'e': '查找查找正则表达式',
+            \ 'f': '查找文件名',
+            \ 'i': '查找包含当前头文件的文件',
+            \ 'd': '查找此函数调用的函数',
+            \ 'a': '查找赋值位置',
+            \ 'z': '在ctags数据库中查找当前单词',
+            \ }
+
+let g:which_key_map_visual.g = { 
+            \ 'name': 'global搜索',
+            \ 'w': {
+            \   'name': "分屏显示搜索结果",
+            \   's': '查找符号',
+            \   'g': '查找定义',
+            \   'c': '调用此函数的函数',
+            \   't': '查找字符串',
+            \   'e': '查找查找正则表达式',
+            \   'f': '查找文件名',
+            \   'i': '查找包含当前头文件的文件',
+            \   'd': '查找此函数调用的函数',
+            \   'a': '查找赋值位置',
+            \   'z': '在ctags数据库中查找当前单词',
+            \   },
+            \ 's': '查找符号',
+            \ 'g': '查找定义',
+            \ 'c': '调用此函数的函数',
+            \ 't': '查找字符串',
+            \ 'e': '查找查找正则表达式',
+            \ 'f': '查找文件名',
+            \ 'i': '查找包含当前头文件的文件',
+            \ 'd': '查找此函数调用的函数',
+            \ 'a': '查找赋值位置',
+            \ 'z': '在ctags数据库中查找当前单词',
+            \ }
 
 
 " 这里是把注册的前缀直接绑定到对应的全局字典
