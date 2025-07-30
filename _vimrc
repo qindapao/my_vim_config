@@ -1096,16 +1096,16 @@ nnoremap <silent> <leader>gwd :belowright split \| GscopeFind d <C-R><C-W><cr>:w
 nnoremap <silent> <leader>gwa :belowright split \| GscopeFind a <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找为此符号赋值的位置
 nnoremap <silent> <leader>gwz :belowright split \| GscopeFind z <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 在ctags的数据库中查找当前单词
 
-nnoremap <silent> <leader>gs :GscopeFind s <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号
-nnoremap <silent> <leader>gg :GscopeFind g <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号定义
-nnoremap <silent> <leader>gc :GscopeFind c <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 调用这个函数的函数
-nnoremap <silent> <leader>gt :GscopeFind t <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找字符串
-nnoremap <silent> <leader>ge :GscopeFind e <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找正则表达式
-nnoremap <silent> <leader>gf :GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找文件名
-nnoremap <silent> <leader>gi :GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找包含当前头文件的文件
-nnoremap <silent> <leader>gd :GscopeFind d <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 此函数调用的函数
-nnoremap <silent> <leader>ga :GscopeFind a <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找为此符号赋值的位置
-nnoremap <silent> <leader>gz :GscopeFind z <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 在ctags的数据库中查找当前单词
+nnoremap <silent> <leader>gns :GscopeFind s <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号
+nnoremap <silent> <leader>gng :GscopeFind g <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号定义
+nnoremap <silent> <leader>gnc :GscopeFind c <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 调用这个函数的函数
+nnoremap <silent> <leader>gnt :GscopeFind t <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找字符串
+nnoremap <silent> <leader>gne :GscopeFind e <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找正则表达式
+nnoremap <silent> <leader>gnf :GscopeFind f <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找文件名
+nnoremap <silent> <leader>gni :GscopeFind i <C-R>=expand("<cfile>")<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找包含当前头文件的文件
+nnoremap <silent> <leader>gnd :GscopeFind d <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 此函数调用的函数
+nnoremap <silent> <leader>gna :GscopeFind a <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找为此符号赋值的位置
+nnoremap <silent> <leader>gnz :GscopeFind z <C-R><C-W><cr>:wincmd p<cr>| " 标签导航:gutentags_plus 在ctags的数据库中查找当前单词
 
 vnoremap <leader>gws y:belowright split \| GscopeFind s <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号
 vnoremap <leader>gwg y:belowright split \| GscopeFind g <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号定义
@@ -1118,16 +1118,16 @@ vnoremap <leader>gwd y:belowright split \| GscopeFind d <c-r>"<cr>:wincmd p<cr>|
 vnoremap <leader>gwa y:belowright split \| GscopeFind a <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找为此符号赋值的位置
 vnoremap <leader>gwz y:belowright split \| GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 在ctags的数据库中查找当前单词
 
-vnoremap <leader>gs y:GscopeFind s <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号
-vnoremap <leader>gg y:GscopeFind g <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号定义
-vnoremap <leader>gc y:GscopeFind c <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 调用这个函数的函数
-vnoremap <leader>gt y:GscopeFind t <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找字符串
-vnoremap <leader>ge y:GscopeFind e <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找正则表达式
-vnoremap <leader>gf y:GscopeFind f <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找文件名
-vnoremap <leader>gi y:GscopeFind i <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找包含当前头文件的文件
-vnoremap <leader>gd y:GscopeFind d <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 此函数调用的函数
-vnoremap <leader>ga y:GscopeFind a <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找为此符号赋值的位置
-vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 在ctags的数据库中查找当前单词
+vnoremap <leader>gns y:GscopeFind s <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号
+vnoremap <leader>gng y:GscopeFind g <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找符号定义
+vnoremap <leader>gnc y:GscopeFind c <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 调用这个函数的函数
+vnoremap <leader>gnt y:GscopeFind t <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找字符串
+vnoremap <leader>gne y:GscopeFind e <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找正则表达式
+vnoremap <leader>gnf y:GscopeFind f <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找文件名
+vnoremap <leader>gni y:GscopeFind i <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找包含当前头文件的文件
+vnoremap <leader>gnd y:GscopeFind d <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 此函数调用的函数
+vnoremap <leader>gna y:GscopeFind a <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 查找为此符号赋值的位置
+vnoremap <leader>gnz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 标签导航:gutentags_plus 在ctags的数据库中查找当前单词
 " gutentags_plus 插件配置 }
 
 " 扩展选择(这里只是记录备忘,所用默认配置即可) {
@@ -1140,8 +1140,8 @@ vnoremap <leader>gz y:GscopeFind z <c-r>"<cr>:wincmd p<cr>| " 标签导航:guten
 
 " NERDTree {
 " 刷新NERDTree的状态
-nnoremap <leader>r :NERDTreeFocus<cr>:NERDTreeRefreshRoot<cr><c-w>p| " 目录树: 刷新目录树状态
-nnoremap <leader>ntf :NERDTreeFind<cr>:NERDTreeRefreshRoot<cr><c-w>p| " 目录树: 进入当前文件对应的目录树并且刷新目录树状态
+nnoremap <leader>rt :NERDTreeFocus<cr>:NERDTreeRefreshRoot<cr><c-w>p| " 目录树: 刷新目录树状态
+nnoremap <leader>rf :NERDTreeFind<cr>:NERDTreeRefreshRoot<cr><c-w>p| " 目录树: 进入当前文件对应的目录树并且刷新目录树状态
 " NERDTree的修改文件的界面使用更小的界面显示
 let NERDTreeMinimalMenu = 1
 let NERDTreeShowHidden = 1
@@ -1621,18 +1621,18 @@ let g:bookmark_auto_save = 1
 
 " 不要使用默认的按键映射
 let g:bookmark_no_default_key_mappings = 1
-nnoremap <Leader><Leader>bt <Plug>BookmarkToggle| " 书签: 切换书签打开与关闭
-nnoremap <Leader><Leader>bi <Plug>BookmarkAnnotate| " 书签: 创建一个注释书签
-nnoremap <Leader><Leader>ba <Plug>BookmarkShowAll| " 书签: 显示所有的书签
-nnoremap <Leader><Leader>bj <Plug>BookmarkNext| " 书签: 跳转到下一个书签
-nnoremap <Leader><Leader>bk <Plug>BookmarkPrev| " 书签: 跳转到上一个书签
-nnoremap <Leader><Leader>bc <Plug>BookmarkClear| " 书签: 删除当前书签
-nnoremap <Leader><Leader>bx <Plug>BookmarkClearAll| " 书签: 删除所有书签
+nnoremap <Leader>bt <Plug>BookmarkToggle| " 书签: 切换书签打开与关闭
+nnoremap <Leader>bi <Plug>BookmarkAnnotate| " 书签: 创建一个注释书签
+nnoremap <Leader>ba <Plug>BookmarkShowAll| " 书签: 显示所有的书签
+nnoremap <Leader>bn <Plug>BookmarkNext| " 书签: 跳转到下一个书签
+nnoremap <Leader>bp <Plug>BookmarkPrev| " 书签: 跳转到上一个书签
+nnoremap <Leader>bc <Plug>BookmarkClear| " 书签: 删除当前书签
+nnoremap <Leader>bx <Plug>BookmarkClearAll| " 书签: 删除所有书签
 
 " these will also work with a [count] prefix
-nnoremap <Leader>kk <Plug>BookmarkMoveUp| " 书签: 当前书签行上移
-nnoremap <Leader>jj <Plug>BookmarkMoveDown| " 书签: 当前书签行下移
-nnoremap <Leader>gl <Plug>BookmarkMoveToLine| " 书签: 书签移动到某一行
+nnoremap <Leader>bk <Plug>BookmarkMoveUp| " 书签: 当前书签行上移
+nnoremap <Leader>bj <Plug>BookmarkMoveDown| " 书签: 当前书签行下移
+nnoremap <Leader>bl <Plug>BookmarkMoveToLine| " 书签: 书签移动到某一行
 
 
 " vim-bookmarks 书签插件配置 }
@@ -2097,12 +2097,12 @@ vnoremap <silent> <leader>gbc y:execute 'Git checkout ' . shellescape(@0) \| clo
 " 删除一个本地分支
 nnoremap <silent> <leader>gbxl :execute 'normal "xyiw' \| execute 'Git branch -d ' . getreg('x') \| close<CR>| " git:branch 删除一个本地分支
 vnoremap <silent> <leader>gbxl y:execute 'Git branch -d ' . shellescape(@0) \| close<CR>| "                      git:branch 删除一个本地分支
-nnoremap <silent> <leader>gbfxl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| close<CR>| "git:branch 删除一个本地分支
-vnoremap <silent> <leader>gbfxl y:execute 'Git branch -D ' . shellescape(@0) \| close<CR>| "                     git:branch 删除一个本地分支
+nnoremap <silent> <leader>gbxfl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| close<CR>| "git:branch 删除一个本地分支
+vnoremap <silent> <leader>gbxfl y:execute 'Git branch -D ' . shellescape(@0) \| close<CR>| "                     git:branch 删除一个本地分支
 
 " 删除一个远程分支
 nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>| "  git:branch 删除一个远程分支
-nnoremap <silent> <leader>gbfxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>| " git:branch 删除一个远程分支
+nnoremap <silent> <leader>gbxfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>| " git:branch 删除一个远程分支
 
 " 查看所有的远程分支
 nnoremap <silent> <leader>gbr :execute 'Git remote prune origin' \| execute 'Git branch -r'<CR>| " git:branch 查看所有在远程分支
@@ -2211,8 +2211,8 @@ noremap <leader>gsnm :silent call GenSectionNum('markdown')<cr>| " markdown: mar
 noremap <leader>gsnz :silent call GenSectionNum('zim')<cr>| " zim: zim生成数字目录序号
 
 " 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突
-noremap <leader><leader>r :call MyReplaceWord('n')<CR>| " 替换: 普通模式替换当前单词
-vnoremap <leader>r :call MyReplaceWord('v')<CR>| " 替换: 可视模式替换当前单词
+noremap <leader>rw :call MyReplaceWord('n')<CR>| " 替换: 普通模式替换当前单词
+vnoremap <leader>rw :call MyReplaceWord('v')<CR>| " 替换: 可视模式替换当前单词
 vnoremap <leader><leader>r :call VisualReplaceWord()<CR>| " 替换: 可视模式替换选择区域复制的单词为新单词
 
 nnoremap <leader>br :call AddBufferBr()<CR>
@@ -2335,8 +2335,8 @@ autocmd InsertLeave * if exists("s:winid") | call popup_close(s:winid) | endif
 autocmd CompleteDone * if exists("s:winid") | call popup_close(s:winid) | endif
 autocmd CompleteDone * .s/\%x00/\r/ge
 " 替换文本中的^@为换行
-nnoremap <leader>rca :%s/\%x00/\r/g<cr>| " 编辑: 普通模式替换文本中的^@为换行
-vnoremap <leader>rca :s/\%x00/\r/g<cr>| " 编辑: 可视模式替换文本中的^@为换行
+nnoremap <leader>ra :%s/\%x00/\r/g<cr>| " 编辑: 普通模式替换文本中的^@为换行
+vnoremap <leader>ra :s/\%x00/\r/g<cr>| " 编辑: 可视模式替换文本中的^@为换行
 
 " :TODO: 后面可以支持跨字母匹配,比如 wind  输入wd,匹配它
 
@@ -3968,6 +3968,12 @@ set columns=280
 set lines=80
 
 
+" diffchar 插件配置 {
+
+nnoremap <Leader>gdcp <Plug>GetDiffCharPair<CR>
+
+" diffchar 插件配置 }
+
 " vim-which-key 插件配置 {
 
 " 不要把按键延迟的值设置得太小
@@ -4247,15 +4253,6 @@ let g:which_key_map_visual.c = {
             \ }
 
 
-" ------------------ 终端操作 -------------------------------------------------
-
-
-let g:which_key_map.d = { 'name': '终端操作' }
-let g:which_key_map.d.b = { 
-            \   'name': "buffer" ,
-            \   't': '删除',
-            \}
-
 " --------------------本地列表操作---------------------------------------------
 let g:which_key_map.l = { 
             \ "name": "locallist 操作",
@@ -4353,16 +4350,62 @@ let g:which_key_map.g = {
             \   'a': '查找赋值位置',
             \   'z': '在ctags数据库中查找当前单词',
             \   },
-            \ 's': '查找符号',
-            \ 'g': '查找定义',
-            \ 'c': '调用此函数的函数',
-            \ 't': '查找字符串',
-            \ 'e': '查找查找正则表达式',
-            \ 'f': '查找文件名',
-            \ 'i': '查找包含当前头文件的文件',
-            \ 'd': '查找此函数调用的函数',
-            \ 'a': '查找赋值位置',
-            \ 'z': '在ctags数据库中查找当前单词',
+            \ 'n': {
+            \   'name': '当前屏显示搜索结果',
+            \   's': '查找符号',
+            \   'g': '查找定义',
+            \   'c': '调用此函数的函数',
+            \   't': '查找字符串',
+            \   'e': '查找查找正则表达式',
+            \   'f': '查找文件名',
+            \   'i': '查找包含当前头文件的文件',
+            \   'd': '查找此函数调用的函数',
+            \   'a': '查找赋值位置',
+            \   'z': '在ctags数据库中查找当前单词',
+            \   },
+            \ 'd': { 
+            \   'name': "git diff",
+            \   'a': '显示所有的差异',
+            \   'c': '显示两个commit的差异(@a register)',
+            \   'b': '显示两个分支的差异(@a register)',
+            \   'v': 'commit或者分支的单文件对比',
+            \   'f': '当前文件和库上最新对比',
+            \   },
+            \ 'b': { 
+            \   'name': 'git branch',
+            \   'n': '创建一个新分支',
+            \   'l': '查看所有本地分支',
+            \   'c': '切换到光标下的分支',
+            \   'x': { 
+            \     'name': '删除分支',
+            \     'l': '删除光标下的本地分支',
+            \     'r': '删除光标下的远程分支',
+            \     'f': { 
+            \       'name': "强制删除",
+            \       'l': '本地分支',
+            \       'r': '远程分支',
+            \       },
+            \     },
+            \   'r': '查看所有的远程分支',
+            \   'f': { 
+            \     'name': 'fetch',
+            \     'r': '拉取一个远程分支并在本地跟踪它',
+            \     },
+            \   },
+            \ 'p': { 
+            \   'name': 'git pull or push',
+            \   'l': '拉取远程最新变更到本地',
+            \   's': '推送本地最新变更到远程',
+            \   },
+            \ 'o': { 
+            \   'name': 'git 提交历史',
+            \   'g': '查看当前文件的所有提交历史',
+            \   },
+            \ 't': { 
+            \   'name': 'git 标签管理',
+            \   'a': '基于某个提交创建一个标签(@a register)',
+            \   'l': '列出所有的本地标签',
+            \   },
             \ }
 
 let g:which_key_map_visual.g = { 
@@ -4380,17 +4423,54 @@ let g:which_key_map_visual.g = {
             \   'a': '查找赋值位置',
             \   'z': '在ctags数据库中查找当前单词',
             \   },
-            \ 's': '查找符号',
-            \ 'g': '查找定义',
-            \ 'c': '调用此函数的函数',
-            \ 't': '查找字符串',
-            \ 'e': '查找查找正则表达式',
-            \ 'f': '查找文件名',
-            \ 'i': '查找包含当前头文件的文件',
-            \ 'd': '查找此函数调用的函数',
-            \ 'a': '查找赋值位置',
-            \ 'z': '在ctags数据库中查找当前单词',
+            \ 'n': {
+            \   'name': '当前屏显示搜索结果',
+            \   's': '查找符号',
+            \   'g': '查找定义',
+            \   'c': '调用此函数的函数',
+            \   't': '查找字符串',
+            \   'e': '查找查找正则表达式',
+            \   'f': '查找文件名',
+            \   'i': '查找包含当前头文件的文件',
+            \   'd': '查找此函数调用的函数',
+            \   'a': '查找赋值位置',
+            \   'z': '在ctags数据库中查找当前单词',
+            \   },
             \ }
+
+" --------------------------- 书签相关 ----------------------------------------
+let g:which_key_map.b = { 
+            \ 'name': 'bookmark, vimio(border)',
+            \ 't': '切换书签打开与关闭',
+            \ 'i': '创建注释书签',
+            \ 'a': '显示所有书签',
+            \ 'n': '跳转到下一个书签',
+            \ 'p': '跳转到上一个书签',
+            \ 'c': '删除当前书签',
+            \ 'x': '删除所有书签',
+            \ 'k': '当前书签行上移',
+            \ 'j': '当前书签行下移',
+            \ 'l': '当前书签行移动到某一行',
+            \ '4': '4向选择边框[min](vimio)',
+            \ '8': '8向选择边框[min](vimio)',
+            \ 'm': { 
+            \   'name': 'vimio(border select max)',
+            \   '4': '4向选择边框[max]',
+            \   '8': '4向选择边框[max]',
+            \   },
+            \ }
+" ----------------------代码记录导航------------------------------------------
+let g:which_key_map.j = { 
+            \ 'name': '代码记录跳转',
+            \ 'j': '跳转到代码',
+            \ 'l': '记录行锚点到系统剪切板',
+            \ 'r': '记录锚点到系统剪切板',
+            \ 'h': '跳转到锚点',
+            \ 'n': '创建新锚点到系统寄存器',
+            \ 'c': '插入代码路径',
+            \ 'k': '插入锚点路径',
+            \ }
+
 
 
 " 这里是把注册的前缀直接绑定到对应的全局字典
