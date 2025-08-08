@@ -710,10 +710,14 @@ nnoremap <leader>lp :lprev<CR>| " locallist: 跳转到本地窗口的上一个�
 
 " 窗口操作
 " 之所以绑定两个字母为了快速响应
-nnoremap <silent> <leader>cw :close<CR>| " 关闭当前窗口
-nnoremap <silent> <leader>ss :split<CR>| " 纵向分屏
-nnoremap <silent> <leader>vv :vsplit<CR>| " 横向分屏
-nnoremap <silent> <leader>ow :only<CR>| " 只保留当前窗口
+" Z 代表最后结束的意思，所以是关闭窗口
+nnoremap <silent> sz :close<CR>| " 关闭当前窗口
+" E 视觉自觉就是纵向分屏
+nnoremap <silent> se :split<CR>| " 纵向分屏
+" W 视觉自觉就是横向分屏
+nnoremap <silent> sw :vsplit<CR>| " 横向分屏
+" n 表示 only 删除别的留自己
+nnoremap <silent> sn :only<CR>| " 只保留当前窗口
 
 
 " :TODO: 基于范围绘制一个圆(如果选择区域不满足要求按照最小规则生成一个,自动重新选择区域并且生成)
@@ -763,8 +767,8 @@ set completeopt-=preview
 nnoremap <silent> <leader>sof :syntax off<cr>| " 辅助: 取消语法高亮(提高效率)
 nnoremap <silent> <leader>son :syntax on<cr>| " 辅助: 取消语法高亮(增加可读性)
 
-nnoremap <leader>swa yiw/\<<C-R>"\>| " 搜索: 当前文件当前光标下单词全词自动搜索
-nnoremap <leader>swm /\<\><Left><Left>| " 搜索: 当前文件全词手动搜索
+nnoremap <leader>swa yiw/\c\<<C-R>"\>| " 搜索: 当前文件当前光标下单词全词自动搜索
+nnoremap <leader>swm /\c\<\><Left><Left>| " 搜索: 当前文件全词手动搜索
 
 " 设置vim等待某些事件的刷新事件(默认是4000ms)[ :TODO: 这个设置可能比较危险,目前还不确定有什么副作用]
 set updatetime=100
@@ -939,6 +943,24 @@ call plug#end()
 " vim-expand-region {
 " + " 辅助:vim-expand-region 普通模式下扩大选区
 " _ " 辅助:vim-expand-region 普通模式下缩小选区
+
+let g:expand_region_text_objects = {
+      \ 'iw'  :1,
+      \ 'iW'  :1,
+      \ 'i"'  :1,
+      \ "i'"  :1,
+      \ 'ib'  :1,
+      \ 'iB'  :1,
+      \ 'i]'  :1,
+      \ 'ab'  :1,
+      \ 'aB'  :1,
+      \ 'a]'  :1,
+      \ 'ii'  :1,
+      \ 'ai'  :1,
+      \ 'ip'  :1,
+      \ 'il'  :1,
+      \ }
+
 " 扩大选区
 nnoremap <M-i> <Plug>(expand_region_expand)| " 编辑: 普通模式下扩大选区
 vnoremap <M-i> <Plug>(expand_region_expand)| " 编辑: 可视模式下扩大选区
@@ -2130,6 +2152,23 @@ vnoremap <silent> <leader>gtxl y:execute 'Git tag -d ' . shellescape(@0) \| clos
 nnoremap <silent> <leader>gtp :execute 'normal "xyiw' \| execute 'Git push --set-upstream origin ' . getreg('x')<CR>| " git:tags 推送某个标签到远程服务器(x寄存器中存储了内容)
 
 nnoremap <silent> <leader>gtr :execute 'Git fetch --prune --tags' \| terminal Git ls-remote --tags<CR>| " git:tags 列出所有的远程标签
+" git:tags 检出某个远程标签到本地
+function! CheckoutTag()
+    let tagline = expand("<cfile>")
+    let tagname = matchstr(tagline, '[^/]*$')
+    execute 'Git fetch origin tag ' . tagname
+    execute 'Git checkout tags/' . tagname
+endfunction
+nnoremap <silent> <leader>gtc :call CheckoutTag()<CR>
+
+function! DeleteRemoteTag()
+    let tagline = expand("<cfile>")
+    let tagname = matchstr(tagline, '[^/]*$')
+    execute 'Git push origin --delete tag ' . tagname
+endfunction
+nnoremap <silent> <leader>gtxr :call DeleteRemoteTag()<CR>
+
+
 function! GetLineContentLast ()
     " 获取当前行的内容
     let line = getline('.')
@@ -2213,7 +2252,7 @@ noremap <leader>gsnz :silent call GenSectionNum('zim')<cr>| " zim: zim生成数�
 " 替换函数快捷方式,和<leader>r和NERDTree刷新快捷键冲突
 noremap <leader>rw :call MyReplaceWord('n')<CR>| " 替换: 普通模式替换当前单词
 vnoremap <leader>rw :call MyReplaceWord('v')<CR>| " 替换: 可视模式替换当前单词
-vnoremap <leader><leader>r :call VisualReplaceWord()<CR>| " 替换: 可视模式替换选择区域复制的单词为新单词
+vnoremap <leader>rn :call VisualReplaceWord()<CR>| " 替换: 可视模式替换选择区域复制的单词为新单词
 
 nnoremap <leader>br :call AddBufferBr()<CR>
 
@@ -3877,7 +3916,7 @@ nnoremap <silent> s, :call ToggleToolBarGroup()<CR>
 " let $https_proxy = 'yy:8080'
 
 " 简短的翻译(中->英)
-vnoremap <leader>t y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(1, 'en')<CR>
+vnoremap <leader>te y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(1, 'en')<CR>
 " 完整的翻译(中->英)
 vnoremap <leader><S-T> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(0, 'en')<CR>
 
@@ -4000,6 +4039,33 @@ let g:which_key_map_s = {}
 "             \   }
 "             \ }
 
+let g:which_key_map.H = {
+            \ 'name' : '+help',
+            \ 's' : [":call feedkeys('s')", '查看 s 键映射'],
+            \ ',' : [":call feedkeys(',')", '查看 localleader 映射'],
+            \ ' ' : [":call feedkeys(' ')", '查看 leader 映射'],
+            \ "\<M-n>" : [":call feedkeys(\"\<M-n>\")", 'autopair jump(M-n)'],
+            \ "\<M-p>" : [":call feedkeys(\"\<M-p>\")", 'autopair toggle(M-p)'],
+            \ "\<M-i>" : [":call feedkeys(\"\<M-i>\")", 'region 增加(M-i)'],
+            \ "\<M-o>" : [":call feedkeys(\"\<M-o>\")", 'region 减少(M-o)'],
+            \ "\<C-S-G>" : [":call feedkeys(\"<C-S-G>\")", 'vimio(C-S-G)[高亮替换]'],
+            \ "\<C-X>" : { 
+            \   'name': "vimio(C-X)[高亮复制] (C-S-X)[高亮剪切]",
+            \   's': [":call feedkeys(\"\<C-S-X>\")", 'vimio(C-S-x)[高亮取消]'],
+            \   "\<CR>": [":call feedkeys(\"\<C-X>\")", 'vimio(C-X)[高亮复制]'],
+            \   },
+            \ "\<C-C>" : { 
+            \   'name': "(C-S-C)[高亮取消]",
+            \   's': [":call feedkeys(\"\<C-S-C>\")", 'vimio(C-S-C)[高亮取消]'],
+            \   },
+            \ "\<C-E>" : [":call feedkeys(\"\<C-E>\")", '调整窗口大小(C-E)'],
+            \ '<F3>' : [":call feedkeys(\"\<F3>\")", '打开文件浏览器'],
+            \ '<F4>' : [":call feedkeys(\"\<F4>\")", '切换Tagbar显示'],
+            \ '<F5>' : [":call feedkeys(\"\<F5>\")", '切换主题'],
+            \ '<F8>' : [":call feedkeys(\"\<F8>\")", '切换NERDTree'],
+            \ }
+
+
 let g:which_key_map.t = {
             \ 'name': "terminal, table mode, vimio",
             \ 't': "table mode 根据当前选择范围自动创建表格",
@@ -4013,7 +4079,7 @@ let g:which_key_map.t = {
             \ }
 
 let g:which_key_map_visual.t = {
-            \ 'name': "table mode, translate",
+            \ 'name': "table mode, translate, 对齐",
             \ 't': "table mode 根据当前选择范围自动创建表格",
             \ 'e': "简短的翻译(中->英)",
             \ 'b' : { 
@@ -4035,7 +4101,7 @@ let g:which_key_map_visual.t = {
 
 " --------------------ale, 标记, vimio-----------------------------------------
 let g:which_key_map.a = {
-            \ 'name': "ale, vimio选择",
+            \ 'name': "ale, (vimio)border 选择",
             \ 'f': "关闭ale语法检查",
             \ 'o': "打开ale语法检查",
             \ 'm': { 
@@ -4051,7 +4117,7 @@ let g:which_key_map.a = {
 
 " -------------------切换相关 vimio选择相关 标记操作---------------------------
 let g:which_key_map.s = { 
-            \ "name": "切换相关",
+            \ "name": "切换相关,vimio(solid选择),vim简单搜索,Marks 标记相关",
             \ 's': "纵向分屏",
             \ '4': "flood选择4向",
             \ '8': "flood选择8向",
@@ -4094,7 +4160,7 @@ let g:which_key_map.s = {
             \ }
 " ------------------ vim 配置文件相关 替换 横向分屏-----------------------------
 let g:which_key_map.v = { 
-            \ "name": "编辑器配置文件",
+            \ "name": "编辑器配置文件,vimgrep",
             \ 'r': "重载vim配置文件",
             \ 's': "vim内置替换功能",
             \ 'v': "窗口横向分屏",
@@ -4175,7 +4241,7 @@ let g:which_key_map_visual.v = {
 " ------------------------ctrlsf 收缩------------------------------------------
 
 let g:which_key_map.c = { 
-            \ "name": "搜索",
+            \ "name": "ctrlsf搜索,收缩级别",
             \ "c": { 
             \   "name": "收缩级别设置",
             \   "0": "conceallevel 级别 0",
@@ -4225,9 +4291,9 @@ let g:which_key_map.c = {
             \ }
 
 let g:which_key_map_visual.c = { 
-            \ "name": "搜索",
+            \ "name": "ctrlsf搜索",
             \ "f" : {
-            \   'name': 'ctrls搜索', 
+            \   'name': 'ctrlsf搜索', 
             \   'i': {
             \     'name': '不敏感',
             \     'p': '全项目',
@@ -4255,12 +4321,19 @@ let g:which_key_map_visual.c = {
 
 " --------------------本地列表操作---------------------------------------------
 let g:which_key_map.l = { 
-            \ "name": "locallist 操作",
+            \ "name": "locallist 操作,vimio(线选择)",
             \ "v": "locallist 中显示搜索结果", 
             \ "o": "打开 locallist", 
             \ "c": "关闭 locallist", 
             \ "n": "跳转到 locallist 的下一个项目", 
             \ "p": "跳转到 locallist 的上一个项目", 
+            \ '4': '(vimio)线4向',
+            \ '8': '(vimio)线8向',
+            \ 'b': { 
+            \   'name': '(vimio)基于线选择的 border inside 选择',
+            \   'a': '选择边框和内部',
+            \   'i': '只选择内部',
+            \   },
             \ }
 
 " --------------------quickfix 列表操作---------------------------------------------
@@ -4328,15 +4401,100 @@ let g:which_key_map_visual.f = {
             \   },
             \ }
 
-let g:which_key_map_s = { ' ': 'vimio',
-            \ 'y': 'vimio-拷贝单个字符',
+let g:which_key_map_s = {
+            \ 'name': 'vimio,窗口管理,工具栏管理',
             \ 'c': '收缩当前窗口最底层分组只保留一个窗口',
+            \ 'z': '关闭当前窗口(z代表结束)',
+            \ 'e': '纵向分屏(E视觉上是纵向分屏)',
+            \ 'w': '横向分屏(W视觉上是横向分屏)',
+            \ 'n': '只保留当前窗口(n表示 only 只留自己)',
+            \ ',': '切换图标栏分组',
+            \ '.': '执行宏a内容',
+            \ ';': '跳转到zim的文件和位置',
+            \ 'h': '切换zim的markup char的显示与隐藏',
+            \ 'a': '(vimio)自动添加箭头',
+            \ 'g': '(vimio)模板集切换',
+            \ 'b': '(vimio)模板lev1逆序切换',
+            \ 'f': '(vimio)模板lev1正序切换',
+            \ 'k': '(vimio)模板lev2步长切换',
+            \ 'd': '(vimio)停止光标移动自动高亮',
+            \ 'i': '(vimio)开始光标移动自动高亮',
+            \ 'j': '(vimio)开始光标移动自动移除高亮',
+            \ 'l': { 
+            \   'name': '切换或者显示线型',
+            \   'c': '切换线型',
+            \   's': '显示线型',
+            \   },
+            \ 'u': '(vimio)根据当前光标下的字符切换线型',
+            \ 'o': '(vimio)预览跟随模式开启',
+            \ 'q': '(vimio)预览跟随模式关闭',
+            \ 'p': '(vimio)当前位置粘贴一个字符',
+            \ 's': { 
+            \   'name': '(vimio)搜索和shape',
+            \   's': '搜索stencil',
+            \   'b': '绘制一个盒子',
+            \   'r': '形状resize开始',
+            \   'e': '形状resize结束',
+            \   't': '形状改变类型',
+            \   },
+            \ 'y': '(vimio)拷贝单个字符',
+            \ 't': '(vimio)切换预览是否透明',
+            \ 'v': '(vimio)预览clip中内容',
+            \ 'm': { 
+            \   'name': '(vimio)智能线操作',
+            \   'c': '取消绘制',
+            \   'd': '切换直斜',
+            \   'e': '结束绘制',
+            \   'f': '切换方向',
+            \   'r': '识别高亮选择线并且重新调整大小',
+            \   's': '开始绘制或者继续绘制',
+            \   'x': '交叉模式切换',
+            \   'a': { 
+            \     'name': '(vimio)箭头操作',
+            \     'e': '结束箭头切换显示和隐藏',
+            \     's': '开始箭头切换显示和隐藏',
+            \     'f': '切换箭头的开始和结尾',
+            \     },
+            \ },
+            \ 'x': { 
+            \   'name': '(vimio)交叉模式管理',
+            \   'm': '切换交叉模式的打开和关闭',
+            \   's': '切换交叉模式的样式',
+            \ },
+            \ }
+
+let g:which_key_map.i = {
+            \ 'name': '(vimio) inside border,对齐线',
+            \ 'g': '切换对齐线显示与隐藏',
+            \ '4': '(vimio)小环4向',
+            \ '8': '(vimio)小环8向',
+            \ 'm': { 
+            \   'name': '(vimio)大环',
+            \   '4': '(vimio)大环4向',
+            \   '8': '(vimio)大环8向',
+            \   },
+            \ }
+
+let g:which_key_map.r = {
+            \ 'name': '(vimio)选择放射线和框以及内部,NERDTree',
+            \ '4': '(vimio)4向',
+            \ '8': '(vimio)8向',
+            \ 'f': '(NERDTree)进入当前文件对应目录树并且刷新目录树',
+            \ 't': '(NERDTree)刷新目录树状态',
+            \ 'w': '(替换)普通模式替换当前单词',
+            \ 'a': '(替换)普通模式替换文本中^@为换行',
+            \ }
+
+let g:which_key_map_visual.r = {
+            \ 'name': '替换',
+            \ 'w': '(替换)可视模式替换当前单词',
+            \ 'n': '(替换)可视模式替换文本中^@为换行',
             \ }
 
 " -------------------- global 搜索---------------------------------------------
 
 let g:which_key_map.g = { 
-            \ 'name': 'global搜索',
+            \ 'name': 'global搜索,git',
             \ 'w': {
             \   'name': "分屏显示搜索结果",
             \   's': '查找符号',
@@ -4405,11 +4563,23 @@ let g:which_key_map.g = {
             \   'name': 'git 标签管理',
             \   'a': '基于某个提交创建一个标签(@a register)',
             \   'l': '列出所有的本地标签',
+            \   's': { 
+            \     'name': '标签显示',
+            \     'l': '显示某个本地标签明细(@x register)',
+            \     },
+            \   'x': { 
+            \     'name': '标签删除',
+            \     'l': '删除一个本地标签(@x register)',
+            \     'r': '删除光标下的一个远程标签',
+            \     },
+            \   'p': '推送某个标签到远程服务器(@x register)',
+            \   'r': '列出所有的远程标签',
+            \   'c': '检出光标下的远程分支到本地',
             \   },
             \ }
 
 let g:which_key_map_visual.g = { 
-            \ 'name': 'global搜索',
+            \ 'name': 'global搜索,git(分支 tag)',
             \ 'w': {
             \   'name': "分屏显示搜索结果",
             \   's': '查找符号',
@@ -4435,6 +4605,25 @@ let g:which_key_map_visual.g = {
             \   'd': '查找此函数调用的函数',
             \   'a': '查找赋值位置',
             \   'z': '在ctags数据库中查找当前单词',
+            \   },
+            \ 'b': { 
+            \   'name': '分支管理',
+            \   'c': '切换到光标下的分支(@a register)',
+            \   'x': { 
+            \     'name': "删除分支",
+            \     'l': '删除可视选择的本地分支',
+            \     'f': { 
+            \       'name': '强制删除',
+            \       'l': '强制删除可视选择的本地分支',
+            \       },
+            \     },
+            \   },
+            \ 't': { 
+            \   'name': '标签管理',
+            \   'x': { 
+            \     'name': '删除操作',
+            \     'l': '删除光标下的一个本地标签',
+            \     },
             \   },
             \ }
 
