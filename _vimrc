@@ -910,21 +910,16 @@ Plug 'qindapao/winresizer'                                                     "
 
 
 " 主题相关
-" Plug 'chiendo97/intellij.vim'                                                  " jetBrain的主题
-" Plug 'cormacrelf/vim-colors-github'                                            " github 主题
-" Plug 'jsit/toast.vim'                                                          " toast 主题
-" Plug 'rakr/vim-one'                                                            " vim-one主题
 Plug 'qindapao/vim', { 'as': 'catppuccin', 'branch': 'qq_modify' }               " catppuccin 主题
-" Plug 'muellan/am-colors'                                                       " 主题插件
-" Plug 'NLKNguyen/papercolor-theme'                                              " 主题插件
-" Plug 'scwood/vim-hybrid'                                                       " 主题插件
-" Plug 'yous/vim-open-color'                                                     " vim的主题
-" Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
-" Plug 'preservim/vim-colors-pencil'                                             " 铅笔主题插件
-" Plug 'humanoid-colors/vim-humanoid-colorscheme'                                " 高对对比度插件
-" Plug 'jonathanfilip/vim-lucius'                                                " 高对比度主题
+Plug 'pbrisbin/vim-colors-off'                                                 " 最简单的主题,所有的高亮基本关闭
 Plug 'qindapao/photon.vim'                                                       " 一个极简的漂亮主题
 Plug 'qindapao/Lightning', {'branch': 'qq_modify'}
+Plug 'nightsense/carbonized'
+Plug 'sainnhe/everforest'
+Plug 'nikolvs/vim-sunbather'
+Plug 'igungor/schellar'
+Plug 'Donearm/Laederon'
+Plug 'devsjc/vim-jb'
 
 Plug 'qindapao/vim-go'
 Plug 'qindapao/vimio'
@@ -1289,159 +1284,258 @@ autocmd filetype sh setlocal omnifunc=OmniFuncShell
 let g:rainbow_active = 1                                                         " 插件针对所有文件类型全局启用
 " vim-rainbow }
 
-" " vim-one {
-" colorscheme one
-" let g:airline_theme='one'
-" set background=dark                                                            " for the dark version
-" " set background=light                                                         " for the light version
-" " vim-one }
-
-" " catppuccin主题 {
-" let g:airline_theme = 'catppuccin_mocha'
-" colorscheme catppuccin_frappe                                                  " 还可以选择catppuccin_latte catppuccin_macchiato catppuccin_mocha
-" " catppuccin主题 }
-
-" " toast主题 {
-" set termguicolors
-" set background=light
-" colorscheme toast
-" ser guicursor+=a:blinkon0
-" " toast主题 }
-
-" " vim-colors-github 主题 {
-" let g:github_colors_soft = 1
-" set background=light
-" let g:github_colors_block_diffmark = 0
-" colorscheme github
-" let g:airline_theme = "github"
-" " 切换亮和暗主题
-" call github_colors#togglebg_map('<f6>')
-" " vim-colors-github 主题 }
-
-" " Mitgorakh/snow 主题 {
-" colorscheme snow
-" set background=light
-" " Mitgorakh/snow 主题 {
-
-" Light theme
-" colorscheme antiphoton
-" photon.vim 主题 }
-" colorscheme Atom
-" colorscheme github
-" set background=light
-" colorscheme sunbather
-
-
 " 主题和颜色设置 {
+" 定义主题列表和颜色配置
+let g:my_themes = [
+    \ {'name': 'Lightning',         'fg': '#F0F0F0', 'bg': '#F5F5F5', 'config': {'global': {'airline_theme': 'catppuccin_frappe'}}},
+    \ {'name': 'photon',            'fg': '#2E2E2E', 'bg': '#3C3C3C', 'config': {'global': {'airline_theme': 'catppuccin_frappe'}}},
+    \ {'name': 'peachpuff',         'fg': '#F0F0F0', 'bg': '#F5F5F5', 
+    \ 'config': {
+    \     'global': {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'carbonized-light',  'fg': '#F0F0F0', 'bg': '#F5F5F5', 
+    \ 'config': {
+    \     'global': {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'carbonized-dark',   'fg': '#2E2E2E', 'bg': '#3C3C3C', 
+    \ 'config': {
+    \     'global': {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'everforest',        'fg': '#2E2E2E', 'bg': '#3C3C3C',
+    \ 'config': { 
+    \     'options': {'background': 'dark'},
+    \     'global':  {
+    \         'everforest_background': 'hard',
+    \         'everforest_better_performance': 1,
+    \         'airline_theme': 'everforest',
+    \         },
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'everforest',        'fg': '#F0F0F0', 'bg': '#F5F5F5',
+    \ 'config': { 
+    \     'options': {'background': 'light'},
+    \     'global': {
+    \         'everforest_background': 'hard',
+    \         'everforest_better_performance': 1,
+    \         'airline_theme': 'everforest',
+    \         },
+    \    'post_command': [
+    \        'set fillchars=vert:▒',
+    \        'highlight VertSplit ctermfg=green guifg=green',
+    \         'highlight ColorColumn guibg=#eeeeee',
+    \        ],
+    \     },
+    \ },
+    \ {'name': 'sunbather',        'fg': '#2E2E2E', 'bg': '#3C3C3C',
+    \ 'config': { 
+    \     'options': {'background': 'dark'},
+    \     'global':  {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         'highlight ColorColumn guibg=#444444',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'sunbather',        'fg': '#F0F0F0', 'bg': '#F5F5F5',
+    \ 'config': { 
+    \     'options': {'background': 'light'},
+    \     'global':  {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         'highlight ColorColumn guibg=#eeeeee',
+    \         'highlight Cursor guibg=#ff66cc guifg=NONE',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'schellar',  'fg': '#F0F0F0', 'bg': '#F5F5F5', 
+    \ 'config': {
+    \     'global': {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'highlight Cursor guibg=#ff66cc guifg=NONE',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'Laederon',  'fg': '#F0F0F0', 'bg': '#F5F5F5', 
+    \ 'config': {
+    \     'global': {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'highlight ColorColumn guibg=#eeeeee',
+    \         'highlight Cursor guibg=#ff66cc guifg=NONE',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'jb',        'fg': '#F0F0F0', 'bg': '#F5F5F5',
+    \ 'config': { 
+    \     'options': {'background': 'light'},
+    \     'global':  {
+    \         'airline_theme': 'catppuccin_frappe',
+    \         'jb_style': 'light',
+    \         'jb_enable_italic': 0,
+    \         'jb_enable_unicode': 1,
+    \         },
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=214 guifg=#FFA500',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'default',    'fg': '#F0F0F0', 'bg': '#F5F5F5',
+    \ 'config': { 
+    \     'options': {'background': 'light'},
+    \     'global':  {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         'highlight ColorColumn guibg=#eeeeee',
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'lunaperche',      'fg': '#F0F0F0', 'bg': '#F5F5F5',
+    \ 'config': { 
+    \     'options': {'background': 'light'},
+    \     'global':  {'airline_theme': 'catppuccin_frappe'},
+    \     'post_command': [
+    \         ],
+    \     },
+    \ },
+    \ {'name': 'off',      'fg': '#F0F0F0', 'bg': '#F5F5F5',
+    \ 'config': { 
+    \     'options': {'background': 'light'},
+    \     'global':  {'airline_theme': 'catppuccin_frappe', 'colors_off_a_little': 1},
+    \     'post_command': [
+    \         'set fillchars=vert:▒',
+    \         'highlight VertSplit ctermfg=green guifg=green',
+    \         'highlight ColorColumn guibg=#eeeeee',
+    \         'highlight CursorLine guibg=#f5f5f5',
+    \         ],
+    \     },
+    \ },
+    \ ]
+
+
 " 定义辅助函数来设置主题和颜色
-function! SetTheme(theme, odd_bg, even_bg)
-    execute 'colorscheme ' . a:theme
-    execute 'hi IndentGuidesOdd guibg=' . a:odd_bg . ' ctermbg=15'
-    execute 'hi IndentGuidesEven guibg=' . a:even_bg . ' ctermbg=15'
-    let g:colors_name = a:theme
-    " 保存当前主题状态到文件
-    call writefile([g:colors_name], expand('~/.vim_theme'))
+function! SetTheme(theme)
+    if has_key(a:theme, 'config')
+        " 设置全局变量
+        if has_key(a:theme.config, 'global')
+            for [key, val] in items(a:theme.config.global)
+                execute 'let g:' . key . ' = ' . string(val)
+            endfor
+        endif
+
+        " 设置 Vim 选项
+        if has_key(a:theme.config, 'options')
+            for [key, val] in items(a:theme.config.options)
+                execute 'set ' . key . '=' . val
+            endfor
+        endif
+    endif
+
+    execute 'colorscheme ' . a:theme.name
+    execute 'hi IndentGuidesOdd guibg=' . a:theme.fg . ' ctermbg=15'
+    execute 'hi IndentGuidesEven guibg=' . a:theme.bg . ' ctermbg=15'
+
+    " 执行后置命令
+    if has_key(a:theme, 'config') && has_key(a:theme.config, 'post_command')
+        for cmd in a:theme.config.post_command
+            execute cmd
+        endfor
+    endif
+
+    redraw
+    echohl Question
+    echo '* 正在应用主题：' . a:theme.name . ' ' . (g:my_color_name_index + 1) . '/' . len(g:my_themes)
+    echohl None
 endfunction
 
 " 定义切换主题的函数
 function! ToggleMyOwnTheme()
-    if g:colors_name == 'photon'
-        call ApplyTheme('peachpuff')
-    elseif g:colors_name == 'peachpuff'
-        call ApplyTheme('Lightning')
-    else
-        call ApplyTheme('photon')
-    endif
+    let g:my_color_name_index = (g:my_color_name_index + 1) % len(g:my_themes)
+    call ApplyTheme()
 endfunction
 
 " 定义应用主题的函数
-function! ApplyTheme(theme)
-    if a:theme == 'photon'
-        call SetTheme('photon', '#2E2E2E', '#3C3C3C')
-    elseif a:theme == 'peachpuff'
-        call SetTheme('peachpuff', '#F0F0F0', '#F5F5F5')
-    else
-        call SetTheme('Lightning', '#F0F0F0', '#F5F5F5')
-    endif
+function! ApplyTheme()
+    let theme = g:my_themes[g:my_color_name_index]
+    call SetTheme(theme)
+    " 保存当前主题状态到文件
+    call writefile([g:my_color_name_index], expand('~/.vim_theme'))
 endfunction
-
 
 " 在 Vim 启动时读取主题状态并应用
 if filereadable(expand('~/.vim_theme'))
-    let g:colors_name = readfile(expand('~/.vim_theme'))[0]
+    let g:my_color_name_index = readfile(expand('~/.vim_theme'))[0]
 else
-    let g:colors_name = 'Lightning'
+    let g:my_color_name_index = 0
 endif
 
-call ApplyTheme(g:colors_name)
 nnoremap <silent><F5> :call ToggleMyOwnTheme()<CR>
+autocmd VimEnter * call timer_start(50, { -> ApplyTheme() })
+
+
+function! RemoveCommentItalic()
+    let l:new_attrs = []
+
+    " 获取 Comment 的 synID
+    let l:id = synIDtrans(hlID('Comment'))
+
+    " term/cterm/gui 样式
+    for style_type in ['bold', 'underline', 'reverse', 'standout']
+        if synIDattr(l:id, style_type, 'gui') == 1
+            call add(l:new_attrs, 'gui=' . style_type)
+        endif
+        if synIDattr(l:id, style_type, 'cterm') == 1
+            call add(l:new_attrs, 'cterm=' . style_type)
+        endif
+    endfor
+
+    " 颜色
+    let l:guifg = synIDattr(l:id, 'fg', 'gui')
+    let l:ctermfg = synIDattr(l:id, 'fg', 'cterm')
+    if l:guifg != ''
+        call add(l:new_attrs, 'guifg=' . l:guifg)
+    endif
+    if l:ctermfg != ''
+        call add(l:new_attrs, 'ctermfg=' . l:ctermfg)
+    endif
+
+    " 去掉 italic，不添加 gui=italic 或 cterm=italic
+
+    " 如果没有其它样式，显式设置 gui=NONE 和 cterm=NONE
+    if join(l:new_attrs, ' ') !~ 'gui='
+        call add(l:new_attrs, 'gui=NONE')
+    endif
+    if join(l:new_attrs, ' ') !~ 'cterm='
+        call add(l:new_attrs, 'cterm=NONE')
+    endif
+
+    " 构造并执行 highlight 命令
+    let l:cmd = 'highlight Comment ' . join(l:new_attrs, ' ')
+    execute l:cmd
+endfunction
+autocmd ColorScheme * call RemoveCommentItalic()
 " 主题和颜色设置 }
-
-
-" set t_Co=256
-" " 还有amdard
-" colorscheme amlight
-" set guicursor+=a:blinkon0
-
-" " papercolor-theme 主题 {
-" " 这个主题用于git对比效果很好
-" set t_Co=256   " This is may or may not needed.
-" set background=light
-" colorscheme PaperColor
-" " papercolor-theme 主题 }
-
-" " 为diff的时候单独设置一个颜色方案
-" " 不过目前这个并没有效果(不知道原因)
-" " 可以在对比的时候手动设置主题即可
-" if &diff
-"     set t_Co=256   " This is may or may not needed.
-"     set background=light
-"     colorscheme PaperColor
-" endif
-
-" " intellij 主题 {
-" " 这个主题编码可以,但是用于git对比效果不好
-" set background=light
-" colorscheme intellij
-" " let g:lightline.colorscheme='intellij'
-" " intellij 主题 {
-
-" " vim-hybrid 主题 {
-" set background=light
-" colorscheme hybrid
-" " vim-hybrid 主题 }
-
-" " vim-open-color 主题配置 {
-" set background=light
-" colorscheme open-color
-" " vim-open-color 主题配置 }
-
-" " vim-colors-off 主题配置 {
-" colorscheme off
-" set background=light
-" " vim-colors-off 主题配置 }
-
-" " vim-colors-pencil 主题配置 {
-" colorscheme pencil
-" set background=light
-" " vim-colors-pencil 主题配置 }
-
-
-" " vim-humanoid-colorscheme 插件配置 {
-" colorscheme humanoid
-" set background=light
-" " 这里需要单独设置光标不闪烁
-" set guicursor+=a:blinkon0
-" " vim-humanoid-colorscheme 插件配置 }
-
-
-" " lucius 主题配置 {
-" colorscheme lucius
-" let g:lucius_style = 'light'
-" set background=light
-" let g:lucius_contrast = 'normal'
-" let g:lucius_contrast_bg = 'high'
-" " lucius 主题配置 }
 
 " LeaderF 配置 {
 
