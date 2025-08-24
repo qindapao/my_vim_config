@@ -668,6 +668,7 @@ set guioptions-=m                                                               
 
 " 打开某个目录下面的文件执行vimgrep忽略设置,这样每个项目可以独立
 autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tmp,test.c
+autocmd BufNewFile,BufRead *.vim9 set filetype=vim
 
 " 编辑vim配置文件
 nnoremap <Leader>ver :e $MYVIMRC<CR>| " 辅助: 编辑当前的vim配置文件
@@ -2211,10 +2212,10 @@ nnoremap <silent> <leader>gbl :execute 'Git branch'<CR>| " git:branch 查看所�
 nnoremap <silent> <leader>gbc :execute 'normal "xyiw' \| execute 'Git checkout ' . getreg('x') \| close<CR>| "   git:branch 切换分支
 vnoremap <silent> <leader>gbc y:execute 'Git checkout ' . shellescape(@0) \| close<CR>| "                        git:branch 切换分支
 " 删除一个本地分支
-nnoremap <silent> <leader>gbxl :execute 'normal "xyiw' \| execute 'Git branch -d ' . getreg('x') \| close<CR>| " git:branch 删除一个本地分支
-vnoremap <silent> <leader>gbxl y:execute 'Git branch -d ' . shellescape(@0) \| close<CR>| "                      git:branch 删除一个本地分支
-nnoremap <silent> <leader>gbxfl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| close<CR>| "git:branch 删除一个本地分支
-vnoremap <silent> <leader>gbxfl y:execute 'Git branch -D ' . shellescape(@0) \| close<CR>| "                     git:branch 删除一个本地分支
+nnoremap <silent> <leader>gbxl :execute 'normal "xyiw' \| execute 'Git branch -d ' . getreg('x') \| bwipeout \| execute 'Git branch'<CR>| " git:branch 删除一个本地分支
+vnoremap <silent> <leader>gbxl y:execute 'Git branch -d ' . shellescape(@0) \| bwipeout \| execute 'Git branch'<CR>| "                      git:branch 删除一个本地分支
+nnoremap <silent> <leader>gbxfl :execute 'normal "xyiw' \| execute 'Git branch -D ' . getreg('x') \| bwipeout \| execute 'Git branch'<CR>| "git:branch 删除一个本地分支
+vnoremap <silent> <leader>gbxfl y:execute 'Git branch -D ' . shellescape(@0) \| bwipeout \| execute 'Git branch'<CR>| "                     git:branch 删除一个本地分支
 
 " 删除一个远程分支
 nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>| "  git:branch 删除一个远程分支
@@ -2240,8 +2241,8 @@ nnoremap <leader>gta :execute 'Git tag -a <tag-name> ' . getreg('a') .  ' -m "�
 nnoremap <silent> <leader>gtsl :execute 'normal "xyiw' \| execute 'Git show ' . getreg('x')<CR>| " git:tags 显示某个标签明细
 nnoremap <silent> <leader>gtl :execute 'Git tag -l'<CR>| " git:tags 列出所有的本地标签
 
-nnoremap <silent> <leader>gtxl :execute 'normal "xyiw' \| execute 'Git tag -d ' . getreg('x') \| close<CR>| " git:tags 删除一个本地标签
-vnoremap <silent> <leader>gtxl y:execute 'Git tag -d ' . shellescape(@0) \| close<CR>| " git:tags 删除一个本地标签
+nnoremap <silent> <leader>gtxl :execute 'normal "xyiw' \| execute 'Git tag -d ' . getreg('x') \| bwipeout \| execute 'Git tag -l'<CR>| " git:tags 删除一个本地标签
+vnoremap <silent> <leader>gtxl y:execute 'Git tag -d ' . shellescape(@0) \| bwipeout \| execute 'Git tag -l'<CR>| " git:tags 删除一个本地标签
 
 nnoremap <silent> <leader>gtp :execute 'normal "xyiw' \| execute 'Git push --set-upstream origin ' . getreg('x')<CR>| " git:tags 推送某个标签到远程服务器(x寄存器中存储了内容)
 
@@ -2271,7 +2272,18 @@ function! GetLineContentLast ()
     " 返回最后一个域的内容
     return fields[-1]
 endfunction
-nnoremap <silent> <leader>gtxr :execute 'Git push origin :' . GetLineContentLast() \| close<CR>| " git:tags 删除某一个远程标签
+" :TODO: 待验证
+function! QQGitDeleteRemoteTagAndRefresh()
+    let l:tag = GetLineContentLast()
+    " 1 表示选择的是 Yes 2 表示选择的 No
+    if confirm("删除远程标签 '" . l:tag . "' ?", "&Yes\n&No") != 1
+        return
+    endif
+    execute 'Git push origin :' . l:tag
+    execute 'Git fetch --prune --tags'
+  execute 'terminal Git ls-remote --tags'
+endfunction
+nnoremap <silent> <leader>gtxr :call QQGitDeleteRemoteTagAndRefresh()<CR>| " git:tags 删除某一个远程标签
 
 
 
