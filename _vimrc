@@ -429,30 +429,6 @@ endfunction
 "     call job_start(['chrome', get_adr])
 " endfunction
 
-
-" =========================== 关闭当前分组的其它窗口 ==========================
-" 找到最内层包含当前窗口的分组
-function! FindLeafGroup(node, target_winid) abort
-    if type(a:node) == type([])
-        if a:node[0] ==# 'row' || a:node[0] ==# 'col'
-            " 遍历子节点
-            for child in a:node[1]
-                let result = FindLeafGroup(child, a:target_winid)
-                if !empty(result)
-                    return result
-                endif
-            endfor
-        elseif a:node[0] ==# 'leaf' && a:node[1] == a:target_winid
-            " 找到了当前窗口，返回它所在的最内层父分组
-            return a:node
-        endif
-    elseif type(a:node) == type(0) && a:node == a:target_winid
-        " 有些版本直接是数字窗口 ID
-        return a:node
-    endif
-    return []
-endfunction
-
 " 关闭同组兄弟窗口，只保留当前窗口
 function! CollapseLeafGroup() abort
     let cur_winid = win_getid()
