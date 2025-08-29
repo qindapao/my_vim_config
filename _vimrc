@@ -616,8 +616,8 @@ set guifont=Fira\ Code:h8
 
 set noundofile
 set nobackup
-set guioptions+=b                                                                " 添加水平滚动条
-" 打开右侧滚动条
+" 水平滚动条会让界面在上下滚动的时候有卡顿和撕裂感
+" set guioptions+=b   " 打开右侧滚动条
 set guioptions+=r
 " 隐藏左侧滚动条
 set guioptions-=L
@@ -779,8 +779,10 @@ Plug 'qindapao/vim-repeat'                                                     "
 " Plug 'WolfgangMehner/bash-support'                                           " bash开发支持
 Plug 'qindapao/auto-pairs'                                                     " 插入模式下自动补全括号
 Plug 'qindapao/ale'                                                            " 异步语法检查和自动格式化框架
-" 如果编辑挂载的远程文件,下面这个插件会导致很卡
-Plug 'qindapao/vim-airline'                                                    " 漂亮的状态栏
+" " 如果编辑挂载的远程文件,下面这个插件会导致很卡
+" Plug 'qindapao/vim-airline'                                                    " 漂亮的状态栏
+" 虽然功能不如 vim-airline 强大，但是快速湿滑
+Plug 'itchyny/lightline.vim'
 Plug 'qindapao/tabular'                                                        " 自动对齐插件
 " 下面两个插件任选其一
 " Plug 'qindapao/indentLine'                                                    " 对齐参考线插件
@@ -790,10 +792,11 @@ Plug 'qindapao/vim-rhubarb'                                                    "
 " 这个插件功能和vim-flog重复,先屏蔽
 " Plug 'junegunn/gv.vim'                                                         " git树显示插件
 Plug 'qindapao/vim-flog'                                                       " 显示漂亮的git praph插件
-" 如果编辑挂载的远程文件,下面这个插件会导致很卡
+" 如果编辑的是远程文件或者是编辑的文件很大，下面这个插件都会很卡
+" 所以默认加载插件后禁用，然后需要的时候手动打开和关闭 ggo ggc
 Plug 'qindapao/vim-gitgutter'                                                  " git改变显示插件
 Plug 'qindapao/vimcdoc'                                                        " vim的中文文档
-if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md'
+if expand('%:e') ==# 'txt' || expand('%:e') ==# 'md' || expand('%:e') ==# 'adoc'
     " 这里要注意下,这个插件会导致preview预览涂鸦窗口无法关闭,影响自定义补全
     Plug 'qindapao/completor.vim'                                              " 主要是用它的中文补全功能
 else
@@ -802,6 +805,7 @@ else
 endif
 Plug 'qindapao/vim-gutentags'                                                  " gtags ctags自动生成插件
 Plug 'qindapao/gutentags_plus'                                                 " 方便自动化管理tags插件
+" 这个插件在大文件的时候也非常卡
 Plug 'qindapao/tagbar'                                                         " 当前文件的标签浏览器
 Plug 'qindapao/vim-bookmarks'                                                  " vim的书签插件
 " 另外一个标记管理器(这个是标记并不是书签,书签是持久化的,这个不是,并且只能字母,所以需要和书签配合起来使用)
@@ -820,7 +824,8 @@ Plug 'qindapao/vim9-stargate'
 " 高亮当前行的跳转关键字,用处不大
 " Plug 'unblevable/quick-scope'
 " Plug 'justinmk/vim-sneak'                                                      " 双字符移动插件
-Plug 'qindapao/vim-rainbow'                                                    " 彩虹括号
+" " 这个插件在大文件的时候也很卡，禁用
+" Plug 'qindapao/vim-rainbow' 
 Plug 'qindapao/vim-commentary'                                                 " 简洁注释
 " 按照插件的说明来安装,安装的时候需要稍微等待一些时间,让安装钩子执行完毕
 Plug 'qindapao/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for': ['markdown', 'vim-plug']}
@@ -959,6 +964,17 @@ let g:ale_lint_on_save = 0
 nnoremap <leader>af :ALEDisable<cr>| " lint: 关闭ale的语法检查
 " 手动打开ale
 nnoremap <leader>ao :ALEEnable<cr>| " lint: 打开ale的语法检查
+" 定义需要禁用 ALE 的文件类型列表
+let g:ale_disabled_filetypes = ['markdown', 'asciidocx', 'asciidoc', 'adoc', 'text', 'txt', 'zim', 'sh', 'bash']
+" 每次打开文件时判断是否禁用 ALE
+autocmd FileType * call s:ToggleALEByFiletype()
+function! s:ToggleALEByFiletype()
+    if index(g:ale_disabled_filetypes, &filetype) >= 0
+        silent! ALEDisable
+    else
+        silent! ALEEnable
+    endif
+endfunction
 " }
 
 " 注意coc.nvim插件也有语法检查功能(某些情况下也需要关闭,比如调试)
@@ -1164,7 +1180,12 @@ let g:NERDTreeGitStatusIndicatorMapCustom = {
 
 " vim-gitgutter {
 let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " git可执行文件路径
-let g:gitgutter_max_signs = -1                                                   " 标记的数量为无限
+let g:gitgutter_max_signs = 2000                                                 " 如果设置为-1,标记的数量为无限
+" 默认不启用
+let g:gitgutter_enabled = 0
+" 切换它的打开和关闭
+nnoremap <silent> <leader>ggo :GitGutterEnable<CR>
+nnoremap <silent> <leader>ggc :GitGutterDisable<CR>
 " vim-gitgutter }
 
 " vim-guifont {
@@ -1612,6 +1633,40 @@ nnoremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><C
 
 " LeaderF 配置 }
 " tagbar 配置 {
+" conf.ctags 配置 C:\Users\xx\ctags.d\conf.ctags
+"
+" --langdef=asciidocx
+" --langmap=asciidocx:.ad.adoc.asciidoc
+" --regex-asciidocx=/^=[ \t]+([^[:cntrl:]]+)/o \1/h/
+" --regex-asciidocx=/^==[ \t]+([^[:cntrl:]]+)/. \1/h/
+" --regex-asciidocx=/^===[ \t]+([^[:cntrl:]]+)/. . \1/h/
+" --regex-asciidocx=/^====[ \t]+([^[:cntrl:]]+)/. . . \1/h/
+" --regex-asciidocx=/^=====[ \t]+([^[:cntrl:]]+)/. . . . \1/h/
+" --regex-asciidocx=/^======[ \t]+([^[:cntrl:]]+)/. . . . \1/h/
+" --regex-asciidocx=/^=======[ \t]+([^[:cntrl:]]+)/. . . . \1/h/
+" --regex-asciidocx=/\[\[([^]]+)\]\]/\1/a/
+" --regex-asciidocx=/^\.([^ \t\.][^[:cntrl:]]+)/\1/t/
+" --regex-asciidocx=/image::([^\[]+)/\1/i/
+" --regex-asciidocx=/image:([^:][^\[]+)/\1/I/
+" --regex-asciidocx=/include::([^\[]+)/\1/n/
+
+
+" --langdef=txt
+" --langmap=txt:.txt
+" --regex-txt=/^(\={6}\s)(\S.+)(\s\={6})$/\2/h,heading/
+" --regex-txt=/^(\={5}\s)(\S.+)(\s\={5})$/. 2/h,heading/
+" --regex-txt=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
+" --regex-txt=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
+" --regex-txt=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
+
+" --langdef=zim
+" --langmap=zim:.txt
+" --regex-zim=/^(\={6}\s)(\S.+)(\s\={6})$/\2/h,heading/
+" --regex-zim=/^(\={5}\s)(\S.+)(\s\={5})$/. \2/h,heading/
+" --regex-zim=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
+" --regex-zim=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
+" --regex-zim=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
+"
 let g:tagbar_type_zim = {
     \ 'ctagstype' : 'zim',
     \ 'kinds' : [
@@ -1624,13 +1679,32 @@ let g:tagbar_type_txt = {
         \ 'h:heading',
     \ ]
 \ }
+
+" vim 的文件类型依然是 asciidoc 但是呢使用自定义的 ctags 类型 asciidocx
+" 这样就在既保持编辑器识别又能让tagbar按照自定义的方式处理标题
+let g:tagbar_type_asciidoc = {
+    \ 'ctagstype' : 'asciidocx',
+    \ 'kinds' : [
+        \ 'h:table of contents',
+        \ 'a:anchors:1',
+        \ 't:titles:1',
+        \ 'n:includes:1',
+        \ 'i:images:1',
+        \ 'I:inline images:1'
+    \ ],
+    \ 'sort' : 0
+\ }
+
 " 0:不要按照tag名排序,而是按照tag出现的顺序排序
 " 1:按照tag名排序
 let g:tagbar_sort = 0
 
 " 这是为了占用更少的空间
 let g:tagbar_position = 'rightbelow'
-
+let g:tagbar_autoshowtag = 0
+" 必须要加这一行，不然大文件的时候默认使用tagbar会非常卡顿
+" 这是airline显示tag用的
+let g:airline#extensions#tagbar#enabled = 0
 " tagbar 配置 }
 
 " auto-pairs 配置 {
@@ -4612,6 +4686,11 @@ let g:which_key_map.g = {
             \   'v': 'commit或者分支的单文件对比',
             \   'f': '当前文件和库上最新对比',
             \   },
+            \ 'g': { 
+            \   'name': "vim-gitgutter 打开与关闭",
+            \   'o': '打开 vim-gitgutter',
+            \   'c': '关闭 vim-gitgutter',
+            \   },
             \ 'b': { 
             \   'name': 'git branch',
             \   'n': '创建一个新分支',
@@ -4764,4 +4843,24 @@ call which_key#register('s', "g:which_key_map_s", 'n')
 
 
 " vim-which-key 插件配置 }
+
+" 切换到 html 模板的目录中运行 python -m http.server
+function! PreviewAsciiDoc()
+    let l:filename = expand('%:t')
+    let l:url = 'http://localhost:8000/asciidoc_preview.html?file=' . l:filename
+    " 前提是浏览器的路径要在环境变量中
+    call job_start(['chrome', l:url])
+    " call job_start(['msedge', l:url])
+endfunction
+
+nnoremap <leader><leader>p :call PreviewAsciiDoc()<CR>
+
+" :/<C-r>=BuildLooseRegex("你好世界")<CR>
+" :echo BuildLooseRegex("你好世界")
+" \V你\s\*好\s\*世\s\*界
+function! BuildLooseRegex(keyword)
+    let chars = split(a:keyword, '\zs')
+    let pattern = '\V' . join(chars, '\s\*')
+    return pattern
+endfunction
 
