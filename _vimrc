@@ -4845,6 +4845,11 @@ call which_key#register('s', "g:which_key_map_s", 'n')
 " vim-which-key 插件配置 }
 
 " 切换到 html 模板的目录中运行 python -m http.server
+" 或者指定目录运行也可以 python -m http.server --directory /path/to/html
+" python -m http.server 8000 --bind 127.0.0.1
+" 强制使用 ipv4
+" http://127.0.0.1:8000/asciidoc_preview.html?file=demo.adoc
+" 
 function! PreviewAsciiDoc()
     let l:filename = expand('%:t')
     let l:url = 'http://localhost:8000/asciidoc_preview.html?file=' . l:filename
