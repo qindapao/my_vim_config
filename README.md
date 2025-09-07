@@ -334,6 +334,9 @@ https://hanleylee.com/articles/usage-of-vim-editor-basic/
 
 一个很好看的适合`vim`使用的[字体](https://github.com/hanleylee/yahei-fira-icon-hybrid-font)。
 
+另外一个很好看而且适合编程的[字体](https://github.com/subframe7536/maple-font)。
+下载前可以看下[下载说明](https://github.com/subframe7536/maple-font/blob/variable/README_CN.md#%E5%91%BD%E5%90%8D%E8%AF%B4%E6%98%8E)。
+
 # windows系统下调整光标的移动速度
 
 按 Win + R 打开运行对话框，输入 control keyboard 并按回车。

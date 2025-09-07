@@ -607,7 +607,8 @@ set guicursor+=a:blinkon0
 " set guifont=Yahei\ Fira\ Icon\ Hybrid:h11
 " set guifont=微软雅黑\ PragmataPro\ Mono:h8
 " 这个字体某些方向符号无法显示
-set guifont=Fira\ Code:h8
+" set guifont=Fira\ Code:h8
+set guifont=Maple\ Mono\ NL\ NF\ CN:h8
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
@@ -617,7 +618,8 @@ set guifont=Fira\ Code:h8
 set noundofile
 set nobackup
 " 水平滚动条会让界面在上下滚动的时候有卡顿和撕裂感
-" set guioptions+=b   " 打开右侧滚动条
+" set guioptions+=b
+" 打开右侧滚动条
 set guioptions+=r
 " 隐藏左侧滚动条
 set guioptions-=L
@@ -709,6 +711,7 @@ autocmd filetype css setlocal omnifunc=csscomplete#CompleteCSS
 autocmd filetype javascript setlocal omnifunc=javascriptcomplete#CompleteJS
 autocmd filetype xml setlocal omnifunc=xmlcomplete#CompleteTags
 autocmd filetype zim setlocal omnifunc=OmniCompleteCustom
+autocmd filetype asciidoc setlocal omnifunc=OmniCompleteCustom
 
 
 " C语言的编译和调试
@@ -2467,31 +2470,32 @@ function! OmniCompleteCustom(findstart, base)
         " dup: 如果设置为1标识允许添加重复项(只要word相同就能添加)(需要后面的代码处理否则没有作用)
         " :TODO: 这个变量移动到单独的字典文件中,然后每个语言一个文件,在vimrc中source进来(不是对应文件的字典清空,节省内存,要考虑字典文件的内存使用问题)
         " 还需要看下内存xnhc
-        for item in g:complete_list_all
+        " 用 filter 先筛出匹配项
+        let matched = filter(copy(g:complete_list_all),
+                    \ 'has_key(v:val, "icase") && v:val.icase ? v:val.word =~ "\\c" . a:base : v:val.word =~ "\\C" . a:base')
+
+        for item in matched
             " 匹配不区分大小写
             " 据说matchstr效率更高?
-            " if item['word'] =~ '\c^' . a:base
-            let pattern = item['icase'] ? '\c' . a:base : '\C' . a:base
-            if item['word'] =~ pattern
-                " if matchstr(item['word'], pattern) != ''
-                let item_copy = copy(item)
+            " if matchstr(item['word'], pattern) != ''
+            let item_copy = copy(item)
 
-                if has_key(g:word_to_complete, item_copy['word'])
-                    let item_copy['word'] = g:word_to_complete[item_copy['word']]
-                endif
-
-                if item_copy['kind'] == 'ic' || item_copy['kind'] == 'if'
-                    let item_copy['word'] = eval(item_copy['word'])
-                endif
-                " add more information to the completion menu
-                call add(res, item_copy)
+            if has_key(g:word_to_complete, item_copy['word'])
+                let item_copy['word'] = g:word_to_complete[item_copy['word']]
             endif
+
+            if item_copy['kind'] == 'ic' || item_copy['kind'] == 'if'
+                let item_copy['word'] = eval(item_copy['word'])
+            endif
+            " add more information to the completion menu
+            call add(res, item_copy)
         endfor
         return res
     endif
 endfunction
 
 " 设置默认的用户自定义补全函数
+" c-x c-u(并不是 c-x c-o)
 set completefunc=OmniCompleteCustom
 
 " 在补全时显示弹出窗口
