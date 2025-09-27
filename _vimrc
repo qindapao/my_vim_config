@@ -2201,7 +2201,7 @@ let g:ctrlsf_mapping = {
     \ }
 " 自动打开预览窗口
 " 目前似乎这个功能无效，原因未知
-let g:ctrlsf_auto_preview = 1
+let g:ctrlsf_auto_preview = 0
 " 定义上下文的数量
 let g:ctrlsf_context = '-B 5 -A 3'
 " 根据项目文件，如 .svn .git 等等来确定项目根目录(因为我们当前有 Rooter 插件)
