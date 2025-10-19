@@ -583,8 +583,23 @@ set tabstop=4
 set softtabstop=4
 set shiftwidth=4
 set expandtab                                                                    " 用空格替换TAB
-" perl格式的文件,TAB就是TAB, 不要替换
-autocmd filetype perl setlocal noexpandtab
+
+" perl格式的文件的特殊设置 {
+autocmd FileType perl call s:CustomPerlIndent()
+
+function! s:CustomPerlIndent()
+    " 禁用 Vim 的 Perl 缩进脚本（只对 Perl）
+    setlocal indentexpr=
+    " setlocal indentkeys=
+    setlocal nosmartindent nocindent noautoindent
+
+    " 设置 TAB 为 4 个空格宽度
+    setlocal tabstop=4
+    setlocal shiftwidth=4
+    setlocal softtabstop=4
+    setlocal noexpandtab
+endfunction
+" }
 
 " 设置星号不要自动跳转,只高亮
 nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>| " 搜索: 搜索并高亮当前单词
@@ -908,6 +923,7 @@ Plug 'Donearm/Laederon'
 Plug 'devsjc/vim-jb'
 
 Plug 'qindapao/vim-go'
+Plug 'vim-perl/vim-perl'
 Plug 'qindapao/vimio'
 Plug 'qindapao/vim-which-key'
 
