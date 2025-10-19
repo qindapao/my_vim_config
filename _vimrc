@@ -608,10 +608,11 @@ set guicursor+=a:blinkon0
 " set guifont=微软雅黑\ PragmataPro\ Mono:h8
 " 这个字体某些方向符号无法显示
 " set guifont=Fira\ Code:h8
-set guifont=Maple\ Mono\ NL\ NF\ CN:h8
+" set guifont=Maple\ Mono\ NL\ NF\ CN:h8
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
+set guifont=vimio\ mono:h8
 
 
 
@@ -2256,7 +2257,10 @@ nnoremap <silent> <leader>gdc :execute 'Git! difftool ' . getreg('a') . ' ' . ge
 " 分支全对比
 nnoremap <silent> <leader>gdb :execute 'Git! difftool ' . getreg('a') . ' --name-status'<CR>| " git:diff 对比两个分支或者两个commit(以当前的作为基准)
 " 执行单文件对比(commit id 和 分支)
-nnoremap <silent> <leader>gdv :execute 'Gvdiffsplit ' . getreg('a')<CR>| " git:diff 执行单文件对比
+nnoremap <silent> <leader>gdd :execute 'Gvdiffsplit ' . getreg('a')<CR>| " git:diff 执行单文件对比
+nnoremap <silent> <leader>gdv :call DiffQuickfixEntryWithA()<CR>
+nnoremap <silent> <leader>gdn :call DiffQuickfixNextEntryWithA()<CR>
+
 " 对比当前文件
 nnoremap <silent> <leader>gdf :execute 'Gvdiffsplit'<CR>| " git:diff 对比当前文件
 
@@ -2316,6 +2320,61 @@ function! DeleteRemoteTag()
 endfunction
 nnoremap <silent> <leader>gtxr :call DeleteRemoteTag()<CR>
 
+" 最终对比的时候是左旧右新
+xnoremap <leader>ec :<C-u>call ExtractCommitsFromVisualRange()<CR>
+
+function! ExtractCommitsFromVisualRange()
+    " 获取选区的起止行号
+    let start = getpos("'<")[1]
+    let end = getpos("'>")[1]
+
+    " 获取选中的行
+    let lines = getline(start, end)
+
+    " 初始化 commit 列表
+    let commits = []
+
+    " 正则匹配：前后有空格的 [abcdefg]，提取中间哈希
+    for line in lines
+        " • 2025-10-13 02:03:45 +0200 [f8e23da] {xx} FIXED: xx
+        let match = matchlist(line, '\v\s\[\zs([0-9a-f]{7})\ze\]\s')
+        if len(match) > 1
+            call add(commits, match[1])
+        endif
+    endfor
+
+    " 存入寄存器 a 和 b
+    " a 是 新提交
+    " b 是 旧提交
+    if len(commits) >= 2
+        let @b = commits[0]
+        let @a = commits[-1]
+        echo "Copied to registers: a = " . @a . ", b = " . @b
+    else
+        echo "Not enough properly bracketed commits found in selection."
+    endif
+endfunction
+
+function! DiffQuickfixEntryWithA()
+    " Step 1: 只保留 Quickfix 窗口
+    only
+
+    " Step 2: 模拟回车，打开光标所在的 Quickfix 项
+    execute "normal! \<CR>"
+
+    " Step 3: 执行 Gvdiffsplit 对比，使用寄存器 a 中的提交哈希
+    execute "Gvdiffsplit " . getreg('a')
+endfunction
+
+function! DiffQuickfixNextEntryWithA()
+    copen
+    
+    only
+
+    execute "cnext"
+
+    execute "Gvdiffsplit " . getreg('a')
+endfunction
 
 function! GetLineContentLast ()
     " 获取当前行的内容
@@ -2325,6 +2384,7 @@ function! GetLineContentLast ()
     " 返回最后一个域的内容
     return fields[-1]
 endfunction
+
 " :TODO: 待验证
 function! QQGitDeleteRemoteTagAndRefresh()
     let l:tag = GetLineContentLast()
@@ -4078,7 +4138,7 @@ nnoremap <silent> s, :call ToggleToolBarGroup()<CR>
 " 简短的翻译(中->英)
 vnoremap <leader>te y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(1, 'en')<CR>
 " 完整的翻译(中->英)
-vnoremap <leader><S-T> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(0, 'en')<CR>
+vnoremap <leader>tf y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(0, 'en')<CR>
 
 " 简短的翻译(英->中)
 vnoremap <C-t> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TransToTerminal(1, 'zh')<CR>
@@ -4091,23 +4151,52 @@ nnoremap <leader>p :call PasteTerminalToBuffer(1, g:TRANSLATE_SELECTION_MODE)<CR
 nnoremap <leader><S-P> :call PasteTerminalToBuffer(0, g:TRANSLATE_SELECTION_MODE)<CR>
 
 function! TransToTerminal(isBrief, language)
-    let @+ = substitute(@", "'", "\\'", "g")
-    execute "wincmd j"
-    sleep 100m
-    
-    " cygwin环境下可能需要把trans(本身是一个shell脚本)里面的头部shebang可能需要改成
-    " #!/usr/bin/bash 才能正常运行，原因未知
-    " let cmd = '         clear;echo "-----------------------------";echo "";trans :' . a:language . (a:isBrief ? " --brief " : " ") . "'" . @+ . "'"
-    let cmd = 'clear;echo "----------------------";echo "";trans :' . a:language . (a:isBrief ? " --brief " : " ") . "'" . @+ . "'" . ";echo ''"
+    " 获取选中的文本并处理引号
+    let l:raw = substitute(@", "'", "\\'", "g")
 
+    " 按行拆分
+    let l:lines = split(l:raw, "\n")
+
+    " 根据语言合并句子(目标和源是反的)
+    if a:language ==# 'en'
+        " 中文：直接连接，不加空格
+        let l:merged = join(l:lines, '')
+    else
+        " 英文：连接时加空格
+        let l:merged = join(l:lines, ' ')
+    endif
+
+    " 构造命令
+    " ⚠️ cygwin 环境下可能需要修改 trans 脚本的 shebang：
+    "    把 #!/bin/bash 改成 #!/usr/bin/bash 才能正常运行（原因未知）
+    let l:cmd = 'clear;echo "-----------------------------";echo "";trans :' . a:language
+    let l:cmd .= (a:isBrief ? " --brief " : " ") . "'" . l:merged . "'" . ";echo ''"
+
+    " 切换到终端窗口
+    call SwitchToTerminalWindow()
+    sleep 500m
+
+    " 如果不是终端模式，进入插入
     if mode() !~# 't'
         call feedkeys("i", 'n')
     endif
 
-    let term_bufnr = bufnr('%')
-    call term_sendkeys(term_bufnr, cmd . "\n")
-    " call feedkeys(cmd . "\<CR>", 'n')
+    " 发送命令
+    let l:term_bufnr = bufnr('%')
+    call term_sendkeys(l:term_bufnr, l:cmd . "\n")
 endfunction
+
+function! SwitchToTerminalWindow()
+    for win in range(1, winnr('$'))
+        if getwinvar(win, '&buftype') ==# 'terminal'
+            execute win . 'wincmd w'
+            return
+        endif
+    endfor
+    echo "⚠️ 没有找到终端窗口，保持当前窗口"
+endfunction
+
+
 
 function! PasteTerminalToBuffer(isBrief, selection_mode)
     execute "normal! G"
@@ -4687,7 +4776,9 @@ let g:which_key_map.g = {
             \   'a': '显示所有的差异',
             \   'c': '显示两个commit的差异(@a register)',
             \   'b': '显示两个分支的差异(@a register)',
-            \   'v': 'commit或者分支的单文件对比',
+            \   'd': 'commit或者分支的单文件对比当前文件',
+            \   'v': 'commit或者分支的单文件对比当前文件(quickfix)',
+            \   'n': 'commit或者分支的单文件对比下一个文件',
             \   'f': '当前文件和库上最新对比',
             \   },
             \ 'g': { 
