@@ -707,6 +707,7 @@ nnoremap <leader>lp :lprev<CR>| " locallist: 跳转到本地窗口的上一个�
 " 之所以绑定两个字母为了快速响应
 " Z 代表最后结束的意思，所以是关闭窗口
 nnoremap <silent> sz :close<CR>| " 关闭当前窗口
+nnoremap <silent> <F2> :close<CR>| " 关闭当前窗口
 " E 视觉自觉就是纵向分屏
 nnoremap <silent> se :split<CR>| " 纵向分屏
 " W 视觉自觉就是横向分屏
@@ -2360,8 +2361,8 @@ function! ExtractCommitsFromVisualRange()
     endfor
 
     " 存入寄存器 a 和 b
-    " a 是 新提交
-    " b 是 旧提交
+    " b 是 新提交
+    " a 是 旧提交
     if len(commits) >= 2
         let @b = commits[0]
         let @a = commits[-1]
@@ -4166,12 +4167,51 @@ nnoremap <leader>p :call PasteTerminalToBuffer(1, g:TRANSLATE_SELECTION_MODE)<CR
 " 复杂情况进行替换
 nnoremap <leader><S-P> :call PasteTerminalToBuffer(0, g:TRANSLATE_SELECTION_MODE)<CR>
 
-function! TransToTerminal(isBrief, language)
-    " 获取选中的文本并处理引号
-    let l:raw = substitute(@", "'", "\\'", "g")
+function! BashANSIQuote(s)
+    let b = '$'
+    let b .= "'"
+    let i = 0
+    let len = strlen(a:s)
+    while i < len
+        let c = a:s[i]
+        let ord = char2nr(c)
+        if ord == 27
+            let b .= '\E'
+        elseif ord == 7
+            let b .= '\a'
+        elseif ord == 8
+            let b .= '\b'
+        elseif ord == 9
+            let b .= '\t'
+        elseif ord == 10
+            let b .= '\n'
+        elseif ord == 11
+            let b .= '\v'
+        elseif ord == 12
+            let b .= '\f'
+        elseif ord == 13
+            let b .= '\r'
+        elseif ord == 39
+            let b .= "\\'"
+        elseif ord == 92
+            let b .= '\\'
+        else
+            if ord < 32 || ord == 127
+                let b .= printf('\%03o', ord)
+            else
+                let b .= c
+            endif
+        endif
+        let i += 1
+    endwhile
+    let b .= "'"
+    return b
+endfunction
 
+" 用于发送字符到bash终端.
+function! TransToTerminal(isBrief, language)
     " 按行拆分
-    let l:lines = split(l:raw, "\n")
+    let l:lines = split(@", "\n")
 
     " 根据语言合并句子(目标和源是反的)
     if a:language ==# 'en'
@@ -4182,15 +4222,18 @@ function! TransToTerminal(isBrief, language)
         let l:merged = join(l:lines, ' ')
     endif
 
+    let l:ascii_quote = BashANSIQuote(l:merged)
+
     " 构造命令
     " ⚠️ cygwin 环境下可能需要修改 trans 脚本的 shebang：
     "    把 #!/bin/bash 改成 #!/usr/bin/bash 才能正常运行（原因未知）
+    " 某些环境下会有奇怪的标准错误输出，屏蔽掉
     let l:cmd = 'clear;echo "-----------------------------";echo "";trans :' . a:language
-    let l:cmd .= (a:isBrief ? " --brief " : " ") . "'" . l:merged . "'" . ";echo ''"
+    let l:cmd .= (a:isBrief ? " --brief " : " ") . l:ascii_quote . " 2>/dev/null;echo ''"
 
     " 切换到终端窗口
     call SwitchToTerminalWindow()
-    sleep 500m
+    sleep 100m
 
     " 如果不是终端模式，进入插入
     if mode() !~# 't'
@@ -4236,10 +4279,19 @@ function! PasteTerminalToBuffer(isBrief, selection_mode)
 
     normal! "+y
     execute "wincmd k"
+
+    " 获取剪贴板内容
+    let clipboard_content = getreg('+')
+
+    " 去掉换行符，将内容连接成一行
+    let processed_content = substitute(clipboard_content, '\n', '', 'g')
+
+    " 将处理后的内容放回剪贴板
+    call setreg('+', processed_content)
+
     normal! gv
     normal! p
 endfunction
-
 
 " 自动翻译相关的配置 }
 
