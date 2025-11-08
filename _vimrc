@@ -3823,8 +3823,8 @@ endfunction
 
 function! DetectSlides()
     let g:slide_files = glob('*.*', 0, 1)
-    " 使用自定义的按照数字排序
-    let g:slide_files = sort(g:slide_files, {a, b -> str2nr(matchstr(a, '\d\+')) - str2nr(matchstr(b, '\d\+'))})
+    " 使用自定义的按照数字排序(提取最后的数字)
+    let g:slide_files = sort(g:slide_files, {a, b -> str2nr(matchstr(a, '\d\+\D*$')) - str2nr(matchstr(b, '\d\+\D*$'))})
     let g:total_slides = len(g:slide_files)
 endfunction
 
