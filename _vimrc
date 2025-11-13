@@ -624,12 +624,28 @@ set guicursor+=a:blinkon0
 " set guifont=微软雅黑\ PragmataPro\ Mono:h8
 " 这个字体某些方向符号无法显示
 " set guifont=Fira\ Code:h8
-" set guifont=Maple\ Mono\ NL\ NF\ CN:h8
+function! MySetGuiFont()
+    let candidates = [
+            \ 'vimio mono:h8',
+            \ 'Maple Mono Normal NL:h8',
+            \ 'Maple Mono NL NF CN:h8'
+            \ ]
+    for font_iter in candidates
+        if !empty(getfontname(font_iter))
+            execute 'set guifont=' . substitute(font_iter, ' ', '\\ ', 'g')
+            break
+        endif
+    endfor
+endfunction
+" 一定要在 GUI 完成后再调用（GUIEnter）
+augroup MyGuiFont
+    autocmd!
+    autocmd GUIEnter * call MySetGuiFont()
+augroup END
+
 " set guifont=Microsoft\ YaHei\ Mono:h8
 " set guifont=PragmataPro\ Mono:h8
 " set guifont=PragmataPro:h8
-set guifont=vimio\ mono:h8
-
 
 
 set noundofile
@@ -662,7 +678,7 @@ set guioptions-=T                                                               
 set guioptions-=m                                                                " 禁用菜单栏
 
 " 打开某个目录下面的文件执行vimgrep忽略设置,这样每个项目可以独立
-autocmd BufNewFile,BufRead E:/code/P5-App-Asciio* set wildignore=t/**,xt/**,*.tmp,test.c
+autocmd BufNewFile,BufRead */P5-App-Asciio* set wildignore=t/**,xt/**,*.tmp,test.c
 autocmd BufNewFile,BufRead *.vim9 set filetype=vim
 
 " 编辑vim配置文件
@@ -950,16 +966,17 @@ let g:expand_region_text_objects = {
       \ "i'"  :1,
       \ 'ib'  :1,
       \ 'iB'  :1,
-      \ 'i]'  :1,
-      \ 'ab'  :1,
-      \ 'aB'  :1,
-      \ 'a]'  :1,
-      \ 'ii'  :1,
-      \ 'ai'  :1,
-      \ 'ip'  :1,
-      \ 'il'  :1,
       \ }
 
+      " 下面的这些先备份，暂时不设置
+      " \ 'i]'  :1,
+      " \ 'ab'  :1,
+      " \ 'aB'  :1,
+      " \ 'a]'  :1,
+      " \ 'ii'  :1,
+      " \ 'ai'  :1,
+      " \ 'ip'  :1,
+      " \ 'il'  :1,
 " 扩大选区
 nnoremap <M-i> <Plug>(expand_region_expand)| " 编辑: 普通模式下扩大选区
 vnoremap <M-i> <Plug>(expand_region_expand)| " 编辑: 可视模式下扩大选区
@@ -1078,8 +1095,16 @@ let g:ale_java_javac_classpath = '.'
 " 这两句非常重要是缺一不可的,并且配置文件的路径一定不能写错
 let $GTAGSLABEL = 'native-pygments'                                              " 让非C语言使用这个生成符号表
 " let g:gutentags_gtags_extra_args = ['--gtagslabel=native-pygments']
+
 " 这里的路径注意下一定要是绝对路径
-let $GTAGSCONF = 'C:/Users/pc/.vim/gtags/share/gtags/gtags.conf'                 " gtags的配置文件的路径
+for conf in ['C:/Users/pc/.vim/gtags/share/gtags/gtags.conf',
+            \ 'D:/programes/vim/glob/share/gtags/gtags.conf',
+            \ 'C:/Users/q00208337/.vim/gtags/share/gtags/gtags.conf']
+    if filereadable(conf)
+        let $GTAGSCONF = conf
+        break
+    endif
+endfor
 
 let g:gutentags_project_root = ['.root', '.svn', '.git', '.hg', '.project']      " gutentags 搜 索工程目录的标志，当前文件路径向上递归直到碰到这些文件/目录名
 let g:gutentags_ctags_tagfile = '.tags'                                          " 所生成的数据文件的名称
@@ -1201,7 +1226,15 @@ let g:NERDTreeGitStatusIndicatorMapCustom = {
 " nerdtree-git-plugin 插件 }
 
 " vim-gitgutter {
-let g:gitgutter_git_executable = 'D:\programes\git\Git\bin\git.exe'              " git可执行文件路径
+
+" :TODO: 笔记本的环境需要重点验证下
+" vim-gitgutter {
+if executable('git')
+    let g:gitgutter_git_executable = 'git'
+elseif filereadable('D:/programes/git/Git/bin/git.exe')
+    let g:gitgutter_git_executable = 'D:/programes/git/Git/bin/git.exe'
+endif
+
 let g:gitgutter_max_signs = 2000                                                 " 如果设置为-1,标记的数量为无限
 " 默认不启用
 let g:gitgutter_enabled = 0
@@ -1223,30 +1256,7 @@ function! ResizeGvimWindow(x, y, width, height)
   call system(l:nircmd_cmd)
 endfunction
 
-" 使用powershell命令获取GVim窗口的像素大小(windows系统专用!目前只支持一个窗口的情况)
-" :TODO: 精细过滤可以文件名或者?
-" 目前这个函数并没有意义(有set guioptions+=k选项就够了)
-function! GetGvimWindowSize()
-    let l:ps_script_path = 'E:\code\my_vim_config\get_win_size.ps1'
-    let l:cmd = 'powershell -ExecutionPolicy Bypass -File ' . shellescape(l:ps_script_path)
-    let l:size = system(l:cmd)
-    return l:size
-endfunction
-
-
 function! PreserveWindowSize(delta)
-    " let l:size = GetGvimWindowSize()
-    " let l:pattern = 'Width: \(\d\+\), Height: \(\d\+\)'
-    " let matches = matchlist(l:size, pattern)
-    " " 先保存原始的像素尺寸
-    " let l:window_width_px = matches[1]
-    " let l:window_height_px = matches[2]
-
-    " " 获取窗口的起始位置
-    " let l:pos = execute('silent! winpos')
-    " let l:x = split(split(l:pos, 'X')[1], ',')[0]
-    " let l:y = split(split(l:pos, 'Y')[1], ' ')[0]
-
     let l:decimalpat = '[0-9]\+\(\.[0-9]*\)\?'
     let l:fontpat_unix = '^\(\(-[^-]\+\)\{6}-\)\(' . l:decimalpat . '\)'
     let l:fontpat_win32 = '\(:h\)\(' . l:decimalpat . '\)\(:\|,\|$\)'
@@ -1736,9 +1746,16 @@ au filetype zim let b:AutoPairs = {'(':')', '[':']', '{':'}',"''":"''",'"':'"', 
 " auto-pairs 配置 }
 
 " doq的配置 {
-let g:pydocstring_doq_path = 'D:/python/Script/doq'
+" 探测 doq 的路径
+if executable('doq')
+    " 如果 PATH 里已经有 doq，就直接用
+    let g:pydocstring_doq_path = 'doq'
+elseif filereadable('D:/python/Script/doq')
+    let g:pydocstring_doq_path = 'D:/python/Script/doq'
+elseif filereadable('C:/Users/pc/AppData/Local/Programs/Python/Python314/Scripts/doq.exe')
+    let g:pydocstring_doq_path = 'C:/Users/pc/AppData/Local/Programs/Python/Python314/Scripts/doq.exe'
+endif
 " doq的配置 }
-
 
 
 " vim-markdown {
@@ -1983,7 +2000,15 @@ let g:completor_complete_options = 'menuone,noselect'
 
 " 如果使用的是虚拟环境这里要配置虚拟环境的地址,补全这里还有一个问题,如果文件名不规范,有@等特殊字符,无法补全
 " let g:completor_python_binary = 'D:/code/tu_refactor_learn/TU_Refactory/.venv/Scripts/python.exe'
-let g:completor_python_binary = 'D:/python/python.exe'
+if executable('python3')
+    let g:completor_python_binary = 'python3'
+elseif executable('python')
+    let g:completor_python_binary = 'python'
+elseif filereadable('D:/python/python.exe')
+    let g:completor_python_binary = 'D:/python/python.exe'
+elseif filereadable('C:/Users/pc/AppData/Local/Programs/Python/Python314/python.exe')
+    let g:completor_python_binary = 'C:/Users/pc/AppData/Local/Programs/Python/Python314/python.exe'
+endif
 
 nnoremap <silent> <leader><leader><leader>d :call completor#do('definition')<CR>| " 补全:completor 显示定义
 nnoremap <silent> <leader><leader><leader>c :call completor#do('doc')<CR>| " 补全:completor 显示文档
