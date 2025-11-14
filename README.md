@@ -60,7 +60,7 @@ https://github.com/junegunn/vim-plug
 
     LuaJIT-2.1.0-beta3
 
-2. 随便找一个英文目录，解压后，使用cygwin的环境进入到源码的顶级目录，然后`make`即可。
+2. 随便找一个英文目录，解压后，使用`msys2`的环境进入到源码的顶级目录，然后`make`即可。
 3. 等待编译完成，然后把生成的可执行文件放置到任何的能让`vim`读取到的`PATH`目录下。
    luajit.exe
    lua51.dll
