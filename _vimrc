@@ -515,6 +515,9 @@ endif
 if filereadable('D:/msys64/ucrt64_bash.bat')
     " vim-terminal-help 使用的变量，并不是vim默认的变量
     let g:terminal_cwd = 1
+    " 系统环境变量中的路径一定不能有空格，否则下面的脚本会执行异常
+    " 并且下面的脚本的换行符一定要是windows的换行符，如果是Linux的换行符脚本
+    " 无法正常执行
     let g:terminal_shell = 'D:/msys64/ucrt64_bash.bat'
     " 下面的设置后会导致启动的时候命令行卡住，当前不使用也没有影响
     " set shellcmdflag=-c
