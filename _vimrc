@@ -513,6 +513,7 @@ endif
 
 " 优先 MSYS2 wrapper（优先级高）
 if filereadable('D:/msys64/ucrt64_bash.bat')
+    " vim-terminal-help 使用的变量，并不是vim默认的变量
     let g:terminal_cwd = 1
     let g:terminal_shell = 'D:/msys64/ucrt64_bash.bat'
     " 下面的设置后会导致启动的时候命令行卡住，当前不使用也没有影响
