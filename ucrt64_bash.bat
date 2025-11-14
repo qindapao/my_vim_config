@@ -4,9 +4,7 @@ set "MSYS2_ROOT=D:\msys64"
 set "DEBUG=0"    rem 设为1可输出调试信息
 rem ============================================
 
-rem 保证脚本在 MSYS2 根目录运行（让 msys2 的检测逻辑正确）
-pushd "%MSYS2_ROOT%" >nul 2>&1
-
+rem 保留调用时的当前 Windows 工作目录（%CD% 未被修改）
 rem 关键环境变量（要在启动 bash 前设置）
 set "MSYSTEM=UCRT64"
 set "CHERE_INVOKING=1"
@@ -20,21 +18,16 @@ rem 明确要求使用 UTF-8 locale，避免部分程序退回 ANSI/GBK
 set "LANG=zh_CN.UTF-8"
 set "LC_ALL=zh_CN.UTF-8"
 
-rem 可选：显式设置 HOME（根据需要取消注释并修改）
-rem set "HOME=%USERPROFILE%"
-
 if "%DEBUG%"=="1" (
   echo [wrapper] MSYS2_ROOT=%MSYS2_ROOT%
+  echo [wrapper] CWD=%CD%
   echo [wrapper] MSYSTEM=%MSYSTEM%
-  echo [wrapper] MSYS2_PATH_TYPE=%MSYS2_PATH_TYPE%
   echo [wrapper] PATH=%PATH%
   echo [wrapper] LANG=%LANG% LC_ALL=%LC_ALL%
 )
 
-rem 启动 bash 为 login interactive；%* 保留 -c "..." 等参数
+rem 直接用登录交互 bash 启动。因为我们没有改变 %CD%，bash 启动后会以调用者目录为当前目录。
 "%MSYS2_ROOT%\usr\bin\bash.exe" --login -i %*
 
-set "ERR=%ERRORLEVEL%"
-popd >nul 2>&1
-exit /b %ERR%
+exit /b %ERRORLEVEL%
 

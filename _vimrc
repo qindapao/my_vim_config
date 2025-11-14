@@ -511,12 +511,17 @@ if has('gui_running')
 endif
 
 
-
-" 设置默认的终端为bash
-let g:terminal_cwd = 1
-" 当前wsl下的免密输入已经搞定,所以就使用wsl下的环境
-let g:terminal_shell = 'bash'
-
+" 优先 MSYS2 wrapper（优先级高）
+if filereadable('D:/msys64/ucrt64_bash.bat')
+    set shell=D:/msys64/ucrt64_bash.bat
+    set shellcmdflag=-c
+    set shellquote=\"
+    set shellxquote=
+else
+    let g:terminal_cwd = 1
+    " " 当前wsl下的免密输入已经搞定,所以就使用wsl下的环境
+    let g:terminal_shell = 'bash'
+endif
 
 filetype plugin indent on                                                        " 打开文件类型检测
 set history=1000
