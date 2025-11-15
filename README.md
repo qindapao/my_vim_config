@@ -44,6 +44,34 @@ https://github.com/vim/vim-win32-installer/releases
 
 由于我映射了很多和`shift`相关的按键，所以我打算不使用`Gvim`的最新版本，当前使用`16`号补丁或者`44`号补丁。
 
+但是重新看了作者的[说明](https://github.com/vim/vim/commit/68d9472c65ec75725a0b431048bebe036921331c)后，我发现或许我可以使用
+最新版本的`Gvim`。我只是需要调用一个函数来切换默认的按键映射方式而已。
+
+```vim
+:call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'experimental'})
+```
+
+或者：
+
+```vim
+:call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'classic'})
+```
+
+如果是在初始化的阶段，或者是极小的`Gvim`的构建，也可以通过直接设置下面这个环境变量来达到同样的目的。
+
+```vim
+set VIM_KEYCODE_TRANS_STRATEGY=experimental
+```
+
+或者:
+
+```vim
+set VIM_KEYCODE_TRANS_STRATEGY=classic
+```
+
+
+
+
 # 特殊插件安装备忘
 
 ## 1 vim-plug
