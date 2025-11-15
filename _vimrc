@@ -962,6 +962,10 @@ Plug 'qindapao/vim-which-key'
 " ctrl + x + ctrl + o 触发 Go 语言的全功能补全
 " vim-go 插件的配置 }
 
+
+Plug 'vimwiki/vimwiki'
+
+
 call plug#end()
 " 插件 }
 
@@ -5070,3 +5074,10 @@ function! BuildLooseRegex(keyword)
     return pattern
 endfunction
 
+
+" vimwiki 插件配置 {
+let g:vimwiki_list = [
+      \ {'path': '~/Documents/workwiki/', 'syntax': 'default', 'ext': '.wiki'},
+      \ {'path': '~/Documents/personalwiki/', 'syntax': 'default', 'ext': '.wiki'}
+      \ ]
+" }
