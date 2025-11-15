@@ -2070,6 +2070,8 @@ nnoremap <silent> <F3> :Explore<CR>| " 目录树: 打开vim自带的文件管理
 " 有个小tips: 我们在搜 索结果页中我们可以使用zM折叠所有的搜 索结果(类似于vscode的效果)
 " :TODO: 目前发现全词匹配-W不能和-I一起使用
 " 获取光标下的单词(这里命令在第二个命令,所以不能用<cword>)
+
+nnoremap <leader>cfto :CtrlSFToggle<cr>| "                         搜索:ctrlsf:切换搜索窗口的打开和关闭
 nnoremap <leader>cfip :Rooter<cr> :CtrlSF -I <C-r><C-w><cr>| "     搜索:ctrlsf:项目级 不敏感,非全词
 nnoremap <leader>cfsp :Rooter<cr> :CtrlSF -S <C-r><C-w><cr>| "     搜索:ctrlsf:项目级 敏感,非全词
 " 目前发现敏感和全词必须配套使用,否则全词功能失效?
