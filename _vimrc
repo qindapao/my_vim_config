@@ -5093,13 +5093,18 @@ endfunction
 
 " vimwiki 插件配置 {
 " 获取 Vim 安装目录的上一级目录
+" 'qq_style.css'文件需要提前放到 workwiki_html 目录中
 let s:vim_parent = fnamemodify($VIM, ':h')
 let g:vimwiki_list = [
-      \ {'path': s:vim_parent . '/workwiki/', 'syntax': 'default', 'ext': '.wiki'},
-      \ {'path': s:vim_parent . '/personalwiki/', 'syntax': 'default', 'ext': '.wiki'}
+      \ {'path': s:vim_parent . '/workwiki/', 'syntax': 'default', 'ext': '.wiki', 'css_name': 'qq_style.css', 'path_html': s:vim_parent . '/workwiki_html/'},
+      \ {'path': s:vim_parent . '/personalwiki/', 'syntax': 'default', 'ext': '.wiki', 'css_name': 'qq_style.css'}
       \ ]
 " let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,hr,p,pre,ul,ol,li,table,tr,td,th,dl,dt,dd,blockquote,div,span'
-let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,p,pre,span'
+" 需要支持svg的嵌入
+" 需要手动先把图片和SVG放到导出目录下来
+let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,p,pre,span,object,embed,iframe,svg'
+
 let g:vimwiki_codeblock_highlight = 1
+let g:vimwiki_auto_chdir = 1
 " }
 
