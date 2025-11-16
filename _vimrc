@@ -1712,7 +1712,17 @@ nnoremap <leader>fgp :<C-U><C-R>=printf("Leaderf gtags --previous %s", "")<CR><C
 " --regex-zim=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
 " --regex-zim=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
 " --regex-zim=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
-"
+
+" --langdef=vimwiki
+" --langmap=vimwiki:.wiki
+" --regex-vimwiki=/^=[ \t]+([^[:cntrl:]]+)[ \t]+=$/\1/h,header/
+" --regex-vimwiki=/^==[ \t]+([^[:cntrl:]]+)[ \t]+==$/. \1/h,header/
+" --regex-vimwiki=/^===[ \t]+([^[:cntrl:]]+)[ \t]+===$/.   \1/h,header/
+" --regex-vimwiki=/^====[ \t]+([^[:cntrl:]]+)[ \t]+====$/.     \1/h,header/
+" --regex-vimwiki=/^=====[ \t]+([^[:cntrl:]]+)[ \t]+=====$/.       \1/h,header/
+" --regex-vimwiki=/^======[ \t]+([^[:cntrl:]]+)[ \t]+======$/.         \1/h,header/
+
+
 let g:tagbar_type_zim = {
     \ 'ctagstype' : 'zim',
     \ 'kinds' : [
@@ -1726,6 +1736,12 @@ let g:tagbar_type_txt = {
     \ ]
 \ }
 
+let g:tagbar_type_vimwiki = {
+    \ 'ctagstype' : 'vimwiki',
+    \ 'kinds' : [
+        \ 'h:heading',
+    \ ]
+\ }
 " vim 的文件类型依然是 asciidoc 但是呢使用自定义的 ctags 类型 asciidocx
 " 这样就在既保持编辑器识别又能让tagbar按照自定义的方式处理标题
 let g:tagbar_type_asciidoc = {
@@ -5076,8 +5092,13 @@ endfunction
 
 
 " vimwiki 插件配置 {
+" 获取 Vim 安装目录的上一级目录
+let s:vim_parent = fnamemodify($VIM, ':h')
 let g:vimwiki_list = [
-      \ {'path': '~/Documents/workwiki/', 'syntax': 'default', 'ext': '.wiki'},
-      \ {'path': '~/Documents/personalwiki/', 'syntax': 'default', 'ext': '.wiki'}
+      \ {'path': s:vim_parent . '/workwiki/', 'syntax': 'default', 'ext': '.wiki'},
+      \ {'path': s:vim_parent . '/personalwiki/', 'syntax': 'default', 'ext': '.wiki'}
       \ ]
+" let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,hr,p,pre,ul,ol,li,table,tr,td,th,dl,dt,dd,blockquote,div,span'
+let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,p,pre,span'
 " }
+
