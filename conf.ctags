@@ -1,0 +1,40 @@
+--langdef=asciidocx
+--langmap=asciidocx:.ad.adoc.asciidoc
+--regex-asciidocx=/^=[ \t]+([^[:cntrl:]]+)/o \1/h/
+--regex-asciidocx=/^==[ \t]+([^[:cntrl:]]+)/. \1/h/
+--regex-asciidocx=/^===[ \t]+([^[:cntrl:]]+)/. . \1/h/
+--regex-asciidocx=/^====[ \t]+([^[:cntrl:]]+)/. . . \1/h/
+--regex-asciidocx=/^=====[ \t]+([^[:cntrl:]]+)/. . . . \1/h/
+--regex-asciidocx=/^======[ \t]+([^[:cntrl:]]+)/. . . . \1/h/
+--regex-asciidocx=/^=======[ \t]+([^[:cntrl:]]+)/. . . . \1/h/
+--regex-asciidocx=/\[\[([^]]+)\]\]/\1/a/
+--regex-asciidocx=/^\.([^ \t\.][^[:cntrl:]]+)/\1/t/
+--regex-asciidocx=/image::([^\[]+)/\1/i/
+--regex-asciidocx=/image:([^:][^\[]+)/\1/I/
+--regex-asciidocx=/include::([^\[]+)/\1/n/
+
+--langdef=txt
+--langmap=txt:.txt
+--regex-txt=/^(\={6}\s)(\S.+)(\s\={6})$/\2/h,heading/
+--regex-txt=/^(\={5}\s)(\S.+)(\s\={5})$/. 2/h,heading/
+--regex-txt=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
+--regex-txt=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
+--regex-txt=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
+
+--langdef=zim
+--langmap=zim:.txt
+--regex-zim=/^(\={6}\s)(\S.+)(\s\={6})$/\2/h,heading/
+--regex-zim=/^(\={5}\s)(\S.+)(\s\={5})$/. \2/h,heading/
+--regex-zim=/^(\={4}\s)(\S.+)(\s\={4})$/.   \2/h,heading/
+--regex-zim=/^(\={3}\s)(\S.+)(\s\={3})$/.     \2/h,heading/
+--regex-zim=/^(\={2}\s)(\S.+)(\s\={2})$/.       \2/h,heading/
+
+--langdef=vimwiki
+--langmap=vimwiki:.wiki
+--regex-vimwiki=/^=[ \t]+([^[:cntrl:]]+)[ \t]+=$/\1/h,header/
+--regex-vimwiki=/^==[ \t]+([^[:cntrl:]]+)[ \t]+==$/. \1/h,header/
+--regex-vimwiki=/^===[ \t]+([^[:cntrl:]]+)[ \t]+===$/.   \1/h,header/
+--regex-vimwiki=/^====[ \t]+([^[:cntrl:]]+)[ \t]+====$/.     \1/h,header/
+--regex-vimwiki=/^=====[ \t]+([^[:cntrl:]]+)[ \t]+=====$/.       \1/h,header/
+--regex-vimwiki=/^======[ \t]+([^[:cntrl:]]+)[ \t]+======$/.         \1/h,header/
+
