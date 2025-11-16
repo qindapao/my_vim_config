@@ -5100,5 +5100,6 @@ let g:vimwiki_list = [
       \ ]
 " let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,hr,p,pre,ul,ol,li,table,tr,td,th,dl,dt,dd,blockquote,div,span'
 let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,p,pre,span'
+let g:vimwiki_codeblock_highlight = 1
 " }
 
