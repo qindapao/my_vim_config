@@ -1112,9 +1112,8 @@ let $GTAGSLABEL = 'native-pygments'                                             
 " let g:gutentags_gtags_extra_args = ['--gtagslabel=native-pygments']
 
 " 这里的路径注意下一定要是绝对路径
-for conf in ['C:/Users/pc/.vim/gtags/share/gtags/gtags.conf',
-            \ 'D:/programes/vim/glob/share/gtags/gtags.conf',
-            \ 'C:/Users/q00208337/.vim/gtags/share/gtags/gtags.conf']
+for conf in [ fnamemodify(expand('~/.vim/gtags/share/gtags/gtags.conf'), ':p'),
+            \ fnamemodify($VIM . '/glob/share/gtags/gtags.conf', ':p') ]
     if filereadable(conf)
         let $GTAGSCONF = conf
         break
@@ -1144,6 +1143,9 @@ let g:gutentags_plus_switch = 0                                                 
 
 " 下面这行是调试用的,当生成的tag出了问题,需要用这行来调试
 let g:gutentags_define_advanced_commands = 1
+" 上面的设置为1后运行下面这个打开追踪
+" :GutentagsToggleTrace
+
 
 " ctags 也要使用 universal ctags ，不能用老的 Exuberant-ctags 
 " 查看当前使用的 python3 版本的方法
@@ -1967,9 +1969,9 @@ let g:UltiSnipsJumpForwardTrigger="<c-b>"
 let g:UltiSnipsJumpBackwardTrigger="<c-z>"
 let g:UltiSnipsSnippetDirectories=["UltiSnips", "mysnips"]
 " Utisnippest目录
-" snippets.userSnippetsDirectory": "C:\\Users\\q00208337\\.vim\\plugged\\vim-snippets\\mysnips",
+" snippets.userSnippetsDirectory": "C:\\Users\\xx\\.vim\\plugged\\vim-snippets\\mysnips",
 " vscode的textmate格式目录 sh.json 后缀
-" snippets.textmateSnippetsRoots": ["C:\\Users\\q00208337\\.vim\\plugged\\vim-snippets\\textmate"]
+" snippets.textmateSnippetsRoots": ["C:\\Users\\xx\\.vim\\plugged\\vim-snippets\\textmate"]
 
 inoremap <silent><expr> <S-TAB>
       \ coc#pum#visible() ? coc#_select_confirm() :
