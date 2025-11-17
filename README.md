@@ -30,34 +30,30 @@ vim configuration file for my personal use
 
 https://github.com/vim/vim-win32-installer/releases
 
-当前我使用的版本是：`9.1`，包含补丁`1-16`。
+目前我稳定使用的版本是补丁`1-16`。然后现在开始试用最新版本的补丁。老版本的`Gvim`无法适配最新的`python`。
+只能安装`python3.12`。
 
-最开始我安装的是`1-16`号补丁，当前现在安装的最新的是`1-44`号补丁。使用50号补丁以及以后都无法识别`shift`键了。
-
-我在vim的项目中反馈了这个问题，并且提了一个issue，但是开发者说这是一个[修复](https://github.com/vim/vim/issues/18745)，以前的才是不正常的。
-
-比如：`Ctrl+V`和`Ctrl+Shift+V`对于编辑器来说都是一个按键，按键码都是`22`。对于其他的组合情况也是这样。
-
-验证方法是在vim的命令行中输入：`:echo getchar()`，然后按`Ctrl+V`；重复这个动作，然后按`Ctrl+SHift+V`，就可以测试是否是相同的按键。
-
-但是呢，使用老版本的`gvim`补丁，比如当前使用的`16`号或者`44`号补丁，只能安装`python3.12`。如果安装最新版本的`python`，某些插件，比如：`LeaderF`就会不正常！
-
-由于我映射了很多和`shift`相关的按键，所以我打算不使用`Gvim`的最新版本，当前使用`16`号补丁或者`44`号补丁。
-
-但是重新看了作者的[说明](https://github.com/vim/vim/commit/68d9472c65ec75725a0b431048bebe036921331c)后，我发现或许我可以使用
-最新版本的`Gvim`。我只是需要调用一个函数来切换默认的按键映射方式而已。
+注意下新版本的`Gvim`有按键映射的策略问题，如果要让`Ctrl`和`Ctrl+Shift`被识别成不同的组合键，那么需要进行下面的设置：
 
 ```vim
 :call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'experimental'})
 ```
 
-或者：
+最新的补丁的默认方案是下面这个，下面这个就不能识别有`Shift`的组合键。
 
 ```vim
 :call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'classic'})
 ```
 
-如果是在初始化的阶段，或者是极小的`Gvim`的构建，也可以通过直接设置下面这个环境变量来达到同样的目的。
+我提了个[问题单](https://github.com/vim/vim/issues/18745)，并且vim的开发人员回复了我。
+
+* 测试按键的方法：
+
+验证方法是在vim的命令行中输入：`:echo getchar()`，然后按`Ctrl+V`；重复这个动作，然后按`Ctrl+SHift+V`，就可以测试是否是相同的按键。
+
+* 初始化阶段的处理方法
+
+(1). 可以直接设置环境变量，适用于最小构建的`Gvim`版本或者是在初始化阶段设置。
 
 ```vim
 set VIM_KEYCODE_TRANS_STRATEGY=experimental
@@ -69,7 +65,11 @@ set VIM_KEYCODE_TRANS_STRATEGY=experimental
 set VIM_KEYCODE_TRANS_STRATEGY=classic
 ```
 
+(2). 也可以创建一个自动事件。
 
+`autocmd GUIEnter * call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'experimental'})`
+
+一定要等GUI加载完成后才能调用函数，不然在初始化阶段是不会生效的。
 
 
 # 特殊插件安装备忘
@@ -113,20 +113,20 @@ https://github.com/junegunn/vim-plug
 
 2. nodejs安装完成后先安装插件，安装插件后需要手动切换到release分支，否则使用的是没有编译的版本，插件安装完成后，安装插件市场
 
-```
+```vim
 :CocInstall coc-marketplace
 :CocList marketplace
 ```
 
 可以在插件市场中搜索和`python`相关的插件。
 
-```
+```vim
 :CocList marketplace python
 ```
 
 3. 可以使用下面的命令显示当前安装的子插件
 
-```
+```vim
 :CocList
 extensitions
 ```
@@ -146,6 +146,7 @@ extensitions
 
 原始的tagbar插件无法显示markdown格式的大纲，需要配合这个插件一起使用。
 安装后需要设置可执行文件的位置:
+
 ```
 \ 'ctagsbin' : 'C:/Users/pc/.vim/plugged/markdown2ctags/markdown2ctags.py',
 ```
@@ -155,6 +156,7 @@ extensitions
 # 语法检查和格式化器
 
 vim的个人插件目录的配置
+
 ```
 C:\Users\pc\.vim
     bundle
@@ -285,9 +287,6 @@ let $GTAGSCONF = '/path/to/share/gtags/gtags.conf'
 ```txt
 mklink /d d:\pythonlib C:\Python311\Lib
 ```
-
-
-
 
 # ctags
 

@@ -5113,3 +5113,8 @@ let g:vimwiki_codeblock_highlight = 1
 let g:vimwiki_auto_chdir = 0
 " }
 
+" 修复在高版本的vim中按键映射变为传统的(Ctrl组合键和Ctrl+Shift组合键无法区分)
+autocmd GUIEnter * call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'experimental'})
+" 如果是下面这个那么就是无法区分的版本
+" autocmd GUIEnter * call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'classic'})
+
