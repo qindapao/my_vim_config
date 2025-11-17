@@ -1619,15 +1619,15 @@ let g:Lf_MruMaxFiles = 2000
 
 
 " 字符串检索相关配置 可以手动补充的词 (-i 忽略大小写. -e <PATTERN> 正则表达式搜 索. -F 搜 索字符串而不是正则表达式. -w 搜 索只匹配有边界的词.)
-nnoremap <leader>frm <Plug>LeaderfRgPrompt| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
-nnoremap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary| " 搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
-nnoremap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
-nnoremap <leader>fren <Plug>LeaderfRgCwordRegexNoBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
-nnoremap <leader>frew <Plug>LeaderfRgCwordRegexBoundary| "    搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
-vnoremap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary| "搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
-vnoremap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
-vnoremap <leader>fren <Plug>LeaderfRgVisualRegexNoBoundary| "  搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
-vnoremap <leader>frew <Plug>LeaderfRgVisualRegexBoundary| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
+nnoremap <leader>frm <Plug>LeaderfRgPrompt --stayOpen| "                  搜索:Leaderf Leaderf rg -e,然后等待输入正则表达式
+nnoremap <leader>frb <Plug>LeaderfRgCwordLiteralNoBoundary --stayOpen| " 搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
+nnoremap <leader>frw <Plug>LeaderfRgCwordLiteralBoundary --stayOpen| "   搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
+nnoremap <leader>fren <Plug>LeaderfRgCwordRegexNoBoundary --stayOpen| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
+nnoremap <leader>frew <Plug>LeaderfRgCwordRegexBoundary --stayOpen| "    搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
+vnoremap <leader>frb <Plug>LeaderfRgVisualLiteralNoBoundary --stayOpen| "搜索:Leaderf 查询光标或者可视模式下所在的词,非全词匹配
+vnoremap <leader>frw <Plug>LeaderfRgVisualLiteralBoundary --stayOpen| "  搜索:Leaderf 查询光标或者可视模式下所在的词,全词匹配
+vnoremap <leader>fren <Plug>LeaderfRgVisualRegexNoBoundary --stayOpen| "  搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，非全词匹配
+vnoremap <leader>frew <Plug>LeaderfRgVisualRegexBoundary --stayOpen| "   搜索:Leaderf 查询光标或者可视模式下所在的正则表达式，全词匹配
 nnoremap <leader>frr :LeaderfRgRecall<cr>| " 搜索:Leaderf 搜索重新打开上一次的rg搜索
 
 nnoremap ]n :Leaderf rg --next<CR>| " 搜索:Leaderf 跳转到字符串搜索列表的下一个结果
