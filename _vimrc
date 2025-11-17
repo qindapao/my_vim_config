@@ -4436,6 +4436,7 @@ let g:which_key_map.H = {
             \ "\<C-E>" : [":call feedkeys(\"\<C-E>\")", '调整窗口大小(C-E)'],
             \ '<F3>' : [":call feedkeys(\"\<F3>\")", '打开文件浏览器'],
             \ '<F4>' : [":call feedkeys(\"\<F4>\")", '切换Tagbar显示'],
+            \ '<F2>' : [":call feedkeys(\"\<F2>\")", '关闭当前窗口'],
             \ '<F5>' : [":call feedkeys(\"\<F5>\")", '切换主题'],
             \ '<F8>' : [":call feedkeys(\"\<F8>\")", '切换NERDTree'],
             \ }
@@ -5105,6 +5106,10 @@ let g:vimwiki_list = [
 let g:vimwiki_valid_html_tags = 'b,i,s,u,sub,sup,kbd,br,p,pre,span,object,embed,iframe,svg'
 
 let g:vimwiki_codeblock_highlight = 1
-let g:vimwiki_auto_chdir = 1
+" 不要自动切换目录，因为这可能会导致 .md 和 .wiki 的文件配合 fugitive 工作的时候不正常
+" 有自动命令会切换目录
+" :verbose au BufWinEnter *.wiki
+" :verbose au BufWinEnter *.md
+let g:vimwiki_auto_chdir = 0
 " }
 
