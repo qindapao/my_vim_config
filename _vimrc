@@ -5112,6 +5112,31 @@ let g:vimwiki_codeblock_highlight = 1
 " :verbose au BufWinEnter *.wiki
 " :verbose au BufWinEnter *.md
 let g:vimwiki_auto_chdir = 0
+
+function! VimwikiLinkHandler(link)
+    " 网页链接 -> 浏览器
+    if a:link =~? '^https\?://'
+        call system('cmd /c start "" ' . shellescape(a:link))
+        return 1
+    endif
+
+    " file: 或 local: -> 系统默认程序
+    if a:link =~? '^\%(file\|local\):'
+        let l:path = substitute(a:link, '^\%(file\|local\):', '', '')
+
+        " 相对路径 -> 基于当前 wiki 文件目录拼绝对路径
+        if l:path !~? '^\%([A-Za-z]:\|[/\\]\)'
+            let l:path = fnamemodify(expand('%:p:h') . '/' . l:path, ':p')
+        endif
+
+        call system('cmd /c start "" ' . shellescape(l:path))
+        return 1
+    endif
+
+    " 其余交给 Vimwiki 默认逻辑（内部链接等）
+    return 0
+endfunction
+
 " }
 
 " 修复在高版本的vim中按键映射变为传统的(Ctrl组合键和Ctrl+Shift组合键无法区分)
