@@ -1,3 +1,8 @@
+
+REM windows 的 cmd 中通过管理员的身份运行下面的命令注册 asciio 文件后缀的默认打开程序
+REM assoc .asciio=asciio
+REM ftype asciio="D:\msys64\ucrt64_bash.bat" %1
+
 @echo off
 rem ====== 配置区（按你的安装路径修改） ======
 set "MSYS2_ROOT=D:\msys64"
@@ -26,8 +31,23 @@ if "%DEBUG%"=="1" (
   echo [wrapper] LANG=%LANG% LC_ALL=%LC_ALL%
 )
 
-rem 直接用登录交互 bash 启动。因为我们没有改变 %CD%，bash 启动后会以调用者目录为当前目录。
-"%MSYS2_ROOT%\usr\bin\bash.exe" --login -i %*
+rem === 无参数：进入交互式 bash ===
+if "%~1"=="" (
+    "%MSYS2_ROOT%\usr\bin\bash.exe" --login -i %*
+    exit /b %ERRORLEVEL%
+)
 
+rem === 有参数：执行 asciio 打开文件 ===
+set "APP=asciio"
+set "WIN_FILE=%~1"
+set "MSYS_FILE=%WIN_FILE:\=/%"
+
+if "%DEBUG%"=="1" (
+    echo [wrapper] WIN_FILE=%WIN_FILE%
+    echo [wrapper] MSYS_FILE=%MSYS_FILE%
+    echo [wrapper] APP=%APP%
+)
+
+rem 进入 MSYS2 登录环境，执行一次命令后退出
+"%MSYS2_ROOT%\usr\bin\bash.exe" --login -c "set -e; %APP% \"%MSYS_FILE%\""
 exit /b %ERRORLEVEL%
-
