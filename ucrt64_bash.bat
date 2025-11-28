@@ -49,5 +49,6 @@ if "%DEBUG%"=="1" (
 )
 
 rem Enter the MSYS2 login environment, execute the command once and exit
-"%MSYS2_ROOT%\usr\bin\bash.exe" --login -c "set -e; %APP% \"%MSYS_FILE%\""
+start "" "%MSYS2_ROOT%\usr\bin\bash.exe" --login -c "%APP% \"%MSYS_FILE%\""
 exit /b %ERRORLEVEL%
+
