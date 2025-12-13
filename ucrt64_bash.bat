@@ -1,4 +1,6 @@
 
+REM In some environments, the system may treat the current script as cmd execution instead of batch execution.
+REM So just delete all REM in this script on those systems
 REM Run the following command as an administrator in Windows cmd to register the default opening program for the asciio file suffix.
 REM assoc .asciio=asciio
 REM ftype asciio="D:\msys64\ucrt64_bash.bat" %1
