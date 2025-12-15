@@ -881,6 +881,7 @@ Plug 'qindapao/markdown-preview.nvim', { 'do': { -> mkdp#util#install() }, 'for'
 Plug 'qindapao/vim-markdown'                                                   " markdown 增强插件
 Plug 'qindapao/img-paste.vim', {'branch': 'for_zim'}                           " markdown 直接粘贴图片
 Plug 'qindapao/vim-markdown-toc'                                               " 自动设置标题
+Plug 'jszakmeister/markdown2ctags'
 
 " 这个也没啥用,先禁用掉
 " Plug 'fholgado/minibufexpl.vim'                                                " buffer窗口
@@ -1771,6 +1772,24 @@ let g:tagbar_autoshowtag = 0
 let g:airline#extensions#tagbar#enabled = 0
 " tagbar 配置 }
 
+" markdown2ctags 插件配置 {
+" Add support for markdown files in tagbar.
+let g:tagbar_type_markdown = {
+    \ 'ctagstype': 'markdown',
+    \ 'ctagsbin' : '~/.vim/plugged/markdown2ctags/markdown2ctags.py',
+    \ 'ctagsargs' : '-f - --sort=yes --sro=»',
+    \ 'kinds' : [
+        \ 's:sections',
+        \ 'i:images'
+    \ ],
+    \ 'sro' : '»',
+    \ 'kind2scope' : {
+        \ 's' : 'section',
+    \ },
+    \ 'sort': 0,
+\ }
+" markdown2ctags 插件配置 }
+
 " auto-pairs 配置 {
 au filetype markdown,html let b:AutoPairs = {'(':')', '[':']', '{':'}',"'":"'",'"':'"', '`':'`', '**':'**', '~~':'~~', '<':'>'}
 " :TODO: 具体使用的时候在来调整,或者把公司中的配置同步过来
@@ -2356,7 +2375,7 @@ nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchna
 nnoremap <silent> <leader>gbxfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>| " git:branch 删除一个远程分支
 
 " 查看所有的远程分支
-nnoremap <silent> <leader>gbr :execute 'Git remote prune origin' \| execute 'Git branch -r'<CR>| " git:branch 查看所有在远程分支
+nnoremap <silent> <leader>gbr :execute 'Git fetch --all --prune' \| execute 'Git branch -r'<CR>| " git:branch 查看所有在远程分支
 " 拉取一个远程分支并在本地跟踪它(复制远程分支名然后检出到本地然后建立两者的跟踪关系)
 " git fetch origin <远程分支名>:<本地分支名>
 " git branch --set-upstream-to=origin/<远程分支名> <本地分支名>
@@ -5096,6 +5115,8 @@ endfunction
 " vimwiki 插件配置 {
 " 获取 Vim 安装目录的上一级目录
 " 'qq_style.css'文件需要提前放到 workwiki_html 目录中
+" 这行一定要设置，不然会把markdown的文件格式也当成vimwiki来处理，造成tagbar插件无法正常打开markdown的目录大纲
+let g:vimwiki_ext2syntax = {'.wiki': 'default'}
 let s:vim_parent = fnamemodify($VIM, ':h')
 let g:vimwiki_list = [
       \ {'path': s:vim_parent . '/workwiki/', 'syntax': 'default', 'ext': '.wiki', 'css_name': 'qq_style.css', 'path_html': s:vim_parent . '/workwiki_html/'},
