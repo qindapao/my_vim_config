@@ -2398,6 +2398,7 @@ nnoremap <silent> <leader>gtxl :execute 'normal "xyiw' \| execute 'Git tag -d ' 
 vnoremap <silent> <leader>gtxl y:execute 'Git tag -d ' . shellescape(@0) \| bwipeout \| execute 'Git tag -l'<CR>| " git:tags 删除一个本地标签
 
 nnoremap <silent> <leader>gtp :execute 'normal "xyiw' \| execute 'Git push --set-upstream origin ' . getreg('x')<CR>| " git:tags 推送某个标签到远程服务器(x寄存器中存储了内容)
+vnoremap <silent> <leader>gtp "xy:Git push --set-upstream origin <C-R>x<CR>| " git:tags 推送某个标签到远程服务器(x寄存器中存储了内容)
 
 nnoremap <silent> <leader>gtr :execute 'Git fetch --prune --tags' \| terminal Git ls-remote --tags<CR>| " git:tags 列出所有的远程标签
 " git:tags 检出某个远程标签到本地
