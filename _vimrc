@@ -1853,6 +1853,12 @@ inoremap <silent><expr> <S-TAB> pumvisible() ? coc#pum#next(1) : "\<TAB>"| " 补
 let g:coc_data_home = '~/.vim/coc'
 " 这个参数可能并没有作用
 " let g:python3_host_prog = "D:\\python\\python.exe"
+
+" 跳到下一个诊断
+nmap ]g <Plug>(coc-diagnostic-next)
+" 跳到上一个诊断
+nmap [g <Plug>(coc-diagnostic-prev)
+
 " coc补全插件的一些配置 }
 
 " vim-gitgutter 插件配置 {

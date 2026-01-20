@@ -5,5 +5,27 @@
   "pylsp.plugins.pyls_mypy.enabled": true,
   "pylsp.plugins.pyls_mypy.live_mode": false,
   "suggest.detailField": "menu",
-  "suggest.snippetIndicator": "•"
+  "suggest.snippetIndicator": "•",
+  "languageserver": {
+    "perlnavigator": {
+      "command": "node",
+      "args": [
+        "C:/Users/admin/AppData/Roaming/npm/node_modules/perlnavigator-server/out/server.js",
+        "--stdio"
+      ],
+      "filetypes": ["perl"],
+      "settings": {
+        "perlnavigator": {
+          "perlPath": "D:/msys64/ucrt64/bin/perl.exe",
+          "includePaths": [
+            "$workspaceFolder/lib",
+            "D:/msys64/ucrt64/lib/perl5/site_perl",
+            "D:/msys64/ucrt64/lib/perl5/core_perl"
+          ],
+          "enableWarnings": true,
+          "perlcriticEnabled": true
+        }
+      }
+    }
+  }
 }
