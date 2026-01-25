@@ -10,7 +10,7 @@
     "perlnavigator": {
       "command": "node",
       "args": [
-        "C:/Users/admin/AppData/Roaming/npm/node_modules/perlnavigator-server/out/server.js",
+        "${env:APPDATA}/npm/node_modules/perlnavigator-server/out/server.js",
         "--stdio"
       ],
       "filetypes": ["perl"],
@@ -23,7 +23,8 @@
             "D:/msys64/ucrt64/lib/perl5/core_perl"
           ],
           "enableWarnings": true,
-          "perlcriticEnabled": true
+          "perlcriticEnabled": true,
+          "enableDiagnostics": true
         }
       }
     }

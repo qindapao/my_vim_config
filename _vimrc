@@ -2386,6 +2386,7 @@ nnoremap <silent> <leader>gbr :execute 'Git fetch --all --prune' \| execute 'Git
 " git fetch origin <远程分支名>:<本地分支名>
 " git branch --set-upstream-to=origin/<远程分支名> <本地分支名>
 nnoremap <silent> <leader>gbfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch origin ' . branchname . ':' . branchname \| execute 'Git branch --set-upstream-to=origin/' . branchname . ' ' . branchname<CR>| " git:branch 检出一个远程分支到本地
+nnoremap <silent> <leader>gbur :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch upstream ' . branchname . ':' . branchname \| execute 'Git branch --set-upstream-to=upstream/' . branchname . ' ' . branchname<CR>| " git:branch 检出一个远程分支(upstream)到本地
 
 " 拉取最新变更
 nnoremap <silent> <leader>gpl :execute 'Git pull'<CR>| " git: 拉取最新的变更
