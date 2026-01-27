@@ -596,28 +596,20 @@ set softtabstop=4
 set shiftwidth=4
 set expandtab                                                                    " 用空格替换TAB
 
-" perl格式的文件的特殊设置 {
-autocmd FileType perl call s:CustomPerlIndent()
-
-function! s:CustomPerlIndent()
-    " 禁用 Vim 的 Perl 缩进脚本（只对 Perl）
-    setlocal indentexpr=
-    " setlocal indentkeys=
-    setlocal nosmartindent nocindent noautoindent
-
-    " 设置 TAB 为 4 个空格宽度
-    setlocal tabstop=4
-    setlocal shiftwidth=4
-    setlocal softtabstop=4
-    setlocal noexpandtab
-endfunction
-" }
-
 " 设置星号不要自动跳转,只高亮
 nnoremap <silent> * :let @/= '\<' . expand('<cword>') . '\>' <bar> set hls <cr>| " 搜索: 搜索并高亮当前单词
 " :TODO: 这里使用了默认的寄存器，如果后续有干扰，需要保持默认寄存器干净，可能需要修改这里
 xnoremap <silent> * y:let @/='\V'.escape(@", '/\')<CR>:let old_pos = getpos(".")<CR>:set hls<CR>:call setpos('.', old_pos)<CR>| " 搜索: 可视模式搜索并高亮当前单词
 
+" show tab -------------------------------------------------------------------
+set list
+" Override theme settings
+hi clear SpecialKey
+hi SpecialKey ctermfg=245 ctermbg=NONE guifg=#999999 guibg=NONE
+
+set listchars=tab:○◦
+autocmd FileType markdown setlocal tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab
+autocmd FileType perl setlocal indentexpr= nosmartindent nocindent noautoindent tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab
 
 " 星号切换打开和关闭高亮(暂时不使用)
 " nnoremap <silent> * :if &hlsearch \| let @/= '\<' . expand('<cword>') . '\>' \| set nohls \| else \| let @/= '\<' . expand('<cword>') . '\>' \| set hls \| endif <cr>
