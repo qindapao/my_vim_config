@@ -5168,3 +5168,86 @@ endif
 " 如果是下面这个那么就是无法区分的版本
 " autocmd GUIEnter * call test_mswin_event('set_keycode_trans_strategy', {'strategy': 'classic'})
 
+
+" ================================
+"  获取可视模式选中的文本
+" ================================
+" 获取可视模式选中的文本（支持单行/多行精确列）
+function! s:get_visual_selection()
+    let [lnum1, col1] = getpos("'<")[1:2]
+    let [lnum2, col2] = getpos("'>")[1:2]
+
+    " Single row selection: intercept directly on this row by column
+    if lnum1 == lnum2
+        let line = getline(lnum1)
+        return line[col1 - 1 : col2 - 2]
+    endif
+
+    " Multi-line selection: first take the entire paragraph,
+    " then trim the beginning and end
+    let lines = getline(lnum1, lnum2)
+    if empty(lines)
+        return ''
+    endif
+
+    " Crop first and last row
+    let lines[0]  = lines[0][col1 - 1 :]
+    let lines[-1] = lines[-1][: col2 - 2]
+
+    return join(lines, "\n")
+endfunction
+
+" -----------------------------快速打开光标下的文件------------------ {
+function! s:is_absolute_path(path)
+    " Unix absolute path: /foo/bar
+    if a:path =~? '^/'
+        return 1
+    endif
+
+    " Windows UNC path: \\server\share
+    if a:path =~? '^\\\\'
+        return 1
+    endif
+
+    " Windows drive letter: C:\foo or C:/foo
+    if a:path =~? '^[A-Za-z]:[\\/]'
+        return 1
+    endif
+
+    return 0
+endfunction
+
+" ================================
+"  Open the selected path（edit/split/vsplit/tab）
+" ================================
+function! QqOpenSelectedPath(cmd)
+    let path = s:get_visual_selection()
+    let path = trim(path)
+
+    if empty(path)
+        echo "No path selected"
+        return
+    endif
+
+    " If not an absolute path, based on the directory of the current buffer
+    if !s:is_absolute_path(path)
+        let path = GetCurrentPath() . '/' . path
+    endif
+
+    " Normalize paths using fnamemodify (cross-platform)
+    let path = fnamemodify(path, ':p')
+
+    if filereadable(path) || isdirectory(path)
+        execute a:cmd . ' ' . fnameescape(path)
+    else
+        echo "Not a file or directory: " . path
+    endif
+endfunction
+
+xnoremap <leader>e :<C-u>call QqOpenSelectedPath('edit')<CR>
+xnoremap <leader>t :<C-u>call QqOpenSelectedPath('tabedit')<CR>
+xnoremap <leader>s :<C-u>call QqOpenSelectedPath('split')<CR>
+xnoremap <leader>v :<C-u>call QqOpenSelectedPath('vsplit')<CR>
+
+" -----------------------------快速打开光标下的文件------------------ }
+
