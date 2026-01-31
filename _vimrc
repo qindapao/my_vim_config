@@ -965,6 +965,21 @@ call plug#end()
 " 插件 }
 
 " 插件配置 {
+
+" lightline {
+" 强制显示状态栏
+set laststatus=2
+let g:lightline = {
+    \ 'active': {
+    \   'left': [ [ 'mode', 'paste' ],
+    \             [ 'gitbranch', 'readonly', 'filename', 'modified' ] ]
+    \ },
+    \ 'component_function': {
+    \   'gitbranch': 'FugitiveHead'
+    \ },
+    \ }
+" lightline }
+
 " vim-expand-region {
 " + " 辅助:vim-expand-region 普通模式下扩大选区
 " _ " 辅助:vim-expand-region 普通模式下缩小选区
