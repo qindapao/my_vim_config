@@ -1,21 +1,21 @@
 "
 " VIM使用最大原则(只要功能够用就不要折腾,不要轻易更新.时间要花在对的事情上)
-"       o                                  
-"       o                ooooooooo         
-"       o      ooooo     o       o         
-"      oooooo  o   o     o       o         
-"      o  o    o   o     o       o         
-"     o   o    o   o     o       o         
-"         o    o   o     ooooooooo         
-"         o    o   o         o             
-"     oooooooo o   o         o             
-"         o    o   o     o   o             
-"        o o   o   o     o   oooooo        
-"        o o   o   o     o   o             
-"       o   o  ooooo    o o  o             
-"       o   o  o   o    o  o o             
-"      o    o          o    ooooooooo      
-"     o               o                    
+"       o
+"       o                ooooooooo
+"       o      ooooo     o       o
+"      oooooo  o   o     o       o
+"      o  o    o   o     o       o
+"     o   o    o   o     o       o
+"         o    o   o     ooooooooo
+"         o    o   o         o
+"     oooooooo o   o         o
+"         o    o   o     o   o
+"        o o   o   o     o   oooooo
+"        o o   o   o     o   o
+"       o   o  ooooo    o o  o
+"       o   o  o   o    o  o o
+"      o    o          o    ooooooooo
+"     o               o
 " :TODO: 文件中的替换操作或者别的需要传入参数的操作可能因为转义字符出错,暂时没处理,如果遇到问题可以在这方面排查
 " 按键组
 "
@@ -607,7 +607,8 @@ set list
 hi clear SpecialKey
 hi SpecialKey ctermfg=245 ctermbg=NONE guifg=#999999 guibg=NONE
 
-set listchars=tab:○◦
+set listchars=tab:○◦,trail:▫
+
 autocmd FileType markdown setlocal tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab
 autocmd FileType perl setlocal indentexpr= nosmartindent nocindent noautoindent tabstop=8 shiftwidth=8 softtabstop=8 noexpandtab
 
@@ -695,7 +696,8 @@ cnoremap <c-k> <up>| " 命令: 命令行历史记录上翻页
 
 nnoremap <leader>lv :lv /<c-r>=expand("<cword>")<cr>/%<cr>:lw<cr>| " 搜索: 在location window(本地列表)列出搜索结果
 
-nnoremap <leader><leader><space> :%s/\s\+$//e<CR>| " 编辑: 移除文件中所有行尾的空白字符
+nnoremap <leader><leader><space> :%s/\s\+$//e<CR>| " 编辑: 移除文件中所有行尾的空白(全文)
+xnoremap <leader><leader><space> :s/\s\+$//e<CR> | " 编辑: 移除选区中所有行尾空白(可视)
 iab xtime <c-r>=strftime("%Y-%m-%d %H:%M:%S")<cr>| " 编辑: 在插入模式下快速插入当前日期(需要按两个TAB键触发)
 
 " nnoremap <silent> <leader>exp :silent !explorer %:p:h<CR><CR>| " 文件: 外部文件浏览器中打开当前文件所在目录
@@ -2286,11 +2288,11 @@ let g:ctrlsf_default_view_mode = 'compact'
 " M 切换回紧凑模式的预览(切换回去比较卡，建议不要)
 " :help ctrlsf-options
 let g:ctrlsf_mapping = {
-    \ "openb": { 'key': "d" },
+    \ "openb": { 'key': "b" },
     \ "popen": { 'key': "s" },
-    \ "pquit": { 'key': "a" },
+    \ "pquit": { 'key': "q" },
     \ "stop":  { 'key': "x" },
-    \ "vsplit":  { 'key': "v" },
+    \ "vsplit":  { 'key': "w" },
     \ "next": "n",
     \ "prev": "N",
     \ }
