@@ -63,7 +63,8 @@ New-SymbolicLink -Name "slide.vim" -Target (Join-Path -Path $args[1] -ChildPath 
 New-SymbolicLink -Name "toolbar.vim" -Target (Join-Path -Path $args[1] -ChildPath "toolbar.vim")
 New-SymbolicLink -Name "zim.vim" -Target (Join-Path -Path $args[1] -ChildPath "zim.vim")
 New-SymbolicLink -Name "whichkey.vim" -Target (Join-Path -Path $args[1] -ChildPath "whichkey.vim")
-New-SymbolicLink -Name "post.vim" -Target (Join-Path -Path $args[1] -ChildPath "post.vim")
+New-SymbolicLink -Name "whichkey.vim" -Target (Join-Path -Path $args[1] -ChildPath "whichkey.vim")
+New-SymbolicLink -Name "ai.vim" -Target (Join-Path -Path $args[1] -ChildPath "ai.vim")
 
 Get-ChildItem -Attributes ReparsePoint
 Pop-Location # 回到原来的目录

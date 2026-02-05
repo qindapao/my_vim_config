@@ -108,6 +108,7 @@ Plug 'qindapao/vim-expand-region'                                              "
 Plug 'qindapao/vimspector'                                                     " 调试插件
 " Plug 'github/copilot.vim'                                                    " 智能补全,只是尝试下功能
 Plug 'qindapao/winresizer'                                                     " 调整窗口
+Plug 'madox2/vim-ai'                                                           " AI辅助编程
 
 
 

@@ -24,9 +24,9 @@ source $VIMRUNTIME/vimrc_example.vim
 " Remap a few keys for Windows behavior
 source $VIMRUNTIME/mswin.vim
 
-let s:vimrc_dir = fnamemodify($MYVIMRC, ':h')
+let g:vimrc_dir = fnamemodify($MYVIMRC, ':h')
 function! SourceVimrcLocal(file)
-    execute 'source ' . s:vimrc_dir . '/' . a:file
+    execute 'source ' . g:vimrc_dir . '/' . a:file
 endfunction
 
 " 注意: s: 脚本作用域的变量不会共享
@@ -65,5 +65,6 @@ call SourceVimrcLocal('slide.vim')
 call SourceVimrcLocal('toolbar.vim')
 call SourceVimrcLocal('zim.vim')
 call SourceVimrcLocal('whichkey.vim')
+call SourceVimrcLocal('ai.vim')
 call SourceVimrcLocal('post.vim')
 

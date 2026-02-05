@@ -3,6 +3,8 @@
 
 " ----------------------------------------------------------------------------
 
+" set shell=D:/msys64/usr/bin/bash.exe
+
 " vim-terminal-help 插件配置 {
 let g:terminal_height = 20
 tnoremap <Esc> <C-\><C-n>| " 终端: 进入到普通模式
