@@ -146,6 +146,8 @@ command! Gcf GitGutterQuickFixCurrentFile | copen       " git: quickfix列表打
 
 
 " vim-fugitive 插件按键绑定 {
+nnoremap <silent> <leader>gcc :Git commit --amend<cr>|                                                              " git: 追加一个提交
+
 nnoremap <silent> <leader>gda :Git difftool -y<cr>|                                                                 " git: diff 显示所有差异
 nnoremap <silent> <leader>gdc :execute 'Git! difftool ' . getreg('a') . ' ' . getreg('b') . ' --name-status'<CR>|   " git: diff 对比两个commit
 nnoremap <silent> <leader>gdb :execute 'Git! difftool ' . getreg('a') . ' --name-status'<CR>|                       " git: diff 对比两个分支或者两个commit(以当前的作为基准)
