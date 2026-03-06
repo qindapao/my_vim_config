@@ -124,7 +124,8 @@ Plug 'igungor/schellar'
 Plug 'Donearm/Laederon'
 Plug 'devsjc/vim-jb'
 
-Plug 'qindapao/vim-go'
+" coc-go是替代方案, 并且更加的快速智能
+" Plug 'qindapao/vim-go'
 Plug 'vim-perl/vim-perl'
 Plug 'qindapao/vimio'
 Plug 'qindapao/vim-which-key'
