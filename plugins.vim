@@ -130,6 +130,8 @@ Plug 'vim-perl/vim-perl'
 Plug 'qindapao/vimio'
 Plug 'qindapao/vim-which-key'
 
+Plug 'tbastos/vim-lua'
+
 " vim-go 插件的配置 {
 " 修改 GOPATH 目录(目前导致了一些问题先不改)
 " let g:go_bin_path = '~\.vim\go\bin' 

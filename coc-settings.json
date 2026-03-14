@@ -7,6 +7,11 @@
   "suggest.detailField": "menu",
   "suggest.snippetIndicator": "•",
   "languageserver": {
+    "lua": {
+      "command": "D:/lua_language_server/bin/lua-language-server.exe",
+      "args": ["-E", "D:/lua_language_server/main.lua"],
+      "filetypes": ["lua"]
+    },
     "perlnavigator": {
       "command": "node",
       "args": [
@@ -28,5 +33,12 @@
         }
       }
     }
-  }
+  },
+  "Lua.hint.enable": true,
+  "Lua.runtime.version": "Lua 5.4",
+  "Lua.workspace.checkThirdParty": false,
+  "Lua.workspace.library": [
+    "D:/msys64/ucrt64/share/lua/5.4",
+    "D:/msys64/ucrt64/lib/lua/5.4"
+  ]
 }
