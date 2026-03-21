@@ -44,6 +44,25 @@ nmap <silent> ga <Plug>(coc-codeaction)
 " ]g 快速跳到下一个诊断
 " [g 快速跳到前一个诊断
 
+" 显示当前文件的符号列表（找函数、找 Table 定义极快）
+nnoremap <silent><nowait> <space>o  :<C-u>CocList outline<cr>
+
+" 快捷键冲突
+" " 签名帮助（当你写函数参数写到一半忘了顺序时，强制弹出提示）
+" inoremap <silent><expr> <C-h> coc#refresh()
+
+" 全局符号搜索
+nnoremap <silent><nowait> <space>sf :<C-u>CocList -I symbols<cr>
+
+" 全局诊断列表
+nnoremap <silent><nowait> <space>ax :<C-u>CocList diagnostics<cr>
+
+" 全局诊断列表(窗口不关闭)
+nnoremap <silent><nowait> <space>aX :<C-u>:CocDiagnostics<cr>
+
+" ]g 快速跳到下一个诊断
+" [g 快速跳到前一个诊断
+
 " ----------------------------------------------------------------------------
 
 

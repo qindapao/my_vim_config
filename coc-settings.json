@@ -1,44 +1,59 @@
 {
-  "suggest.noselect": true,
-  "python.jediEnabled": false,
-  "python.languageServer": "pylsp",
-  "pylsp.plugins.pyls_mypy.enabled": true,
-  "pylsp.plugins.pyls_mypy.live_mode": false,
-  "suggest.detailField": "menu",
-  "suggest.snippetIndicator": "•",
-  "languageserver": {
-    "lua": {
-      "command": "D:/lua_language_server/bin/lua-language-server.exe",
-      "args": ["-E", "D:/lua_language_server/main.lua"],
-      "filetypes": ["lua"]
-    },
-    "perlnavigator": {
-      "command": "node",
-      "args": [
-        "${env:APPDATA}/npm/node_modules/perlnavigator-server/out/server.js",
-        "--stdio"
-      ],
-      "filetypes": ["perl"],
-      "settings": {
+    "suggest.noselect": true,
+    "python.jediEnabled": false,
+    "python.languageServer": "pylsp",
+    "pylsp.plugins.pyls_mypy.enabled": true,
+    "pylsp.plugins.pyls_mypy.live_mode": false,
+    "suggest.detailField": "menu",
+    "suggest.snippetIndicator": "•",
+    "languageserver": {
+        "lua": {
+            "command": "D:/lua_language_server/bin/lua-language-server.exe",
+            "args": ["D:/lua_language_server/main.lua"],
+            "filetypes": ["lua"],
+            "settings": {
+                "Lua": {
+                    "workspace": {
+                        "library" : [
+                            "D:/msys64/ucrt64/share/lua/5.4",
+                            "D:/msys64/ucrt64/lib/lua/5.4",
+                            "${3rd}/lfs/library",
+                            "${3rd}/Lpeg/library", 
+                            "${3rd}/luv/library"
+                        ],
+                        "checkThirdParty": false
+                    },
+                    "hint" : { "enable": false },
+                    "runtime": { "version": "Lua 5.4" },
+                    "hover": {
+                        "enable": true,
+                        "viewNumber": true,
+                        "expandAlias": true
+                    },
+                    "codeLens": { "enable": false }
+                }
+            }
+        },
         "perlnavigator": {
-          "perlPath": "D:/msys64/ucrt64/bin/perl.exe",
-          "includePaths": [
-            "$workspaceFolder/lib",
-            "D:/msys64/ucrt64/lib/perl5/site_perl",
-            "D:/msys64/ucrt64/lib/perl5/core_perl"
-          ],
-          "enableWarnings": true,
-          "perlcriticEnabled": true,
-          "enableDiagnostics": true
+            "command": "node",
+            "args": [
+                "${env:APPDATA}/npm/node_modules/perlnavigator-server/out/server.js",
+                "--stdio"
+            ],
+            "filetypes": ["perl"],
+            "settings": {
+                "perlnavigator": {
+                    "perlPath": "D:/msys64/ucrt64/bin/perl.exe",
+                    "includePaths": [
+                        "$workspaceFolder/lib",
+                        "D:/msys64/ucrt64/lib/perl5/site_perl",
+                        "D:/msys64/ucrt64/lib/perl5/core_perl"
+                    ],
+                    "enableWarnings": true,
+                    "perlcriticEnabled": true,
+                    "enableDiagnostics": true
+                }
+            }
         }
-      }
     }
-  },
-  "Lua.hint.enable": true,
-  "Lua.runtime.version": "Lua 5.4",
-  "Lua.workspace.checkThirdParty": false,
-  "Lua.workspace.library": [
-    "D:/msys64/ucrt64/share/lua/5.4",
-    "D:/msys64/ucrt64/lib/lua/5.4"
-  ]
 }

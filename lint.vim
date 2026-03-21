@@ -33,6 +33,7 @@ autocmd FileType * call s:ToggleALEByFiletype()
 " 设置格式化器
 let g:ale_fixers = {
 \   'sh': ['shfmt'],
+\   'lua': ['stylua'],
 \}
 " 定制错误和告警标签
 let g:ale_sign_error = '>>'
@@ -51,6 +52,31 @@ let g:ale_virtualtext_cursor = 0
 let g:ale_lint_on_save = 0
 " 不保存历史记录
 let g:ale_history_enabled = 0
+
+" --- StyLua  ---
+let g:ale_lua_stylua_options = '--indent-type Spaces'
+    \ . ' --indent-width 4'
+    \ . ' --column-width 100'
+    \ . ' --call-parentheses Always'
+    \ . ' --quote-style AutoPreferDouble'
+    \ . ' --preserve-block-newline-gaps Preserve'
+    \ . ' --line-endings Unix'
+    \ . ' --collapse-simple-statement Always'
+    \ . ' --no-editorconfig'
+
+" 这里的注释只是对上面的说明，VIM的跨行语句中不能写注释！
+" let g:ale_lua_stylua_options = '--indent-type Spaces'
+"     \ . ' --indent-width 4'
+"     \ . ' --column-width 100'                     " 行宽
+"     \ . ' --call-parentheses Always'              " 强制括号：这是对齐的基石
+"     \ . ' --quote-style AutoPreferDouble'         " 双引号优先
+"     \ . ' --preserve-block-newline-gaps Preserve' " 如果你手动在块前后留了空行，不许删
+"     \ . ' --line-endings Unix'                    " 强制 Unix 换行符
+"     \ . ' --collapse-simple-statement Always'     " 允许把 if ... then return end 挤在一行
+"     \ . ' --no-editorconfig'                      " 屏蔽掉所有隐藏的配置文件干扰
+
+" 手动格式化
+nnoremap <F9> :ALEFix<CR>
 
 
 
