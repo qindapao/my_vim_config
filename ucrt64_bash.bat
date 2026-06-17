@@ -11,6 +11,9 @@ set "MSYS2_ROOT=D:\msys64"
 set "DEBUG=0"    rem Set to 1 to output debugging information
 rem ============================================
 
+rem === 强行开启 Windows 当前主机的控制台虚拟终端颜色解析(VT100 兼容模式) ===
+reg add "HKCU\Console" /v "VirtualTerminalLevel" /t REG_DWORD /d 1 /f >nul 2>&1
+
 rem Preserves the current Windows working directory at the time of the call（%CD% not modified）
 rem Key environment variables (to be set before starting bash)
 set "MSYSTEM=UCRT64"
