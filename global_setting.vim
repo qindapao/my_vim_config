@@ -162,7 +162,10 @@ nnoremap <leader>ven :set ve=<cr>|              " global: : 取消设置虚拟�
 nnoremap <leader>cc0 :set conceallevel=0<cr>| " global: 设置conceallevel级别0
 nnoremap <leader>cc2 :set conceallevel=2<cr>| " global: 设置conceallevel级别2
 
-
+" ![](https://img.qindapao.com/opt/1panel/apps/openresty/openresty/www/sites/img.qindapao.com/index/20260629161904386.png)
+" 删除中间的路径变成
+" ![](https://img.qindapao.com/20260629161904386.png)
+nnoremap <Leader>x cib<C-R>=substitute(@", '\/opt\/1panel\/apps\/openresty\/openresty\/www\/sites\/img\.qindapao\.com\/index\/', '\/', '')<CR><Esc>
 
 
 " =====================File: global_setting }======================= 全局设置相关 ======================================
