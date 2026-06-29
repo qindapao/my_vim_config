@@ -145,8 +145,8 @@ autocmd BufNewFile,BufRead *.vim9 set filetype=vim
 
 " ----------------------------- 全局映射 --------------------------------------
 
-nnoremap gR R                                   " global: gR 和 R 互换
-nnoremap R gR                                   " global: gR 和 R 互换
+nnoremap gR R|                                  " global: gR 和 R 互换
+nnoremap R gR|                                  " global: gR 和 R 互换
 nnoremap <silent> <leader>scc :set cursorcolumn<cr>
                                                 " global: 高亮当前列
 nnoremap <silent> <leader>scn :set nocursorcolumn<cr>
