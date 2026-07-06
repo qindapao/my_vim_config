@@ -55,7 +55,7 @@ set ruler                                   " 开启 标尺
 set colorcolumn=81,121                      " 设置 列边界线
 set nu                                      " 打开当前行号显示
 set rnu                                     " 打开相对行号
-set nowrap                                  " 默认不要 wrap
+set wrap                                    " 默认要 wrap, 方便文档编写
 autocmd filetype markdown set wrap
                                             " 如果是markdown文件设置 wrap
 au! vimrcEx filetype text                   " txt文本不允许vim自动换行
@@ -147,6 +147,13 @@ autocmd BufNewFile,BufRead *.vim9 set filetype=vim
 
 nnoremap gR R|                                  " global: gR 和 R 互换
 nnoremap R gR|                                  " global: gR 和 R 互换
+
+" 智能判断：如果没有输入计数（count），则按视觉行移动；如果输入了数字（如 10j），则按物理行移动
+nnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
+nnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
+vnoremap <expr> j (v:count == 0 ? 'gj' : 'j')
+vnoremap <expr> k (v:count == 0 ? 'gk' : 'k')
+
 nnoremap <silent> <leader>scc :set cursorcolumn<cr>
                                                 " global: 高亮当前列
 nnoremap <silent> <leader>scn :set nocursorcolumn<cr>
