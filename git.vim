@@ -165,7 +165,7 @@ nnoremap <silent> <leader>gbxfl :execute 'normal "xyiw' \| execute 'Git branch -
 vnoremap <silent> <leader>gbxfl y:execute 'Git branch -D ' . shellescape(@0) \| bwipeout \| execute 'Git branch'<CR>|                       " git: branch 删除一个本地分支
 
 nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>|    " git: branch 删除一个远程分支
-nnoremap <silent> <leader>gbxfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>|   " git: branch 删除一个远程分支
+vnoremap <silent> <leader>gbxr y:execute 'Git push origin -d ' . shellescape(trim(@0))<CR>|  " branch 删除一个本地分支(可视模式)
 
 nnoremap <silent> <leader>gbr :execute 'Git fetch --all --prune' \| execute 'Git branch -r'<CR>|                    " git: branch 查看所有在远程分支
 " 拉取一个远程分支并在本地跟踪它(复制远程分支名然后检出到本地然后建立两者的跟踪关系)
@@ -173,6 +173,8 @@ nnoremap <silent> <leader>gbr :execute 'Git fetch --all --prune' \| execute 'Git
 " git branch --set-upstream-to=origin/<远程分支名> <本地分支名>
 nnoremap <silent> <leader>gbfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch origin ' . branchname . ':' . branchname \| execute 'Git branch --set-upstream-to=origin/' . branchname . ' ' . branchname<CR>
                                                                                                                     " git: branch 检出一个远程分支到本地
+vnoremap <silent> <leader>gbfr y:let b_name=shellescape(trim(@0)) \| execute 'Git fetch origin ' . b_name . ':' . b_name \| execute 'Git branch --set-upstream-to=origin/' . b_name . ' ' . b_name<CR>
+                                                                                                                    " git: branch 可视模式检出一个远程分支到本地
 nnoremap <silent> <leader>gbur :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch upstream ' . branchname . ':' . branchname \| execute 'Git branch --set-upstream-to=upstream/' . branchname . ' ' . branchname<CR>
                                                                                                                     " git: branch 检出一个远程分支(upstream)到本地
 
