@@ -166,6 +166,8 @@ vnoremap <silent> <leader>gbxfl y:execute 'Git branch -D ' . shellescape(@0) \| 
 
 nnoremap <silent> <leader>gbxr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -d ' . branchname<CR>|    " git: branch 删除一个远程分支
 nnoremap <silent> <leader>gbxfr :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git push origin -D ' . branchname<CR>|   " git: branch 删除一个远程分支
+vnoremap <silent> <leader>gbxr y:execute 'Git push origin -d ' . shellescape(trim(@0))<CR>|  " 可视模式：删除远程分支（普通 -d）
+vnoremap <silent> <leader>gbxfr y:execute 'Git push origin -D ' . shellescape(trim(@0))<CR>| " 可视模式：强行删除远程分支（强制 -D）
 
 nnoremap <silent> <leader>gbr :execute 'Git fetch --all --prune' \| execute 'Git branch -r'<CR>|                    " git: branch 查看所有在远程分支
 " 拉取一个远程分支并在本地跟踪它(复制远程分支名然后检出到本地然后建立两者的跟踪关系)
