@@ -39,16 +39,6 @@ let g:gitgutter_enabled = 0                             " 默认不启用 gitgut
 
 " ----------------------------------------------------------------------------
 
-" git:tags 检出某个远程标签到本地
-function! GitCheckoutTag()
-    let tagline = expand("<cfile>")
-    let tagname = matchstr(tagline, '[^/]*$')
-    execute 'Git fetch origin tag ' . tagname
-    execute 'Git checkout tags/' . tagname
-endfunction
-
-" ----------------------------------------------------------------------------
-
 function! GitExtractCommitsFromVisualRange()
     " 获取选区的起止行号
     let start = getpos("'<")[1]
@@ -106,31 +96,63 @@ function! GitDiffQuickfixNextEntryWithA()
     execute "Gvdiffsplit " . getreg('a')
 endfunction
 
+" ----------------------------------------------------------------------------
+" 核心智能提取函数：通吃 git log 和 git ls-remote 格式
+function! s:GetTagFromCurrentLine()
+    let l:line = getline('.')
+    let l:tag = ''
+
+    if l:line =~ 'tag: '
+        let l:tag = matchstr(l:line, 'tag:\s*\zs[^,)]*')
+    elseif l:line =~ 'refs/tags/'
+        let l:tag = matchstr(l:line, 'refs/tags/\zs[^[:space:]^{}]*')
+    else
+        " 兜底方案
+        let l:tag = matchstr(expand("<cfile>"), '[^/]*$')
+        let l:tag = substitute(l:tag, '\^{}$', '', '')
+    endif
+    return trim(l:tag)
+endfunction
 
 " ----------------------------------------------------------------------------
-
-" :TODO: 待验证
+" 安全删除远程 Tag 并刷新
 function! GitDeleteRemoteTagAndRefresh()
-    let l:tag = CommonGetLineContentLast()
-    " 1 表示选择的是 Yes 2 表示选择的 No
+    let l:tag = s:GetTagFromCurrentLine()
+
+    " 安全拦截
+    if empty(l:tag)
+        echo "未能在当前行识别出有效的 Tag 名字"
+        return
+    endif
+
+    " 安全确认弹窗
     if confirm("删除远程标签 '" . l:tag . "' ?", "&Yes\n&No") != 1
         return
     endif
-    execute 'Git push origin :' . l:tag
+    
+    " 执行删除（修正了 --delete 的语法）
+    execute 'Git push origin --delete ' . l:tag
     execute 'Git fetch --prune --tags'
     execute 'terminal Git ls-remote --tags'
 endfunction
 
 " ----------------------------------------------------------------------------
+" 智能检出远程 Tag 到本地
+function! GitCheckoutTag()
+    let l:tagname = s:GetTagFromCurrentLine()
 
-function! GitDeleteRemoteTag()
-    let tagline = expand("<cfile>")
-    let tagname = matchstr(tagline, '[^/]*$')
-    execute 'Git push origin --delete tag ' . tagname
+    if empty(l:tagname)
+        echo "未能在当前行识别出有效的 Tag 名字"
+        return
+    endif
+
+    " 1. 精准拉取远程特定 Tag 刷新到本地
+    execute 'Git fetch origin refs/tags/' . l:tagname . ':refs/tags/' . l:tagname
+    " 2. 切换到该 Tag (Git 会进入 detached HEAD 状态，这是正常的)
+    execute 'Git checkout ' . l:tagname
 endfunction
 
 " ----------------------------------------------------------------------------
-
 
 " 切换它的打开和关闭
 nnoremap <silent> <leader>ggo :GitGutterEnable<CR>      " git: 打开 gitgutter
@@ -177,11 +199,15 @@ vnoremap <silent> <leader>gbfr y:let b_name=shellescape(trim(@0)) \| execute 'Gi
                                                                                                                     " git: branch 可视模式检出一个远程分支到本地
 nnoremap <silent> <leader>gbur :let branchline=expand("<cfile>") \| let branchname=matchstr(branchline, '[^/]*$') \| execute 'Git fetch upstream ' . branchname . ':' . branchname \| execute 'Git branch --set-upstream-to=upstream/' . branchname . ' ' . branchname<CR>
                                                                                                                     " git: branch 检出一个远程分支(upstream)到本地
+vnoremap <silent> <leader>gbur y:let b_name=shellescape(trim(@0)) \| execute 'Git fetch upstream ' . b_name . ':' . b_name \| execute 'Git branch --set-upstream-to=upstream/' . b_name . ' ' . b_name<CR>
+                                                                                                                    " git: branch 可视模式检出一个 upstream 分支到本地
 
 nnoremap <silent> <leader>gpl :execute 'Git pull'<CR>|                                                              " git: 拉取最新的变更
 " 推送当前更改(当前本地分支)
 nnoremap <silent> <leader>gps :let branchname=system('git rev-parse --abbrev-ref HEAD') \| execute 'Git push --set-upstream origin ' . trim(branchname)<CR>
                                                                                                                     " git: 推送当前本地分支到远端
+nnoremap <silent> <leader>gpfs :let branchname=system('git rev-parse --abbrev-ref HEAD') \| execute 'Git push --set-upstream origin ' . trim(branchname) . ' --force-with-lease'<CR>
+                                                                                                                    " git: 安全强制推送当前本地分支到远端
 
 " 查看当前文件的所有提交历史
 nnoremap <silent> <leader>gog :0Gclog<cr> |                                                                         " git: 查看当前文件相关的所有提交历史记录
@@ -200,8 +226,7 @@ nnoremap <silent> <leader>gtp :execute 'normal "xyiw' \| execute 'Git push --set
 vnoremap <silent> <leader>gtp "xy:Git push --set-upstream origin <C-R>x<CR>|                                        " git: tags 推送某个标签到远程服务器(x寄存器中存储了内容)
 
 nnoremap <silent> <leader>gtr :execute 'Git fetch --prune --tags' \| terminal Git ls-remote --tags<CR>|             " git: tags 列出所有的远程标签
-nnoremap <silent> <leader>gtxr :call GitDeleteRemoteTagAndRefresh()<CR>|                                            " git: tags 删除某一个远程标签(待验证)
-nnoremap <silent> <leader>gtxr :call GitDeleteRemoteTag()<CR>                                                       " git: tags 删除某一个远程标签
+nnoremap <silent> <leader>gtxr :call GitDeleteRemoteTagAndRefresh()<CR>|                                            " git: tags 删除某一个远程标签
 nnoremap <silent> <leader>gtc :call GitCheckoutTag()<CR>|                                                           " git: tags 检出某个远程标签到本地
 
 xnoremap <leader>ec :<C-u>call GitExtractCommitsFromVisualRange()<CR>|                                              " git: Flog 界面截取选区内的起始 commit(最终对比的时候是左旧右新)
