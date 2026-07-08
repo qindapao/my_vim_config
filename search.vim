@@ -314,8 +314,6 @@ let g:ctrlsf_fold_result = 0
 " 让每个窗口有独立面板
 let g:ctrlsf_position = 'left_local'
 let g:ctrlsf_compact_position = 'bottom_inside'
-" 切换窗口的打开和关闭
-nnoremap <leader>cfit :CtrlSFToggle<CR>
 " ctrlsf 插件配置 }
 
 

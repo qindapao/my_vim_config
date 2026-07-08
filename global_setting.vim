@@ -56,7 +56,7 @@ set colorcolumn=81,121                      " 设置 列边界线
 set nu                                      " 打开当前行号显示
 set rnu                                     " 打开相对行号
 set wrap                                    " 默认要 wrap, 方便文档编写
-autocmd filetype markdown set wrap
+" autocmd filetype markdown set wrap
                                             " 如果是markdown文件设置 wrap
 au! vimrcEx filetype text                   " txt文本不允许vim自动换行
 set wildmenu                                " 打开命令行自动补全
