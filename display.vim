@@ -296,7 +296,7 @@ autocmd ColorScheme * call DisplayRemoveCommentItalic()
 " :TODO: 不知道从哪个配置开始NERDTree的显示不正常,需要先关闭语法高亮然后再打开语法高亮才能正常(默认会显示多余的^G字符,有空再定位吧,可能是哪个设置导致的)
 " 定位方法是回退当前配置的git前面的提交,一直回退到不出问题的vimrc的版本
 nnoremap <silent> <leader>sof :syntax off<cr>|          " display: 取消语法高亮(提高效率)
-nnoremap <silent> <leader>son :syntax on<cr>|           " display: 取消语法高亮(增加可读性)
+nnoremap <silent> <leader>son :syntax on<cr>|           " display: 打开语法高亮(增加可读性)
 
 " ----------------------------------------------------------------------------
 
