@@ -105,7 +105,7 @@ function! TranslateTransCmdSend(isBrief, language)
 
     let l:ascii_quote = CommonBashANSIQuote(merged)
 
-    let cmd = 'trans :' . a:language
+    let cmd = 'gawk -f /usr/bin/trans.awk - -no-ansi -4 :' . a:language
     let cmd .= (a:isBrief ? " --brief " : " ") . l:ascii_quote . " 2>/dev/null"
 
     let output = CommonHiddenTermGetOutput(cmd)
