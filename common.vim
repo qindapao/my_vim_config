@@ -236,6 +236,7 @@ endfunction
 " ----------------------------------------------------------------------------
 " 发送一个命令到 隐藏终端 并且获取命令执行结果
 function! CommonHiddenTermGetOutput(cmd)
+    " let start_time = reltime()
     let l:old_shell = &shell
     let l:old_shellcmdflag = &shellcmdflag
 
@@ -250,25 +251,38 @@ function! CommonHiddenTermGetOutput(cmd)
             \ 'LANG': 'zh_CN.UTF-8'
             \ }
 
+        " let start_init = reltime()
+
         " 直接将 cmd 作为 bash -c 的参数传入，执行完自动 exit
         let buf = term_start([&shell, '--login', '-i', '-c', a:cmd], {
                     \ 'hidden': 1,
                     \ 'env': env})
 
+        " let end_init = reltimestr(reltime(start_init))
+        " let start_wait = reltime()
+
         " 等待进程结束（超时时间设大一些，防止长命令超时）
         let timeout = 0
-        while term_getstatus(buf) =~ 'running' && timeout < 500
-            sleep 10m
+        while term_getstatus(buf) =~ 'running' && timeout < 2000
+            sleep 5m
             let timeout += 1
         endwhile
 
         sleep 50m
+
+        " let end_wait = reltimestr(reltime(start_wait))
         " redraw
 
         " 获取 Buffer 的真正总行数（包含历史滚屏内容）
         let output = getbufline(buf, 1, '$')
 
         execute 'bwipeout! ' . buf
+
+        " let end_func = reltimestr(reltime(start_time))
+
+        " echom "[Timer] init=" . end_init 
+        "         \ . " wait=" . end_wait
+        "         \ . " total=" . end_func
 
         return output
     finally
