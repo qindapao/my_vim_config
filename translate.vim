@@ -87,6 +87,83 @@ function! TranslatePasteTerminalToBuffer(isBrief, selection_mode)
 endfunction
 
 
+function! TranslateTransCmdSend(isBrief, language)
+    " let l:view = winsaveview()
+
+    let source_text = CommonGetVisualSelection()
+     " 按行拆分
+    let lines = split(source_text, "\n")
+
+    " 根据语言合并句子(目标和源是反的)
+    if a:language ==# 'en'
+        " 中文：直接连接，不加空格
+        let merged = join(lines, '')
+    else
+        " 英文：连接时加空格
+        let merged = join(lines, ' ')
+    endif
+
+    let l:ascii_quote = CommonBashANSIQuote(merged)
+
+    let cmd = 'trans :' . a:language
+    let cmd .= (a:isBrief ? " --brief " : " ") . l:ascii_quote . " 2>/dev/null"
+
+    let output = CommonHiddenTermGetOutput(cmd)
+    " 恢复上一次可视选框
+    normal! gv
+    " call winrestview(l:view)
+
+    return output
+endfunction
+
+function! TranslatePopupShow(isBrief, language)
+    let output = TranslateTransCmdSend(a:isBrief, a:language)
+
+    if empty(output)
+        echohl WarningMsg | echom "翻译结果为空" | echohl None
+        return
+    endif
+
+    " 获取当前 Vim 窗口尺寸，动态计算合理的弹窗上限
+    let max_w = float2nr(&columns * 0.6)  " 宽度最多占屏幕 60%
+    let max_h = float2nr(&lines * 0.4)    " 高度最多占屏幕 40%
+
+
+    " 智能自适应弹窗配置
+    call popup_create(output, {
+        \ 'line': 'cursor+1',
+        \ 'col': 'cursor+2',
+        \ 'pos': 'topleft',
+        \ 'flip': 1,
+        \ 'moved': 'any',
+        \ 'maxwidth': max_w,
+        \ 'maxheight': max_h,
+        \ 'padding': [0, 1, 0, 1],
+        \ 'border': [1, 1, 1, 1],
+        \ 'borderchars': ['─', '│', '─', '│', '┌', '┐', '┘', '└'],
+        \ 'highlight': 'Normal',
+        \ 'borderhighlight': ['TopColor', 'RightColor', 'BottomColor', 'LeftColor'],
+        \ 'wrap': 1
+        \ })
+endfunction
+
+function! TranslateReplace(isBrief, language)
+    let output = TranslateTransCmdSend(a:isBrief, a:language)
+
+    if empty(output)
+        echohl WarningMsg | echom "翻译结果为空" | echohl None
+        return
+    endif
+
+    let saved_reg = getreg('"')
+    let saved_regtype = getregtype('"')
+
+    call setreg('"', join(output, "\n"), g:TRANSLATE_SELECTION_MODE)
+    execute 'normal! ""p'
+
+    call setreg('"', saved_reg, saved_regtype)
+endfunction
+
 " 自动翻译相关的配置 {
 " 首先需要使用 alt+= 打开默认终端
 " 然后再进行下面的所有操作
@@ -95,21 +172,36 @@ endfunction
 " let $http_proxy = 'xx:8080'
 " let $https_proxy = 'yy:8080'
 
-" 简短的翻译(中->英)
-vnoremap <leader>te y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(1, 'en')<CR>
-" 完整的翻译(中->英)
-vnoremap <leader>tf y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(0, 'en')<CR>
+" " 简短的翻译(中->英)
+" vnoremap <leader>te y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(1, 'en')<CR>
+" " 完整的翻译(中->英)
+" vnoremap <leader>tf y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(0, 'en')<CR>
 
-" 简短的翻译(英->中)
-vnoremap <C-t> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(1, 'zh')<CR>
-" 完整的翻译(英->中)
-vnoremap <C-S-T> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(0, 'zh')<CR>
+" " 简短的翻译(英->中)
+" vnoremap <C-t> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(1, 'zh')<CR>
+" " 完整的翻译(英->中)
+" vnoremap <C-S-T> y:let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateToTerminal(0, 'zh')<CR>
 
-" 简单情况进行替换
-nnoremap <leader>p :call TranslatePasteTerminalToBuffer(1, g:TRANSLATE_SELECTION_MODE)<CR>
-" 复杂情况进行替换
-nnoremap <leader><S-P> :call TranslatePasteTerminalToBuffer(0, g:TRANSLATE_SELECTION_MODE)<CR>
+" " 简单情况进行替换
+" nnoremap <leader>p :call TranslatePasteTerminalToBuffer(1, g:TRANSLATE_SELECTION_MODE)<CR>
+" " 复杂情况进行替换
+" nnoremap <leader><S-P> :call TranslatePasteTerminalToBuffer(0, g:TRANSLATE_SELECTION_MODE)<CR>
 
+
+" 简短的翻译(中->英) Popup 显示
+vnoremap <silent> <leader>te :<C-u>call TranslatePopupShow(1, 'en')<CR>
+" 简短的翻译(英->中) Popup 显示
+vnoremap <silent> <leader>tc :<C-u>call TranslatePopupShow(1, 'zh')<CR>
+
+" 完整的翻译(中->英) Popup 显示
+vnoremap <silent> <leader>ty :<C-u>call TranslatePopupShow(0, 'en')<CR>
+" 完整的翻译(英->中) Popup 显示
+vnoremap <silent> <leader>tz :<C-u>call TranslatePopupShow(0, 'zh')<CR>
+
+" 简短替换(中->英)
+vnoremap <silent> <C-t> :<C-u>let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateReplace(1, 'en')<CR>
+" 简短替换(英->中)
+vnoremap <silent> <C-S-T> :<C-u>let g:TRANSLATE_SELECTION_MODE = visualmode() \| call TranslateReplace(1, 'zh')<CR>
 
 
 " 自动翻译相关的配置 }

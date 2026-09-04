@@ -234,6 +234,50 @@ function! CommonGetRelationPath()
 endfunction
 
 " ----------------------------------------------------------------------------
+" 发送一个命令到 隐藏终端 并且获取命令执行结果
+function! CommonHiddenTermGetOutput(cmd)
+    let l:old_shell = &shell
+    let l:old_shellcmdflag = &shellcmdflag
+
+    try
+        let &shell = 'D:\msys64\usr\bin\bash.exe'
+        let &shellcmdflag = '--login -i -c'
+
+        let env = {
+            \ 'MSYSTEM': 'MSYS',
+            \ 'CHERE_INVOKING': '1',
+            \ 'LC_ALL': 'zh_CN.UTF-8',
+            \ 'LANG': 'zh_CN.UTF-8'
+            \ }
+
+        " 直接将 cmd 作为 bash -c 的参数传入，执行完自动 exit
+        let buf = term_start([&shell, '--login', '-i', '-c', a:cmd], {
+                    \ 'hidden': 1,
+                    \ 'env': env})
+
+        " 等待进程结束（超时时间设大一些，防止长命令超时）
+        let timeout = 0
+        while term_getstatus(buf) =~ 'running' && timeout < 500
+            sleep 10m
+            let timeout += 1
+        endwhile
+
+        sleep 50m
+        " redraw
+
+        " 获取 Buffer 的真正总行数（包含历史滚屏内容）
+        let output = getbufline(buf, 1, '$')
+
+        execute 'bwipeout! ' . buf
+
+        return output
+    finally
+        let &shell = l:old_shell
+        let &shellcmdflag = l:old_shellcmdflag
+    endtry
+endfunction
+
+" ----------------------------------------------------------------------------
 
 " =====================File: common.vim }======================= 公共函数区域 ==
 
