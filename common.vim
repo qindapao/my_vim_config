@@ -233,9 +233,38 @@ function! CommonGetRelationPath()
     return l:relative_path
 endfunction
 
+
+
+" ----------------------------------------------------------------------------
+let s:common_has_wsl = -1  " -1: 未检测, 0: 无, 1: 有
+function! CommonHasWSL()
+    if s:common_has_wsl == -1
+        try
+            let result = system('wsl.exe --version 2>&1')
+            if v:shell_error == 0 && result !~ 'command not found'
+                let s:common_has_wsl = 1
+            else
+                let s:common_has_wsl = 0
+            endif
+        catch
+            let s:common_has_wsl = 0
+        endtry
+    endif
+    return s:common_has_wsl
+endfunction
+
 " ----------------------------------------------------------------------------
 " 发送一个命令到 隐藏终端 并且获取命令执行结果
+" msys2 bash 速度慢
 function! CommonHiddenTermGetOutput(cmd)
+    if s:common_has_wsl == -1
+        let s:common_has_wsl = CommonHasWSL()
+    endif
+
+    if s:common_has_wsl == 1
+        return CommonWslHiddenTermGetOutput(a:cmd)
+    endif
+
     " let start_time = reltime()
     let l:old_shell = &shell
     let l:old_shellcmdflag = &shellcmdflag
@@ -285,6 +314,75 @@ function! CommonHiddenTermGetOutput(cmd)
         "         \ . " total=" . end_func
 
         return output
+    finally
+        let &shell = l:old_shell
+        let &shellcmdflag = l:old_shellcmdflag
+    endtry
+endfunction
+
+
+" wsl bash 速度快
+" wsl 中也需要部署 trans.awk
+" wsl 中代理设置方式
+" vim ~/.bashrc
+"
+" default via 172.20.240.1 dev eth0 proto kernel
+"
+" win_ip=$(ip route | grep default | awk '{print $3}')
+" export http_proxy="http://$win_ip:7897"
+" export https_proxy="http://$win_ip:7897"
+let s:wsl_host_ip = ''
+function! CommonWslHiddenTermGetOutput(cmd)
+    let l:old_shell = &shell
+    let l:old_shellcmdflag = &shellcmdflag
+
+    try
+        if empty(s:wsl_host_ip)
+            let wsl_host_info = system('wsl.exe -- bash -c "ip route | grep default | awk ''{print $3}''"')
+            let s:wsl_host_ip = matchstr(wsl_host_info, '\d\+\.\d\+\.\d\+\.\d\+')
+        endif
+
+        " echom "wsl_host_ip: " . s:wsl_host_ip
+
+        " 使用 WSL 的 bash
+        let &shell = 'wsl.exe'
+        let &shellcmdflag = '-e bash -c'
+        let env = {}
+
+        let proxy_cmd = 'export http_proxy="http://' . s:wsl_host_ip . ':7897" && ' .
+                       \ 'export https_proxy="http://' . s:wsl_host_ip . ':7897" && ' .
+                       \ 'export LANG=en_US.UTF-8 && ' .
+                       \ a:cmd
+
+        " echom "proxy_cmd: " . proxy_cmd
+
+        " 启动隐藏终端
+        let buf = term_start([&shell, '-e', 'bash', '-c', proxy_cmd], {
+                    \ 'hidden': 1,
+                    \ 'env': env})
+
+
+        " 等待执行完成（WSL 执行很快，可以缩短超时）
+        let timeout = 0
+        while term_getstatus(buf) =~ 'running' && timeout < 1000
+            sleep 5m
+            let timeout += 1
+        endwhile
+
+        sleep 50m  " 减少等待时间
+
+        let output = getbufline(buf, 1, '$')
+        execute 'bwipeout! ' . buf
+
+        " 列表的第一项是干扰信息，我们不需要直接过滤掉
+        " 可能是WSL警告
+        return output[1:]
+        " echom CommonHiddenTermGetOutput('trans -4 :en 中国')
+        " echom CommonHiddenTermGetOutput('echo "hello world"')
+    catch
+        echo "Exception: " . v:exception
+        echo "Throwpoint: " . v:throwpoint
+        return ['Error: ' . v:exception]
     finally
         let &shell = l:old_shell
         let &shellcmdflag = l:old_shellcmdflag
