@@ -233,8 +233,6 @@ function! CommonGetRelationPath()
     return l:relative_path
 endfunction
 
-
-
 " ----------------------------------------------------------------------------
 let s:common_has_wsl = -1  " -1: 未检测, 0: 无, 1: 有
 function! CommonHasWSL()
@@ -320,6 +318,7 @@ function! CommonHiddenTermGetOutput(cmd)
     endtry
 endfunction
 
+" ----------------------------------------------------------------------------
 
 " wsl bash 速度快
 " wsl 中也需要部署 trans.awk
@@ -333,6 +332,7 @@ endfunction
 " export https_proxy="http://$win_ip:7897"
 let s:wsl_host_ip = ''
 function! CommonWslHiddenTermGetOutput(cmd)
+    " let start_time = reltime()
     let l:old_shell = &shell
     let l:old_shellcmdflag = &shellcmdflag
 
@@ -356,11 +356,14 @@ function! CommonWslHiddenTermGetOutput(cmd)
 
         " echom "proxy_cmd: " . proxy_cmd
 
+        " let start_init = reltime()
         " 启动隐藏终端
         let buf = term_start([&shell, '-e', 'bash', '-c', proxy_cmd], {
                     \ 'hidden': 1,
                     \ 'env': env})
 
+        " let end_init = reltimestr(reltime(start_init))
+        " let start_wait = reltime()
 
         " 等待执行完成（WSL 执行很快，可以缩短超时）
         let timeout = 0
@@ -371,8 +374,16 @@ function! CommonWslHiddenTermGetOutput(cmd)
 
         sleep 50m  " 减少等待时间
 
+        " let end_wait = reltimestr(reltime(start_wait))
+
         let output = getbufline(buf, 1, '$')
         execute 'bwipeout! ' . buf
+
+        " let end_func = reltimestr(reltime(start_time))
+
+        " echom "[Timer] init=" . end_init 
+        "         \ . " wait=" . end_wait
+        "         \ . " total=" . end_func
 
         " 列表的第一项是干扰信息，我们不需要直接过滤掉
         " 可能是WSL警告
