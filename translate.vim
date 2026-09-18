@@ -158,7 +158,8 @@ function! TranslateReplace(isBrief, language)
     let saved_reg = getreg('"')
     let saved_regtype = getregtype('"')
 
-    call setreg('"', join(output, "\n"), g:TRANSLATE_SELECTION_MODE)
+    " 默认一次就是翻译一个长行，所以不用换行符连接，直接连接起来即可
+    call setreg('"', join(output, ''), g:TRANSLATE_SELECTION_MODE)
     execute 'normal! ""p'
 
     call setreg('"', saved_reg, saved_regtype)
