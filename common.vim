@@ -385,9 +385,20 @@ function! CommonWslHiddenTermGetOutput(cmd)
         "         \ . " wait=" . end_wait
         "         \ . " total=" . end_func
 
-        " 列表的第一项是干扰信息，我们不需要直接过滤掉
-        " 可能是WSL警告
-        return output[1:]
+        " 过滤机制优化：
+        " 1. 过滤第一行可能的常态干扰信息 (output[0])
+        if len(output) > 0
+            let output = output[1:]
+        endif
+
+        " 2. 检查接下来的第一行（原本的 output[1]）是否包含 WSL 的 systemd 警告
+        let wsl_pattern = 'Failed to start the systemd user session for.*See journalctl for more details'
+        if len(output) > 0 && output[0] =~# wsl_pattern
+            let output = output[1:]
+        endif
+
+        return output
+
         " echom CommonHiddenTermGetOutput('trans -4 :en 中国')
         " echom CommonHiddenTermGetOutput('echo "hello world"')
     catch
