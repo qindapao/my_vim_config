@@ -1,5 +1,6 @@
 *.swp
 *.tags
+*.temp
 GPATH
 GRTAGS
 GTAGS
