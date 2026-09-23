@@ -59,6 +59,8 @@ function! DeleteAndReplaceZimMarkupCharsForBuffer() range
     let start_line = a:firstline
     let end_line = a:lastline
 
+    let links_backup = []  " 用于收集遇到的完整链接文本
+
     for line_num in range(start_line, end_line)
         let line_content = getline(line_num)
         " 不知道为什么 vim不支持正则表达式中使用+,所以这里用了[^'][^']*
@@ -71,10 +73,27 @@ function! DeleteAndReplaceZimMarkupCharsForBuffer() range
         " " 先不考虑链接的情况
         " " 替换两对中括号中间的连接和竖线
         " let line_content = substitute(line_content, "\\[\\[[^|]+|\\([^]]+\\)\\]\\]", "\\1", "g")
+
+        " 匹配并提取 [[链接目标|显示文本]]
+        " 把匹配到的原始链接放进 links_backup 列表
+        let mx = '\[\[\([^|\]]\+\)|\([^\]]\+\)\]\]'
+        let matched_full = matchstr(line_content, mx)
+        while matched_full != ''
+            call add(links_backup, matched_full)
+            " 替换为仅保留 | 后面的显示文本
+            let line_content = substitute(line_content, mx, '\2', '')
+            let matched_full = matchstr(line_content, mx)
+        endwhile
         
         " 将替换后的内容设置回当前行
         call setline(line_num, line_content)    
     endfor
+
+    " 如果存在链接，在选区末尾追加恢复区域
+    if !empty(links_backup)
+        let append_lines = ['链接恢复区域开始'] + links_backup + ['链接恢复区域结束']
+        call append(end_line, append_lines)
+    endif
 endfunction
 
 " ----------------------------------------------------------------------------
@@ -83,17 +102,72 @@ function! RecoverZimMarkupCharsForBuffer() range
     let start_line = a:firstline
     let end_line = a:lastline
 
+    " 1. 搜寻选区内的恢复区域
+    let backup_start_idx = -1
+    let backup_end_idx = -1
+    let links_map = []  " 保存备份区域中的原始链接
+
     for line_num in range(start_line, end_line)
         let line_content = getline(line_num)
-        let line_content = substitute(line_content, '▫\([^▫][^▫]*\)▫', " ''\\1'' ", "g")
-        let line_content = substitute(line_content, '◖\([^◖◗][^◖◗]*\)◗', ' __\1__ ', "g")
-        let line_content = substitute(line_content, '▪\([^▪][^▪]*\)▪', ' \*\*\1\*\* ', "g")
-        let line_content = substitute(line_content, '◤\([^◤◥][^◤◥]*\)◥', ' //\1// ', "g")
-        let line_content = substitute(line_content, '◢\([^◢◣][^◢◣]*\)◣', ' \~\~\1\~\~ ', "g")
-
-        " 将替换后的内容设置回当前行
-        call setline(line_num, line_content)    
+        if line_content =~# '^链接恢复区域开始$'
+            let backup_start_idx = line_num
+        elseif line_content =~# '^链接恢复区域结束$'
+            let backup_end_idx = line_num
+            break
+        elseif backup_start_idx != -1
+            " 收集恢复区中的完整链接
+            call add(links_map, line_content)
+        endif
     endfor
+
+    " 2. 如果存在恢复区域，按顺序还原链接
+    if backup_start_idx != -1 && backup_end_idx != -1
+        let text_end_line = backup_start_idx - 1
+        let link_pointer = 0
+
+        for line_num in range(start_line, text_end_line)
+            let line_content = getline(line_num)
+
+            " 基础 Markup 还原
+            let line_content = substitute(line_content, '▫\([^▫]\+\)▫', " ''\\1'' ", "g")
+            let line_content = substitute(line_content, '◖\([^◖◗]\+\)◗', ' __\1__ ', "g")
+            let line_content = substitute(line_content, '▪\([^▪]\+\)▪', ' \*\*\1\*\* ', "g")
+            let line_content = substitute(line_content, '◤\([^◤◥]\+\)◥', ' //\1// ', "g")
+            let line_content = substitute(line_content, '◢\([^◢◣]\+\)◣', ' \~\~\1\~\~ ', "g")
+
+            " 将上面纯文本依次匹配还原为原始链接
+            while link_pointer < len(links_map)
+                let raw_link = links_map[link_pointer]
+                " 提取链接里的显示文本（即 | 后面的部分）
+                let display_text = substitute(raw_link, '\[\[[^|\]]\+|\([^\]]\+\)\]\]', '\1', '')
+
+                " 如果当前行包含这个显示文本，将其替换回原始链接
+                if display_text != '' && line_content =~# escape(display_text, '[]\.*$^~')
+                    let line_content = substitute(line_content, escape(display_text, '[]\.*$^~'), escape(raw_link, '&\'), '')
+                    let link_pointer += 1
+                else
+                    " 当前行匹配不到下一个待还原文本，跳到下一行继续寻找
+                    break
+                endif
+            endwhile
+
+            call setline(line_num, line_content)
+        endfor
+
+        " 3. 清理/删除恢复区域行
+        execute backup_start_idx . ',' . backup_end_idx . 'delete _'
+    else
+        " 如果没有链接恢复区域，仅执行普通 Markup 还原
+        for line_num in range(start_line, end_line)
+            let line_content = getline(line_num)
+            let line_content = substitute(line_content, '▫\([^▫]\+\)▫', " ''\\1'' ", "g")
+            let line_content = substitute(line_content, '◖\([^◖◗]\+\)◗', ' __\1__ ', "g")
+            let line_content = substitute(line_content, '▪\([^▪]\+\)▪', ' \*\*\1\*\* ', "g")
+            let line_content = substitute(line_content, '◤\([^◤◥]\+\)◥', ' //\1// ', "g")
+            let line_content = substitute(line_content, '◢\([^◢◣]\+\)◣', ' \~\~\1\~\~ ', "g")
+            call setline(line_num, line_content)
+        endfor
+    endif
 endfunction
 
 " :TODO: 增加插入5种符号和链接的快捷键(可视插入,不影响当前列的物理位置排列)
