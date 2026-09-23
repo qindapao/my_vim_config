@@ -54,11 +54,12 @@ let g:zim_inner_links = {}
 
 " ----------------------------------------------------------------------------
 
-function! DeleteAndReplaceZimMarkupCharsForBuffer()
-    " 获取当前缓冲区的所有行数
-    let total_lines = line("$")
+function! DeleteAndReplaceZimMarkupCharsForBuffer() range
+    " 只要函数头用了 range，那么 a:firstline a:lastline 就是隐含传递进来的
+    let start_line = a:firstline
+    let end_line = a:lastline
 
-    for line_num in range(1, total_lines)
+    for line_num in range(start_line, end_line)
         let line_content = getline(line_num)
         " 不知道为什么 vim不支持正则表达式中使用+,所以这里用了[^'][^']*
         let line_content = substitute(line_content, " ''\\([^'][^']*\\)'' ", '▫\1▫', "g")
@@ -78,11 +79,11 @@ endfunction
 
 " ----------------------------------------------------------------------------
 
-function! RecoverZimMarkupCharsForBuffer()
-    " 获取当前缓冲区的所有行数
-    let total_lines = line("$")
+function! RecoverZimMarkupCharsForBuffer() range
+    let start_line = a:firstline
+    let end_line = a:lastline
 
-    for line_num in range(1, total_lines)
+    for line_num in range(start_line, end_line)
         let line_content = getline(line_num)
         let line_content = substitute(line_content, '▫\([^▫][^▫]*\)▫', " ''\\1'' ", "g")
         let line_content = substitute(line_content, '◖\([^◖◗][^◖◗]*\)◗', ' __\1__ ', "g")
@@ -100,20 +101,20 @@ endfunction
 
 " ----------------------------------------------------------------------------
 
-" 设置快捷键 F12 来交替调用两个函数
-nnoremap <silent> sh :call ToggleZimMarkupChars()<CR>
+" 在可视模式（v/V）下按 sh 触发
+vnoremap <silent> sh :call ToggleZimMarkupChars()<CR>
 
 " ----------------------------------------------------------------------------
 
-function! ToggleZimMarkupChars()
+function! ToggleZimMarkupChars() range
     if exists('g:zim_markup_chars_enabled') && g:zim_markup_chars_enabled
-        " 如果已启用，执行恢复函数
-        call RecoverZimMarkupCharsForBuffer()
+        " 将选区范围 透传 给恢复函数
+        execute a:firstline . ',' . a:lastline . 'call RecoverZimMarkupCharsForBuffer()'
         let g:zim_markup_chars_enabled = 0
         echo "已切换到恢复模式"
     else
-        " 如果未启用，执行删除和替换函数
-        call DeleteAndReplaceZimMarkupCharsForBuffer()
+        " 将选区范围 透传 给替换函数
+        execute a:firstline . ',' . a:lastline . 'call DeleteAndReplaceZimMarkupCharsForBuffer()'
         let g:zim_markup_chars_enabled = 1
         echo "已切换到删除和替换模式"
     endif
