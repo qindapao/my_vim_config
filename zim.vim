@@ -155,7 +155,7 @@ function! RecoverZimMarkupCharsForBuffer() range
         endfor
 
         " 3. 清理/删除恢复区域行
-        execute backup_start_idx . ',' . backup_end_idx . 'delete _'
+        silent execute backup_start_idx . ',' . backup_end_idx . 'delete _'
     else
         " 如果没有链接恢复区域，仅执行普通 Markup 还原
         for line_num in range(start_line, end_line)
@@ -168,6 +168,8 @@ function! RecoverZimMarkupCharsForBuffer() range
             call setline(line_num, line_content)
         endfor
     endif
+
+    redraw
 endfunction
 
 " :TODO: 增加插入5种符号和链接的快捷键(可视插入,不影响当前列的物理位置排列)
